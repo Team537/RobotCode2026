@@ -10,6 +10,53 @@ java {
 
 def ROBOT_MAIN_CLASS = "frc.robot.Main"
 
+import java.net.InetAddress
+import java.time.OffsetDateTime
+
+def deployMetadataFile = layout.buildDirectory.file("deploy/537metadata.txt")
+
+tasks.register("generateDeployMetadata") {
+    outputs.file(deployMetadataFile)
+    doLast {
+        def user = System.getProperty("user.name") ?: "unknown"
+        def host = { ->
+            try { InetAddress.getLocalHost().getHostName() } catch (Exception ignored) { "unknown" }
+        }.call()
+
+        def gitBranch = { ->
+            try {
+                def out = new ByteArrayOutputStream()
+                exec { commandLine "git", "rev-parse", "--abbrev-ref", "HEAD"; standardOutput = out; ignoreExitValue = true }
+                out.toString("UTF-8").trim()
+            } catch (Exception ignored) { "unknown" }
+        }.call()
+
+        def gitCommit = { ->
+            try {
+                def out = new ByteArrayOutputStream()
+                exec { commandLine "git", "rev-parse", "HEAD"; standardOutput = out; ignoreExitValue = true }
+                out.toString("UTF-8").trim()
+            } catch (Exception ignored) { "unknown" }
+        }.call()
+
+        def ts = OffsetDateTime.now().toString()
+
+        def f = deployMetadataFile.get().asFile
+        f.parentFile.mkdirs()
+        f.text = """user=${user}
+host=${host}
+gitBranch=${gitBranch}
+gitCommit=${gitCommit}
+timestamp=${ts}
+""".stripIndent()
+    }
+}
+
+// Ensure metadata is generated before deploy
+tasks.matching { it.name == "deploy" }.configureEach {
+    dependsOn("generateDeployMetadata")
+}
+
 // Define my targets (RoboRIO) and artifacts (deployable files)
 // This is added by GradleRIO's backing project DeployUtils.
 deploy {
@@ -35,6 +82,14 @@ deploy {
                     directory = '/home/lvuser/deploy'
                     deleteOldFiles = false // Change to true to delete files on roboRIO that no
                                            // longer exist in deploy directory of this project
+                }
+
+                // Fix: declare as a proper FileArtifact (was using invalid/misspelled map arg)
+                // TODO JD:  Should the folder be /home/lvuser or /home/lvuser/deploy?
+                deployMetadataFileArtifact(getArtifactTypeClass('FileArtifact')) {
+                    file = deployMetadataFile.get().asFile
+                    directory = "/home/lvuser"
+                    dependsOn(tasks.named("generateDeployMetadata"))
                 }
             }
         }

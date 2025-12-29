@@ -77,21 +77,8 @@ public class RobotContainer {
       Constants.Operator.Drive.SLOW_ROTATION_MAX_SPEED
     );
 
-    TranslationDirective manualTranslationPositionDirective = new ManualTranslationPositionDirective(
-      driveSubsystem, 
-      () -> -controller.getLeftY(), // X (On controllers, -Y corresponds to "forwards", or +X)
-      () -> -controller.getLeftX(), 
-      Constants.Operator.Drive.TARGET_TRANSLATION_RADIUS, 
-      Rotation2d.kCCW_Pi_2
-    );
-
-    RotationDirective manualRotationDirectiv
-
     Command manualDriveCommand = new CompositeDriveCommand(driveSubsystem, manualTranslationVelocityDirective, manualRotationVelocityDirective, null, null);
     driveSubsystem.setDefaultCommand(manualDriveCommand);
-
-    Trigger targetTranslationTrigger = new Trigger(() -> controller.getLeftStickButton());
-
 
   }
 

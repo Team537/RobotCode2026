@@ -92,12 +92,7 @@ public class RobotContainer {
 
   public void scheduleAutonomous() {
     
-    driveSubsystem.setPose(new Pose2d(2.0,1.0,Rotation2d.kPi));
-    driveSubsystem.getVelocityCommand(new ChassisSpeeds(5.0, 0, 12.0)).schedule();
-    /*driveSubsystem.getPathfindToPoseCommand(new Pose2d(11.0,4.0,Rotation2d.kPi))
-    .andThen(driveSubsystem.getPathfindToPoseCommand(new Pose2d(2.0,4.0,Rotation2d.kZero)))
-    .andThen(driveSubsystem.getStopCommand())
-    .schedule();*/
+    driveSubsystem.getDriveToPoseCommand(new Pose2d(2.0,6.0,Rotation2d.kZero)).schedule();
 
   }
 

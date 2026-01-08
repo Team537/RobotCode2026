@@ -366,7 +366,7 @@ public class DriveSubsystem extends SubsystemBase {
      * @return A RunCommand that stops all motion of the swerve.
      */
     public Command getStopCommand() {
-        return run(() -> stop());
+        return runOnce(() -> stop());
     }
 
     // ======================================================================
@@ -466,7 +466,7 @@ public class DriveSubsystem extends SubsystemBase {
                 ) < rotationalTolerance.getRadians();
 
             return withinTranslation && withinRotation;
-        });
+        }).andThen(getStopCommand());
     }
 
     /**

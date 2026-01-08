@@ -4,8 +4,6 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.Rotation;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -13,17 +11,15 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.commands.swerve.CompositeDriveCommand;
 import frc.robot.commands.swerve.ManualRotationVelocityDirective;
-import frc.robot.commands.swerve.ManualTranslationPositionDirective;
 import frc.robot.commands.swerve.ManualTranslationVelocityDirective;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.util.EnumPrettifier;
 import frc.robot.util.field.Alliance;
-import frc.robot.util.swerve.requests.TranslationDirective;
 import frc.robot.util.swerve.requests.RotationDirective;
+import frc.robot.util.swerve.requests.TranslationDirective;
 
 
 public class RobotContainer {
@@ -42,7 +38,19 @@ public class RobotContainer {
 
     // Alliance
     EnumPrettifier.setupSendableChooserFromEnum(allianceSelector, Alliance.class, Alliance.RED);
-    SmartDashboard.putData(allianceSelector);
+    SmartDashboard.putData("Alliance",allianceSelector);
+
+    // Pose Rest
+    Command resetPoseCommand = new InstantCommand(() -> {
+        Pose2d pose =
+            allianceSelector.getSelected() == Alliance.BLUE
+                ? Constants.Drive.BLUE_STARTING_POSE
+                : Constants.Drive.RED_STARTING_POSE;
+
+        driveSubsystem.setPose(pose);
+    }).ignoringDisable(true);
+
+    SmartDashboard.putData("Reset Pose", resetPoseCommand);
 
   }
 
@@ -62,7 +70,7 @@ public class RobotContainer {
       Constants.Operator.Drive.NORMAL_TRANSLATION_MAX_SPEED, 
       Constants.Operator.Drive.THROTTLE_TRANSLATION_MAX_SPEED, 
       Constants.Operator.Drive.SLOW_TRANSLATION_MAX_SPEED, 
-      Rotation2d.kCCW_Pi_2
+      allianceSelector.getSelected().driverRotation
     );
 
     // Setup the rotational directive for drive subsystem

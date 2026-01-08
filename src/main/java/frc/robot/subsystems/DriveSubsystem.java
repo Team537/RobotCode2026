@@ -101,6 +101,8 @@ public class DriveSubsystem extends SubsystemBase {
 
         PathfindingCommand.warmupCommand().schedule();
 
+        SmartDashboard.putNumber("Compensation Coefficient", Constants.Drive.ANGULAR_VELOCITY_COMPENSATION_COEFFICIENT);
+
     }
 
     // ------------------------------
@@ -127,12 +129,12 @@ public class DriveSubsystem extends SubsystemBase {
         // Update the Pathfinding system with obstacles and robot current translation
         Pathfinding.setDynamicObstacles(pathPlannerObstacles, getPose().getTranslation());
 
-        ChassisSpeeds speeds = getVelocity();
-        SmartDashboard.putNumber("X Velocity", speeds.vxMetersPerSecond);
-        SmartDashboard.putNumber("Y Velocity", speeds.vyMetersPerSecond);
-        SmartDashboard.putNumber("Speed", Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond));
-        SmartDashboard.putNumber("Angle", Math.atan2(speeds.vyMetersPerSecond, speeds.vxMetersPerSecond));
-        SmartDashboard.putNumber("Omega", speeds.omegaRadiansPerSecond);
+        swerveDrive.setAngularVelocityCompensation(true, true, SmartDashboard.getNumber("Compensation Coefficient", Constants.Drive.ANGULAR_VELOCITY_COMPENSATION_COEFFICIENT));
+
+        Pose2d pose = getPose();
+        SmartDashboard.putNumber("X Position", pose.getX());
+        SmartDashboard.putNumber("Y Position", pose.getY());
+        SmartDashboard.putNumber("Theta Position", pose.getRotation().getRadians());
 
     }
 

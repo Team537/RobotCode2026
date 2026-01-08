@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Rotation;
 
 import java.io.File;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Filesystem;
 
@@ -33,6 +34,18 @@ public class Constants {
     }
 
     public static class Drive {
+
+        // Starting Poses
+        public static final Pose2d BLUE_STARTING_POSE = new Pose2d(
+            2.0,
+            6.0,
+            Rotation2d.kZero
+        );
+        public static final Pose2d RED_STARTING_POSE = new Pose2d(
+            2.0,
+            6.0,
+            Rotation2d.kPi
+        );
 
         // Drive PID Controller Coefficients
         public static final double TRANSLATIONAL_KP = 1.0;

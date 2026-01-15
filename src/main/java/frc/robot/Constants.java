@@ -4,8 +4,14 @@ import static edu.wpi.first.units.Units.Rotation;
 
 import java.io.File;
 
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.Vector;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Filesystem;
 
 public class Constants {
@@ -73,4 +79,17 @@ public class Constants {
 
     }
     
+    public static class VisionOdometryConstants {
+
+        // Center Camera Constants (OLD / EXAMPLE)
+        public static final String CENTER_CAMERA_NAME = "Center";
+        public static final Rotation3d CENTER_CAMERA_ROTATION = new Rotation3d(0, 0, Units.degreesToRadians(180));
+        public static final Translation3d CENTER_CAMERA_TRANSLATION = new Translation3d(
+                Units.inchesToMeters(-10), 
+                Units.inchesToMeters(0), 
+                Units.inchesToMeters(0));
+        
+        public static final Vector<N3> CENTER_SINGLE_TAG_STANDARD_DEVIATION = VecBuilder.fill(4, 4, 8); 
+        public static final Vector<N3> CENTER_MULTI_TAG_STANDARD_DEVIATION = VecBuilder.fill(0.5, 0.5, 1);
+    }
 }

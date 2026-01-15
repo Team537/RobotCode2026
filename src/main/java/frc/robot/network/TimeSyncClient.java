@@ -1,6 +1,8 @@
 package frc.robot.network;
 
 import java.net.*;
+import java.time.Instant;
+
 import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,18 +64,28 @@ public class TimeSyncClient {
             
             for (int i = 0; i < numSamples; i++) {
                 // Record send time T1 in nanoseconds
-                long t1 = System.nanoTime();
                 
+                Instant t1Instant = Instant.now();
+                long t1 = Math.addExact( // Prevent overflow errors.
+                    Math.multiplyExact(t1Instant.getEpochSecond(), 1_000_000_000L),  // Cannot use System.nanoTime() because its reference point is arbitrary.
+                    t1Instant.getNano()
+                );
+
                 // Send a dummy time sync request
                 String request = "TIME_SYNC";
-                byte[] sendData = request.getBytes("UTF-8");
+                byte[] sendData = request.getBytes("StandardCharsets.UTF_8");
                 DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(piIp), piPort);
                 socket.send(sendPacket);
                 
                 // Wait for a response and record receive time T4 in nanoseconds
                 DatagramPacket receivePacket = new DatagramPacket(receiveBuffer, receiveBuffer.length);
                 socket.receive(receivePacket);
-                long t4 = System.nanoTime();
+
+                Instant t4iInstant = Instant.now();
+                long t4 = Math.addExact( // Prevent overflow errors.
+                    Math.multiplyExact(t4iInstant.getEpochSecond(), 1_000_000_000L),  // Cannot use System.nanoTime() because its reference point is arbitrary.
+                    t4iInstant.getNano()
+                );
                 
                 // Parse JSON response into TimeSyncResponse object
                 String jsonResponse = new String(receivePacket.getData(), 0, receivePacket.getLength(), "UTF-8");

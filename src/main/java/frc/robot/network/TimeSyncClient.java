@@ -17,7 +17,8 @@ import java.util.List;
  * where T1 is the send time and T4 is the receive time on the RoboRIO.
  * <hr>
  * @author Cameron Myhre
- * @version 3.0.0
+ * @version 1.1.0
+ * @since 0.1.0-26
  */
 public class TimeSyncClient {
     private final String piIp;

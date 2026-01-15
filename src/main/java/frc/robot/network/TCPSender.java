@@ -15,7 +15,7 @@ import com.google.gson.Gson;
  * and sending configuration data in JSON format over the network.
  * 
  * @author Cameron Myhre
- * @since v2.0.0
+ * @since v0.1.0-26
  */
 public class TCPSender implements AutoCloseable {
 

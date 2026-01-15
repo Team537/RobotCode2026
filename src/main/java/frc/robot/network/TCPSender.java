@@ -1,8 +1,8 @@
 package frc.robot.network;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
@@ -17,10 +17,10 @@ import com.google.gson.Gson;
  * @author Cameron Myhre
  * @since v2.0.0
  */
-public class TCPSender {
+public class TCPSender implements AutoCloseable {
 
     private Socket socket;
-    private PrintWriter writer;
+    private BufferedWriter writer;
     private final Gson gson = new Gson(); // Gson instance for JSON serialization
     private final Object lock = new Object(); // Lock for thread-safe operations
 
@@ -34,53 +34,69 @@ public class TCPSender {
      *                     stream.
      */
     public TCPSender(String piIp, int piPort) throws IOException {
-        this.socket = new Socket();
-        // Establish a connection with a timeout of 5 seconds
-        this.socket.connect(new InetSocketAddress(piIp, piPort), 5000);
-        this.writer = new PrintWriter(
-                new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8),
-                true); // Auto-flush enabled
+        connect(piIp, piPort);
     }
 
+    /**
+     * Establishes a TCP connection to the specified IP and port.
+     * 
+     * @param piIp The IP address of the Raspberry Pi.
+     * @param piPort The port number on which the Raspberry Pi is listening.
+     * @throws IOException if an I/O error occurs when creating the socket or output stream.
+     */
+    private void connect(String piIp, int piPort) throws IOException{
+        
+        Socket socket = new Socket();
+        socket.setTcpNoDelay(true);
+        socket.setKeepAlive(true);
+        socket.connect(new InetSocketAddress(piIp, piPort), 5000);
+
+        BufferedWriter writer = new BufferedWriter(
+            new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8)
+        );
+
+        synchronized (lock) {
+            this.socket = socket;
+            this.writer = writer;
+        }
+    }
+    
     /**
      * Sends a configuration object to the connected Raspberry Pi.
      * The object is serialized to JSON before transmission.
      *
      * @param config The configuration object to send.
+     * @throws IOException 
      * @throws IllegalStateException if the TCP connection is not open.
      */
-    public void sendConfiguration(Object config) {
-        synchronized (lock) {
-            if (!isConnected()) {
-                throw new IllegalStateException("TCP connection is not open. Unable to send data.");
-            }
+    public void sendConfiguration(Object config) throws IOException {
 
-            // Serialize the configuration object to JSON and send
-            String configJson = gson.toJson(config);
-            writer.println(configJson);
+        // Convert the configuration object to JSON.
+        String json = gson.toJson(config) + "\n";
+        synchronized (lock) {
+            ensureConnected();
+            writer.write(json);
+            writer.flush();
         }
     }
 
     /**
-     * Closes the TCP connection and releases associated resources.
-     * This method ensures that the socket and writer are properly closed.
+     * Ensures that the TCP connection is open.
      */
+    private void ensureConnected() {
+        if (!isConnected()) throw new IllegalStateException("TCP connection not open.");
+    }
+
+    /**
+     * Closes the TCP connection and releases all associated resources.
+     */
+    @Override
     public void close() {
         synchronized (lock) {
-            try {
-                if (writer != null) {
-                    writer.close();
-                }
-                if (socket != null && !socket.isClosed()) {
-                    socket.close();
-                }
-            } catch (IOException e) {
-                System.err.println("Error closing TCPSender resources: " + e.getMessage());
-                e.printStackTrace();
-            } finally {
-                writer = null;
-                socket = null;
-            }
+            try { if (writer != null) writer.close(); } catch (IOException ignored) {}
+            try { if (socket != null) socket.close(); } catch (IOException ignored) {}
+            writer = null;
+            socket = null;
         }
     }
 
@@ -97,21 +113,9 @@ public class TCPSender {
      */
     public void reconnect(String piIp, int piPort) throws IOException {
         synchronized (lock) {
-            // Close the old connection if it exists.
-            // The close() method sets socket and writer to null.
             close();
-
-            // Create a new socket
-            this.socket = new Socket();
-            // Attempt to connect to the Pi with a 5-second timeout (same as your
-            // constructor)
-            this.socket.connect(new InetSocketAddress(piIp, piPort), 5000);
-
-            // Create a new PrintWriter with UTF-8
-            this.writer = new PrintWriter(
-                    new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8),
-                    true);
         }
+        connect(piIp, piPort);
     }
 
     /**
@@ -121,7 +125,7 @@ public class TCPSender {
      */
     public boolean isConnected() {
         synchronized (lock) {
-            return socket != null && socket.isConnected() && !socket.isClosed();
+            return socket != null && socket.isConnected() && !socket.isClosed() && !socket.isOutputShutdown();
         }
     }
 }

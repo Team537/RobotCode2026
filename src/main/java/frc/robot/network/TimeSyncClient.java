@@ -1,6 +1,7 @@
 package frc.robot.network;
 
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 
 import com.google.gson.Gson;
@@ -74,7 +75,7 @@ public class TimeSyncClient {
 
                 // Send a dummy time sync request
                 String request = "TIME_SYNC";
-                byte[] sendData = request.getBytes("StandardCharsets.UTF_8");
+                byte[] sendData = request.getBytes(StandardCharsets.UTF_8);
                 DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(piIp), piPort);
                 socket.send(sendPacket);
                 

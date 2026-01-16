@@ -1,116 +1,247 @@
 package frc.robot.network;
 
-import java.net.*;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-
-import com.google.gson.Gson;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
+import com.google.gson.Gson;
+
 /**
- * TimeSyncClient performs time synchronization with the Raspberry Pi using UDP.
- * It sends multiple time sync requests using nanosecond timestamps (via System.nanoTime())
- * and calculates the average clock offset and round-trip delay.
+ * TimeSyncClient performs UDP time synchronization with a Raspberry Pi.
  *
- * The offset is computed using:
- *   offset = ((T2 - T1) + (T3 - T4)) / 2
- * where T1 is the send time and T4 is the receive time on the RoboRIO.
- * <hr>
+ * This implementation:
+ *  - Uses epoch-based nanoseconds (Instant.now()) for cross-device comparability (NOT System.nanoTime()).
+ *  - Sends JSON requests containing a sequence number (seq) so replies can be matched and reordering is harmless.
+ *  - Computes offset/delay using the standard four-timestamp exchange:
+ *      offset = ((t2 - t1) + (t3 - t4)) / 2
+ *      delay  = (t4 - t1) - (t3 - t2)
+ *  - Improves robustness by selecting the best samples (lowest delay) before averaging offset.
+ *  - Avoids silent encoding mistakes and adds defensive parsing/validation.
+ *
+ * Python server compatibility:
+ *  - Works with the refined TimeSyncServer I provided:
+ *      request: {"type":"TIME_SYNC","seq":<int>}
+ *      response: {"t2":<int>,"t3":<int>,"seq":<int>}
+ *
  * @author Cameron Myhre
- * @version 1.1.0
- * @since 0.1.0-26
+ * @version 1.2.0
  */
-public class TimeSyncClient {
+public final class TimeSyncClient {
+
     private final String piIp;
     private final int piPort;
     private final int numSamples;
-    private final Gson gson;
-    
-    /**
-     * Container for time sync response data from the Raspberry Pi.
-     * All times are in nanoseconds.
-     */
-    public static class TimeSyncResponse {
-        public long t2; // Pi receive time
-        public long t3; // Pi send time
+    private final int socketTimeoutMs;
+    private final int interSampleSleepMs;
+    private final int bestSampleCount; // how many of the lowest-delay samples to average
+    private final Gson gson = new Gson();
+
+    /** JSON request payload sent to the Pi. */
+    private static final class TimeSyncRequest {
+        @SuppressWarnings("unused")
+        public final String type = "TIME_SYNC";
+        public final int seq;
+
+        private TimeSyncRequest(int seq) {
+            this.seq = seq;
+        }
     }
-    
+
+    /** JSON response payload received from the Pi. */
+    public static final class TimeSyncResponse {
+        public long t2; // Pi receive time (epoch ns)
+        public long t3; // Pi send time (epoch ns)
+        public Integer seq; // echoed sequence (optional, but expected)
+
+        public boolean hasValidTimes() {
+            return t2 > 0 && t3 > 0 && t3 >= t2;
+        }
+    }
+
+    /** One measurement sample. */
+    private static final class Sample {
+        final long offsetNs;
+        final long delayNs;
+        final int seq;
+
+        Sample(long offsetNs, long delayNs, int seq) {
+            this.offsetNs = offsetNs;
+            this.delayNs = delayNs;
+            this.seq = seq;
+        }
+    }
+
     /**
      * Constructs a TimeSyncClient.
-     * 
-     * @param piIp      The IP address of the Raspberry Pi.
-     * @param piPort    The port number on which the Pi’s time sync server listens.
-     * @param numSamples The number of UDP requests to send for averaging.
+     *
+     * @param piIp                 Pi IP address.
+     * @param piPort               Pi UDP port.
+     * @param numSamples           total samples to attempt.
      */
     public TimeSyncClient(String piIp, int piPort, int numSamples) {
+        this(piIp, piPort, numSamples,
+             1000,  // socketTimeoutMs
+             50,    // interSampleSleepMs
+             Math.max(3, Math.min(numSamples, Math.max(1, numSamples / 3)))); // bestSampleCount heuristic
+    }
+
+    /**
+     * Advanced constructor for tuning.
+     */
+    public TimeSyncClient(
+            String piIp,
+            int piPort,
+            int numSamples,
+            int socketTimeoutMs,
+            int interSampleSleepMs,
+            int bestSampleCount
+    ) {
+        if (numSamples <= 0) throw new IllegalArgumentException("numSamples must be > 0");
         this.piIp = piIp;
         this.piPort = piPort;
         this.numSamples = numSamples;
-        this.gson = new Gson();
+        this.socketTimeoutMs = Math.max(50, socketTimeoutMs);
+        this.interSampleSleepMs = Math.max(0, interSampleSleepMs);
+        this.bestSampleCount = Math.max(1, Math.min(bestSampleCount, numSamples));
     }
-    
+
     /**
-     * Sends several UDP time sync requests and computes the average clock offset and round-trip delay.
-     * Timestamps are obtained in nanoseconds.
+     * Synchronize time with the Pi.
      *
-     * @return a double array: [average offset (ns), average round-trip delay (ns)]
+     * @return double[]{avgOffsetNs, avgDelayNs, usedSamples, attemptedSamples}
+     *         - avgOffsetNs: average clock offset (Pi - RIO) in ns using best samples
+     *         - avgDelayNs:  average round-trip delay in ns using best samples
+     *         - usedSamples: number of samples used in the "best" set
+     *         - attemptedSamples: number of samples attempted
      */
     public double[] synchronizeTime() {
-        List<Long> offsets = new ArrayList<>();
-        List<Long> delays = new ArrayList<>();
-        
+        List<Sample> samples = new ArrayList<>(numSamples);
+
         try (DatagramSocket socket = new DatagramSocket()) {
-            socket.setSoTimeout(1000); // 1 second timeout
+            socket.setSoTimeout(socketTimeoutMs);
+
+            InetAddress piAddress = InetAddress.getByName(piIp);
             byte[] receiveBuffer = new byte[2048];
-            
+
             for (int i = 0; i < numSamples; i++) {
-                // Record send time T1 in nanoseconds
-                
-                Instant t1Instant = Instant.now();
-                long t1 = Math.addExact( // Prevent overflow errors.
-                    Math.multiplyExact(t1Instant.getEpochSecond(), 1_000_000_000L),  // Cannot use System.nanoTime() because its reference point is arbitrary.
-                    t1Instant.getNano()
-                );
+                int seq = i;
 
-                // Send a dummy time sync request
-                String request = "TIME_SYNC";
-                byte[] sendData = request.getBytes(StandardCharsets.UTF_8);
-                DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(piIp), piPort);
+                // --- T1: time request is "sent" (epoch ns) ---
+                long t1 = epochNsNow();
+
+                // Send JSON request with seq
+                TimeSyncRequest req = new TimeSyncRequest(seq);
+                byte[] sendData = gson.toJson(req).getBytes(StandardCharsets.UTF_8);
+                DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, piAddress, piPort);
                 socket.send(sendPacket);
-                
-                // Wait for a response and record receive time T4 in nanoseconds
-                DatagramPacket receivePacket = new DatagramPacket(receiveBuffer, receiveBuffer.length);
-                socket.receive(receivePacket);
 
-                Instant t4iInstant = Instant.now();
-                long t4 = Math.addExact( // Prevent overflow errors.
-                    Math.multiplyExact(t4iInstant.getEpochSecond(), 1_000_000_000L),  // Cannot use System.nanoTime() because its reference point is arbitrary.
-                    t4iInstant.getNano()
+                // Receive response
+                DatagramPacket receivePacket = new DatagramPacket(receiveBuffer, receiveBuffer.length);
+                try {
+                    socket.receive(receivePacket);
+                } catch (java.net.SocketTimeoutException timeout) {
+                    // Skip this sample; continue
+                    sleepQuiet(interSampleSleepMs);
+                    continue;
+                }
+
+                // --- T4: time response is received (epoch ns) ---
+                long t4 = epochNsNow();
+
+                // Parse response JSON
+                String jsonResponse = new String(
+                        receivePacket.getData(),
+                        receivePacket.getOffset(),
+                        receivePacket.getLength(),
+                        StandardCharsets.UTF_8
                 );
-                
-                // Parse JSON response into TimeSyncResponse object
-                String jsonResponse = new String(receivePacket.getData(), 0, receivePacket.getLength(), "UTF-8");
-                TimeSyncResponse response = gson.fromJson(jsonResponse, TimeSyncResponse.class);
-                
-                // Calculate round-trip delay and clock offset (ignoring processing time)
-                long delay = (t4 - t1) - (response.t3 - response.t2);
-                long offset = ((response.t2 - t1) + (response.t3 - t4)) / 2;
-                
-                offsets.add(offset);
-                delays.add(delay);
-                
-                // Wait briefly before next sample
-                Thread.sleep(50);
+
+                TimeSyncResponse resp;
+                try {
+                    resp = gson.fromJson(jsonResponse, TimeSyncResponse.class);
+                } catch (Exception parseErr) {
+                    // Malformed JSON; skip sample
+                    sleepQuiet(interSampleSleepMs);
+                    continue;
+                }
+
+                // Validate response
+                if (resp == null || !resp.hasValidTimes()) {
+                    sleepQuiet(interSampleSleepMs);
+                    continue;
+                }
+
+                // If seq is present, ensure it matches the request we sent
+                if (resp.seq != null && resp.seq != seq) {
+                    // Out-of-order or stale response; ignore
+                    sleepQuiet(interSampleSleepMs);
+                    continue;
+                }
+
+                long t2 = resp.t2;
+                long t3 = resp.t3;
+
+                // Compute delay and offset
+                // delay  = (t4 - t1) - (t3 - t2)
+                // offset = ((t2 - t1) + (t3 - t4)) / 2
+                long delay = (t4 - t1) - (t3 - t2);
+                long offset = ((t2 - t1) + (t3 - t4)) / 2;
+
+                // Basic sanity: delay should not be negative in normal conditions
+                if (delay < 0) {
+                    // Skip pathological sample
+                    sleepQuiet(interSampleSleepMs);
+                    continue;
+                }
+
+                samples.add(new Sample(offset, delay, seq));
+
+                sleepQuiet(interSampleSleepMs);
             }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
-        // Compute averages
-        double avgOffset = offsets.stream().mapToLong(Long::longValue).average().orElse(0);
-        double avgDelay = delays.stream().mapToLong(Long::longValue).average().orElse(0);
-        
-        return new double[] {avgOffset, avgDelay};
+
+        if (samples.isEmpty()) {
+            // No valid samples
+            return new double[]{0, 0, 0, numSamples};
+        }
+
+        // Sort by delay ascending (best = lowest delay)
+        samples.sort(Comparator.comparingLong(s -> s.delayNs));
+
+        int useN = Math.min(bestSampleCount, samples.size());
+        List<Sample> best = samples.subList(0, useN);
+
+        double avgOffset = best.stream().mapToLong(s -> s.offsetNs).average().orElse(0);
+        double avgDelay = best.stream().mapToLong(s -> s.delayNs).average().orElse(0);
+
+        return new double[]{avgOffset, avgDelay, useN, numSamples};
+    }
+
+    /**
+     * Converts an Instant.now() to epoch nanoseconds, with overflow safety.
+     */
+    private static long epochNsNow() {
+        Instant now = Instant.now();
+        return Math.addExact(
+                Math.multiplyExact(now.getEpochSecond(), 1_000_000_000L),
+                now.getNano()
+        );
+    }
+
+    private static void sleepQuiet(int ms) {
+        if (ms <= 0) return;
+        try {
+            Thread.sleep(ms);
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+        }
     }
 }

@@ -94,8 +94,8 @@ public class RobotContainer {
     
     // Example: Drive to multiple coordinates in sequence
     // The robot will drive to coordinate 1, then coordinate 2, then coordinate 3
-    // Far  new Pose2d(1.46, 2.91, Rotation2d.fromDegrees(0))
-    // Close   new Pose2d(2.63, 3.51, Rotation2d.fromDegrees(0))
+    // Far new Pose2d(1.46, 2.91, Rotation2d.fromDegrees(0))
+    // Close new Pose2d(2.63, 3.51, Rotation2d.fromDegrees(0))
     new DriveToSequenceCommand(
       driveSubsystem,
       new Pose2d(1.46, 2.91, Rotation2d.fromDegrees(0)),

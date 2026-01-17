@@ -6,13 +6,13 @@ package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.commands.swerve.CompositeDriveCommand;
+import frc.robot.commands.swerve.DriveToSequenceCommand;
 import frc.robot.commands.swerve.ManualRotationVelocityDirective;
 import frc.robot.commands.swerve.ManualTranslationVelocityDirective;
 import frc.robot.subsystems.DriveSubsystem;
@@ -92,7 +92,23 @@ public class RobotContainer {
 
   public void scheduleAutonomous() {
     
-    driveSubsystem.getDriveToPoseCommand(new Pose2d(2.0,6.0,Rotation2d.kZero)).schedule();
+    // Example: Drive to multiple coordinates in sequence
+    // The robot will drive to coordinate 1, then coordinate 2, then coordinate 3
+    // Far  new Pose2d(1.46, 2.91, Rotation2d.fromDegrees(0))
+    // Close   new Pose2d(2.63, 3.51, Rotation2d.fromDegrees(0))
+    new DriveToSequenceCommand(
+      driveSubsystem,
+      new Pose2d(1.46, 2.91, Rotation2d.fromDegrees(0)),
+      new Pose2d(2.63, 3.51, Rotation2d.fromDegrees(0))
+    ).schedule();
+
+    // Alternative builder pattern syntax:
+    // new DriveToSequenceCommand.Builder(driveSubsystem)
+    //   .addPose(2.0, 6.0, 0)      // x, y, rotation in degrees
+    //   .addPose(4.0, 6.0, 90)
+    //   .addPose(4.0, 4.0, 180)
+    //   .build()
+    //   .schedule();
 
   }
 

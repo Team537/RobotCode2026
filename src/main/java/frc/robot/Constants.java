@@ -54,9 +54,9 @@ public class Constants {
         );
 
         // Drive PID Controller Coefficients
-        public static final double TRANSLATIONAL_KP = 3.0;
+        public static final double TRANSLATIONAL_KP = 3.2;
         public static final double TRANSLATIONAL_KI = 0.0;
-        public static final double TRANSLATIONAL_KD = 0.1;
+        public static final double TRANSLATIONAL_KD = 0.05;
 
         public static final double ROTATIONAL_KP = 5.0;
         public static final double ROTATIONAL_KI = 0.0;
@@ -73,7 +73,7 @@ public class Constants {
         public static final double ANGULAR_VELOCITY_COMPENSATION_COEFFICIENT = 0.1;     
         public static final Rotation2d ENCODER_AUTO_SYNCHRONIZE_DEADBAND = Rotation2d.fromDegrees(1.0);
 
-        public static final double TRANSLATIONAL_TOLERANCE = 0.1;
+        public static final double TRANSLATIONAL_TOLERANCE = 0.025; // Meters
         public static final Rotation2d ROTATIONAL_TOLERANCE = Rotation2d.fromDegrees(3.5);
 
 

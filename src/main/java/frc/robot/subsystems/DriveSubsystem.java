@@ -153,7 +153,7 @@ public class DriveSubsystem extends SubsystemBase {
         Pose2d pose = getPose();
         SmartDashboard.putNumber("X Position", pose.getX());
         SmartDashboard.putNumber("Y Position", pose.getY());
-        SmartDashboard.putNumber("Theta Position", pose.getRotation().getRadians());
+        SmartDashboard.putNumber("Theta Position", pose.getRotation().getDegrees());
     }
 
     /**

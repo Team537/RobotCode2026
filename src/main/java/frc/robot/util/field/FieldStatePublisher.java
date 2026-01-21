@@ -48,7 +48,7 @@ public class FieldStatePublisher {
 		);
 
 		FieldUtil.getCurrentMatchPeriod().ifPresentOrElse(
-			period -> SmartDashboard.putString("Period", period.name()),
+			period -> SmartDashboard.putString("Period", period.name),
 			() -> SmartDashboard.putString("Period", "Unknown")
 		);
 

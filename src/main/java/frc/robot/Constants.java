@@ -7,8 +7,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Filesystem;
-import frc.robot.util.field.FieldArea3d;
-import frc.robot.util.field.FieldRegion3d;
+import frc.robot.util.field.regions.CompositeRegion3d;
+import frc.robot.util.field.regions.RectangularRegion3d;
 
 public class Constants {
 
@@ -166,48 +166,48 @@ public class Constants {
         /*  FieldArea3d Definitions (2D → Infinite Z)                             */
         /* --------------------------------------------------------------------- */
 
-        public static final FieldArea3d BLUE_ALLIANCE_ZONE =
-            new FieldArea3d(BLUE_ALLIANCE_ZONE_C1, BLUE_ALLIANCE_ZONE_C2);
+        public static final RectangularRegion3d BLUE_ALLIANCE_ZONE =
+            new RectangularRegion3d(BLUE_ALLIANCE_ZONE_C1, BLUE_ALLIANCE_ZONE_C2);
 
-        public static final FieldArea3d RED_ALLIANCE_ZONE =
-            new FieldArea3d(RED_ALLIANCE_ZONE_C1, RED_ALLIANCE_ZONE_C2);
+        public static final RectangularRegion3d RED_ALLIANCE_ZONE =
+            new RectangularRegion3d(RED_ALLIANCE_ZONE_C1, RED_ALLIANCE_ZONE_C2);
 
-        public static final FieldArea3d BLUE_TOWER_ZONE =
-            new FieldArea3d(BLUE_TOWER_C1, BLUE_TOWER_C2);
+        public static final RectangularRegion3d BLUE_TOWER_ZONE =
+            new RectangularRegion3d(BLUE_TOWER_C1, BLUE_TOWER_C2);
 
-        public static final FieldArea3d RED_TOWER_ZONE =
-            new FieldArea3d(RED_TOWER_C1, RED_TOWER_C2);
+        public static final RectangularRegion3d RED_TOWER_ZONE =
+            new RectangularRegion3d(RED_TOWER_C1, RED_TOWER_C2);
 
-        public static final FieldArea3d NEUTRAL_ZONE =
-            new FieldArea3d(NEUTRAL_ZONE_C1, NEUTRAL_ZONE_C2);
+        public static final RectangularRegion3d NEUTRAL_ZONE =
+            new RectangularRegion3d(NEUTRAL_ZONE_C1, NEUTRAL_ZONE_C2);
 
-        public static final FieldArea3d BLUE_HUB_OUTPUT_ZONE =
-            new FieldArea3d(BLUE_HUB_OUTPUT_C1, BLUE_HUB_OUTPUT_C2);
+        public static final RectangularRegion3d BLUE_HUB_OUTPUT_ZONE =
+            new RectangularRegion3d(BLUE_HUB_OUTPUT_C1, BLUE_HUB_OUTPUT_C2);
 
-        public static final FieldArea3d RED_HUB_OUTPUT_ZONE =
-            new FieldArea3d(RED_HUB_OUTPUT_C1, RED_HUB_OUTPUT_C2);
+        public static final RectangularRegion3d RED_HUB_OUTPUT_ZONE =
+            new RectangularRegion3d(RED_HUB_OUTPUT_C1, RED_HUB_OUTPUT_C2);
 
         /* --------------------------------------------------------------------- */
         /*  FieldRegion3d Definitions                                             */
         /* --------------------------------------------------------------------- */
 
         /** Blue alliance playable region (tower excluded) */
-        public static final FieldRegion3d BLUE_ALLIANCE_REGION =
-            new FieldRegion3d(
+        public static final CompositeRegion3d BLUE_ALLIANCE_REGION =
+            new CompositeRegion3d(
                 List.of(BLUE_ALLIANCE_ZONE),
                 List.of(BLUE_TOWER_ZONE)
             );
 
         /** Red alliance playable region (tower excluded) */
-        public static final FieldRegion3d RED_ALLIANCE_REGION =
-            new FieldRegion3d(
+        public static final CompositeRegion3d RED_ALLIANCE_REGION =
+            new CompositeRegion3d(
                 List.of(RED_ALLIANCE_ZONE),
                 List.of(RED_TOWER_ZONE)
             );
 
         /** Neutral playable region (hub outputs excluded) */
-        public static final FieldRegion3d NEUTRAL_REGION =
-            new FieldRegion3d(
+        public static final CompositeRegion3d NEUTRAL_REGION =
+            new CompositeRegion3d(
                 List.of(NEUTRAL_ZONE),
                 List.of(
                     BLUE_HUB_OUTPUT_ZONE,

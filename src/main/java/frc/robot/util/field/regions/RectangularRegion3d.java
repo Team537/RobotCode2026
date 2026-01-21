@@ -1,4 +1,4 @@
-package frc.robot.util.field;
+package frc.robot.util.field.regions;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -12,7 +12,7 @@ import edu.wpi.first.math.geometry.Translation3d;
  *
  * Corner order does NOT matter.
  */
-public class FieldArea3d {
+public class RectangularRegion3d implements Region3d {
 
     // Minimum corner (xMin, yMin, zMin)
     private final Translation3d minCorner;
@@ -23,7 +23,7 @@ public class FieldArea3d {
     /**
      * Construct a finite 3D field area from two opposite corners.
      */
-    public FieldArea3d(Translation3d a, Translation3d b) {
+    public RectangularRegion3d(Translation3d a, Translation3d b) {
         // Normalize corners so minCorner truly holds minimum values
         this.minCorner = new Translation3d(
             Math.min(a.getX(), b.getX()),
@@ -42,7 +42,7 @@ public class FieldArea3d {
      * Construct a 2D field area that extends infinitely in the Z direction.
      * Useful for field zones that should apply regardless of robot height.
      */
-    public FieldArea3d(Translation2d a, Translation2d b) {
+    public RectangularRegion3d(Translation2d a, Translation2d b) {
         // X/Y are bounded, Z is unbounded
         this.minCorner = new Translation3d(
             Math.min(a.getX(), b.getX()),
@@ -68,5 +68,36 @@ public class FieldArea3d {
                point.getY() <= maxCorner.getY() &&
                point.getZ() >= minCorner.getZ() &&
                point.getZ() <= maxCorner.getZ();
+    }
+    
+    /**
+     * Gets the center of the rectangular region
+     * @return the center of the rectangular region
+     */
+    public Translation3d getCenter() {
+        return minCorner.plus(maxCorner).div(2.0);
+    }
+
+    /**
+     * Gets the minimum corner of the region
+     * @return The minimunm corner of the region
+     */
+    public Translation3d getMinimumCorner() {
+        return minCorner;
+    }
+
+    /**
+     * Gets the maximum corner of the region
+     * @return The maximum corner of the region
+     */
+    public Translation3d getMaximumCorner() {
+        return maxCorner;
+    }
+
+    /**
+     * Gets the area's rectangular bounding box
+     */
+    public RectangularRegion3d getBounds() {
+        return this;
     }
 }

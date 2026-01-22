@@ -32,6 +32,7 @@ import frc.robot.util.swerve.requests.RotationRequest;
 import frc.robot.util.swerve.requests.TranslationRequest;
 import swervelib.SwerveDrive;
 import swervelib.parser.SwerveParser;
+import swervelib.simulation.ironmaple.simulation.SimulatedArena;
 import swervelib.telemetry.SwerveDriveTelemetry;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 

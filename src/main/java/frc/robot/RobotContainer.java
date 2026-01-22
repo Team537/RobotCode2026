@@ -4,20 +4,29 @@
 
 package frc.robot;
 
+import java.util.List;
+import java.util.function.Supplier;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
+import frc.robot.commands.swerve.BallHuntCommand;
 import frc.robot.commands.swerve.CompositeDriveCommand;
 import frc.robot.commands.swerve.ManualRotationVelocityDirective;
 import frc.robot.commands.swerve.ManualTranslationVelocityDirective;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.util.EnumPrettifier;
 import frc.robot.util.field.Alliance;
+import frc.robot.util.field.Fuel;
+import frc.robot.util.field.FuelFieldSimulation;
+import frc.robot.util.field.regions.Region3d;
 import frc.robot.util.swerve.requests.RotationDirective;
 import frc.robot.util.swerve.requests.TranslationDirective;
 
@@ -92,7 +101,7 @@ public class RobotContainer {
 
   public void scheduleAutonomous() {
     
-    driveSubsystem.getDriveToPoseCommand(new Pose2d(2.0,6.0,Rotation2d.kZero)).schedule();
+    
 
   }
 

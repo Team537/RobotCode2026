@@ -37,6 +37,19 @@ public final class DeployMetadata {
             status = "error: " + e.getClass().getSimpleName();
         }
 
+        publishToNetworkTable(table, status, raw, parsed);
+    }
+
+    /**
+     * Publishes metadata to a NetworkTable. This method is separated out to allow
+     * for easier testing by accepting pre-parsed data and a NetworkTable instance.
+     *
+     * @param table The NetworkTable to publish to
+     * @param status The status message ("ok", "missing: ...", "error: ...")
+     * @param raw The raw file contents
+     * @param parsed The parsed key-value pairs
+     */
+    public static void publishToNetworkTable(NetworkTable table, String status, String raw, Map<String, String> parsed) {
         // Publish status and raw contents for Elastic/Shuffleboard widgets.
         table.getEntry(Configs.NT_STATUS_KEY).setString(status);
         table.getEntry(Configs.NT_RAW_KEY).setString(raw);
@@ -49,10 +62,23 @@ public final class DeployMetadata {
     }
 
     /**
+     * Publishes metadata from pre-read lines. Useful for testing without file system dependencies.
+     *
+     * @param table The NetworkTable to publish to
+     * @param lines The lines to parse and publish
+     */
+    public static void publishFromLines(NetworkTable table, List<String> lines) {
+        Map<String, String> parsed = parseKeyValueLines(lines);
+        String raw = String.join("\n", lines);
+        publishToNetworkTable(table, "ok", raw, parsed);
+    }
+
+    /**
      * Parses lines of the form "key=value" or "key: value" into a map.
      * Blank lines and comment lines starting with '#' or ';' are ignored.
+     * Package-private for testing.
      */
-    private static Map<String, String> parseKeyValueLines(List<String> lines) {
+    static Map<String, String> parseKeyValueLines(List<String> lines) {
         Map<String, String> out = new LinkedHashMap<>();
         for (String line : lines) {
             if (line == null) continue;
@@ -84,7 +110,11 @@ public final class DeployMetadata {
         return out;
     }
 
-    private static String sanitizeKey(String key) {
+    /**
+     * Sanitizes a key for use in NetworkTables topic names.
+     * Package-private for testing.
+     */
+    static String sanitizeKey(String key) {
         // NT topic names should avoid spaces or special characters.
         return key.replaceAll("\\W+", "_");
     }

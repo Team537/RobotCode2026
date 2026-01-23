@@ -100,9 +100,9 @@ public class RobotContainer {
 
     FuelFieldSimulation fuelSim = new FuelFieldSimulation(driveSubsystem::getPose, driveSubsystem::getVelocity,
         Constants.Intake.intakeTransform, Constants.Drive.Field.NEUTRAL_REGION,
-        10, 0.1, 0.3, 0.1);
+        0, 0.1, 0.3, 0.1);
     Command ballHuntCommand = new BallHuntCommand(driveSubsystem, fuelSim::getFuels,
-        Constants.Drive.Field.NEUTRAL_REGION, new InstantCommand());
+        Constants.Drive.Field.NEUTRAL_REGION);
 
     CommandScheduler.getInstance().schedule(ballHuntCommand);
     CommandScheduler.getInstance().schedule(new RunCommand(fuelSim::update));

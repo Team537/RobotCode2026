@@ -79,6 +79,12 @@ public class Constants {
         public static final double TRANSLATIONAL_TOLERANCE = 0.025; // Meters
         public static final Rotation2d ROTATIONAL_TOLERANCE = Rotation2d.fromDegrees(3.5);
 
+        public static final double BALL_HUNT_REPLANNING_DISTANCE = 0.2; // How far the the target must travel before the path is recalculated, in meters
+        public static final double BALL_HUNT_DIRECT_DRIVE_DISTANCE = 1.0; // How far away the target must be before the robot desides its better to pathfind, in meters
+        public static final double BALL_HUNT_TARGET_VELOCITY = 2.0; // The velocity the robot should travel to pick up the balls in m/s
+        public static final double PATROL_REGION_TIME = 2.0; // The amount of time the robot must spend in the region before it starts spinning, in seconds
+        public static final double PATROL_ANGULAR_VELOCITY = 1.0; // The angular speed that the robot should spin while patrolling
+
         public static final class Field {
 
             public static final double FIELD_LENGTH = 16.54;

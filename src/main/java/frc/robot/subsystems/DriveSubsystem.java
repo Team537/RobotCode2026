@@ -13,6 +13,7 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
@@ -32,7 +33,6 @@ import frc.robot.util.swerve.requests.RotationRequest;
 import frc.robot.util.swerve.requests.TranslationRequest;
 import swervelib.SwerveDrive;
 import swervelib.parser.SwerveParser;
-import swervelib.simulation.ironmaple.simulation.SimulatedArena;
 import swervelib.telemetry.SwerveDriveTelemetry;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 
@@ -222,6 +222,25 @@ public class DriveSubsystem extends SubsystemBase {
         } else if (tReq instanceof TranslationRequest.Position pos) {
             vx = xController.calculate(getPose().getX(), pos.position().getX());
             vy = yController.calculate(getPose().getY(), pos.position().getY());
+        } else if (tReq instanceof TranslationRequest.PositionWithVelocity posWithVel) {
+
+            // Vector from robot to target
+            Translation2d error = posWithVel.position().minus(getPose().getTranslation());
+            double distance = error.getNorm();
+
+            // Normalize direction
+            Translation2d direction = distance > 1e-6 ? error.div(distance) : new Translation2d(0.0, 0.0);
+
+            // PID correction toward the target
+            double pidX = xController.calculate(getPose().getX(), posWithVel.position().getX());
+            double pidY = yController.calculate(getPose().getY(), posWithVel.position().getY());
+
+            // Forward velocity along the direction to target
+            double forwardVel = posWithVel.velocity(); // scalar speed in m/s
+
+            vx = pidX + direction.getX() * forwardVel;
+            vy = pidY + direction.getY() * forwardVel;
+
         } else if (tReq instanceof TranslationRequest.Stop) {
             vx = 0.0;
             vy = 0.0;
@@ -233,6 +252,22 @@ public class DriveSubsystem extends SubsystemBase {
         } else if (rReq instanceof RotationRequest.Position rotPos) {
             omega = thetaController.calculate(getPose().getRotation().getRadians(),
                                             rotPos.position().getRadians());
+        } else if (rReq instanceof RotationRequest.ForcePosition rotPos) {
+
+            Rotation2d angleError = getPose().getRotation().minus(rotPos.rotation());
+            double translationalScale = Math.pow(
+                MathUtil.clamp(
+                    angleError.getCos(),
+                    0.0,
+                    1.0
+                ),
+                1.0
+            );
+            vx *= translationalScale;
+            vy *= translationalScale;
+
+            omega = thetaController.calculate(getPose().getRotation().getRadians(),
+                                            rotPos.rotation().getRadians());
         } else if (rReq instanceof RotationRequest.Stop) {
             omega = 0.0;
         }
@@ -281,6 +316,18 @@ public class DriveSubsystem extends SubsystemBase {
         driveWithCompositeRequests(
             new TranslationRequest.Position(
                 pose.getTranslation()
+            ),
+            new RotationRequest.Position(
+                pose.getRotation()
+            )
+        );
+    }
+
+    public void driveToPosition(Pose2d pose,double velocity) {
+        driveWithCompositeRequests(
+            new TranslationRequest.PositionWithVelocity(
+                pose.getTranslation(),
+                velocity
             ),
             new RotationRequest.Position(
                 pose.getRotation()
@@ -498,6 +545,101 @@ public class DriveSubsystem extends SubsystemBase {
         );
     }
 
+    // ======================================================================
+    // CONTINUOUS DRIVE-TO-POSE WITH VELOCITY
+    // ======================================================================
+
+    /**
+     * Continuously drives toward the given fixed target pose using a fixed forward
+     * velocity along the target direction.
+     *
+     * @param targetPose The fixed pose the robot should drive toward.
+     * @param velocity The scalar speed (m/s) along the line toward the target.
+     * @return A command that continuously applies controller output toward the pose.
+     */
+    public Command getContinuousDriveToPoseCommand(Pose2d targetPose, double velocity) {
+        return getContinuousDriveToPoseCommand(() -> targetPose, () -> velocity);
+    }
+
+    /**
+     * Continuously drives toward the given dynamic target pose using a dynamic
+     * forward velocity along the target direction.
+     *
+     * @param targetPoseSupplier Supplier providing the target pose each cycle.
+     * @param velocitySupplier Supplier providing the forward speed along the line to the target.
+     * @return A command that continuously applies controller output toward the pose.
+     */
+    public Command getContinuousDriveToPoseCommand(
+        Supplier<Pose2d> targetPoseSupplier,
+        Supplier<Double> velocitySupplier
+    ) {
+        return run(() -> driveToPosition(targetPoseSupplier.get(), velocitySupplier.get()));
+    }
+
+    // ======================================================================
+    // DRIVE-TO-POSE WITH TOLERANCES AND VELOCITY
+    // ======================================================================
+
+    /**
+     * Drives to a fixed pose and finishes when translational/rotational tolerances are
+     * satisfied, but maintains a specified forward velocity along the target until then.
+     *
+     * @param targetPose The target pose.
+     * @param velocity Forward speed to maintain toward the target.
+     * @param translationalTolerance Maximum allowed linear error in meters.
+     * @param rotationalTolerance Maximum allowed angular error.
+     * @return A terminating drive-to-pose command.
+     */
+    public Command getDriveToPoseCommand(
+        Pose2d targetPose,
+        double velocity,
+        double translationalTolerance,
+        Rotation2d rotationalTolerance
+    ) {
+        return getDriveToPoseCommand(() -> targetPose, () -> velocity, translationalTolerance, rotationalTolerance);
+    }
+
+    /**
+     * Dynamic version with a supplied target pose and velocity.
+     *
+     * @param targetPoseSupplier Supplier providing the target pose each cycle.
+     * @param velocitySupplier Supplier providing forward speed along the line to the target.
+     * @param translationalTolerance Maximum allowed linear error in meters.
+     * @param rotationalTolerance Maximum allowed angular error.
+     * @return A terminating drive-to-pose command.
+     */
+    public Command getDriveToPoseCommand(
+        Supplier<Pose2d> targetPoseSupplier,
+        Supplier<Double> velocitySupplier,
+        double translationalTolerance,
+        Rotation2d rotationalTolerance
+    ) {
+        return getContinuousDriveToPoseCommand(targetPoseSupplier, velocitySupplier).until(() -> {
+            Pose2d target = targetPoseSupplier.get();
+            Pose2d current = getPose();
+
+            // Check linear distance error.
+            boolean withinTranslation =
+                current.getTranslation().getDistance(target.getTranslation()) < translationalTolerance;
+
+            // Check rotational error (absolute angular difference).
+            boolean withinRotation =
+                Math.abs(current.getRotation().minus(target.getRotation()).getRadians()) < rotationalTolerance.getRadians();
+
+            return withinTranslation && withinRotation;
+        }).andThen(getStopCommand());
+    }
+
+    // Convenience versions using default tolerances
+    public Command getDriveToPoseCommand(Pose2d targetPose, double velocity) {
+        return getDriveToPoseCommand(targetPose, velocity, translationalTolerance, rotationalTolerance);
+    }
+
+    public Command getDriveToPoseCommand(Supplier<Pose2d> targetPoseSupplier, Supplier<Double> velocitySupplier) {
+        return getDriveToPoseCommand(targetPoseSupplier, velocitySupplier,translationalTolerance, rotationalTolerance);
+    }
+
+
 
 
     // ======================================================================
@@ -584,6 +726,144 @@ public class DriveSubsystem extends SubsystemBase {
             targetPoseSupplier,
             this.translationalTolerance,
             this.rotationalTolerance
+        );
+    }
+
+    /**
+     * Pathfinds to a fixed target pose using only the PathPlanner AutoBuilder,
+     *
+     * <p>This static version always pathfinds to the same pose.
+     *
+     * @param targetPose The fixed pose to pathfind to.
+     * @return A command that only pathfinds.
+     */
+    public Command getRawPathfindToPoseCommand(Pose2d targetPose) {
+        return AutoBuilder.pathfindToPose(
+            targetPose,
+            new PathConstraints(
+                Constants.Drive.MAX_TRANSLATIONAL_SPEED,
+                Constants.Drive.MAX_TRANSLATIONAL_ACCELERATION,
+                Constants.Drive.MAX_ROTATIONAL_SPEED,
+                Constants.Drive.MAX_ROTATIONAL_ACCELERATION
+            )
+        );
+    }
+
+    // ======================================================================
+    // PATHFIND-TO-POSE WITH VELOCITY
+    // ======================================================================
+
+    /**
+     * Pathfinds to a fixed target pose using the PathPlanner AutoBuilder,
+     * then switches to a holonomic drive-to-pose to precisely finish alignment.
+     *
+     * <p>This static version always pathfinds to the same pose.
+     *
+     * @param targetPose The fixed pose to pathfind to.
+     * @param velocity The forward speed along the path during execution.
+     * @param translationalTolerance Maximum allowed linear error for finishing.
+     * @param rotationalTolerance Maximum allowed angular error for finishing.
+     * @return A command that pathfinds and then fine-aligns using holonomic control.
+     */
+    public Command getPathfindToPoseCommand(
+        Pose2d targetPose,
+        double velocity,
+        double translationalTolerance,
+        Rotation2d rotationalTolerance
+    ) {
+        return AutoBuilder.pathfindToPose(
+            targetPose,
+            new PathConstraints(
+                Constants.Drive.MAX_TRANSLATIONAL_SPEED,
+                Constants.Drive.MAX_TRANSLATIONAL_ACCELERATION,
+                Constants.Drive.MAX_ROTATIONAL_SPEED,
+                Constants.Drive.MAX_ROTATIONAL_ACCELERATION
+            ),
+            velocity
+        ).andThen(
+            // Precise alignment phase
+            getDriveToPoseCommand(targetPose, velocity, translationalTolerance, rotationalTolerance)
+        );
+    }
+
+    /**
+     * Dynamic version — the Supplier is evaluated **once at command initialization**.
+     *
+     * <p>The snapshot is then passed to the static version to ensure pathfinding
+     * stays consistent for the entire run.
+     *
+     * @param targetPoseSupplier Supplier providing the target pose.
+     * @param velocitySupplier Supplier providing the forward speed along the path.
+     * @param translationalTolerance Maximum allowed linear error.
+     * @param rotationalTolerance Maximum allowed angular error.
+     * @return A command that snapshots the target pose and velocity at initialization,
+     *         then pathfinds and finishes with drive-to-pose.
+     */
+    public Command getPathfindToPoseCommand(
+        Supplier<Pose2d> targetPoseSupplier,
+        Supplier<Double> velocitySupplier,
+        double translationalTolerance,
+        Rotation2d rotationalTolerance
+    ) {
+        return new DeferredCommand(() -> {
+            // Snapshot pose and velocity once at init
+            Pose2d poseSnapshot = targetPoseSupplier.get();
+            double velocitySnapshot = velocitySupplier.get();
+            return getPathfindToPoseCommand(poseSnapshot, velocitySnapshot, translationalTolerance, rotationalTolerance);
+        }, Set.of(this));
+    }
+
+    /**
+     * Static convenience version using default tolerances.
+     *
+     * @param targetPose The fixed target pose.
+     * @param velocity The forward speed along the path.
+     * @return A command that pathfinds to the pose and then drive-to-pose finishes.
+     */
+    public Command getPathfindToPoseCommand(Pose2d targetPose, double velocity) {
+        return getPathfindToPoseCommand(
+            targetPose,
+            velocity,
+            this.translationalTolerance,
+            this.rotationalTolerance
+        );
+    }
+
+    /**
+     * Dynamic convenience version using default tolerances.
+     *
+     * @param targetPoseSupplier Supplier providing the target pose.
+     * @param velocitySupplier Supplier providing the forward speed along the path.
+     * @return A command that snapshots the pose and velocity, then pathfinds and finishes.
+     */
+    public Command getPathfindToPoseCommand(Supplier<Pose2d> targetPoseSupplier, Supplier<Double> velocitySupplier) {
+        return getPathfindToPoseCommand(
+            targetPoseSupplier,
+            velocitySupplier,
+            this.translationalTolerance,
+            this.rotationalTolerance
+        );
+    }
+
+    /**
+     * Pathfinds to a fixed target pose using only the PathPlanner AutoBuilder.
+     *
+     * <p>This static version always pathfinds to the same pose.
+     *
+     * @param targetPose The fixed pose to pathfind to.
+     * @param velocity The forward speed along the path during execution.
+     * @return A command that only pathfinds.
+     */
+    public Command getRawPathfindToPoseCommand(Pose2d targetPose, double velocity) {
+        return AutoBuilder.pathfindToPose(
+            targetPose,
+            new PathConstraints(
+                Constants.Drive.MAX_TRANSLATIONAL_SPEED,
+                Constants.Drive.MAX_TRANSLATIONAL_ACCELERATION,
+                Constants.Drive.MAX_ROTATIONAL_SPEED,
+                Constants.Drive.MAX_ROTATIONAL_ACCELERATION
+            ),
+            velocity
         );
     }
 

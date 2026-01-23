@@ -5,6 +5,7 @@ import java.util.List;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Filesystem;
 import frc.robot.util.field.regions.CompositeRegion3d;
@@ -152,7 +153,7 @@ public class Constants {
         );
 
         public static final Translation2d BLUE_HUB_OUTPUT_C2 = new Translation2d(
-            5.600,
+            6.000,
             flipY(BLUE_HUB_OUTPUT_C1.getY())
         );
 
@@ -218,6 +219,16 @@ public class Constants {
 
         }
 
+
+    }
+
+    public static class Intake {
+
+        public static final Transform2d intakeTransform = new Transform2d(
+            new Translation2d(
+                    0.3,
+                    0.0),
+            Rotation2d.kZero);
 
     }
     

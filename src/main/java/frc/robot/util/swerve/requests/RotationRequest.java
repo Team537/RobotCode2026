@@ -5,7 +5,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 public sealed interface RotationRequest
     permits RotationRequest.Stop,
             RotationRequest.Velocity,
-            RotationRequest.Position {
+            RotationRequest.Position,
+            RotationRequest.ForcePosition {
 
     record Stop() implements RotationRequest {}
 
@@ -13,5 +14,8 @@ public sealed interface RotationRequest
         implements RotationRequest {}
 
     record Position(Rotation2d position)
+        implements RotationRequest {}
+
+    record ForcePosition(Rotation2d rotation) 
         implements RotationRequest {}
 }

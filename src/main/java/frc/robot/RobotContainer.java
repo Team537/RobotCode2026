@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import frc.robot.commands.swerve.BallHuntCommand;
 import frc.robot.commands.swerve.CompositeDriveCommand;
+import frc.robot.commands.swerve.DriveToSequenceCommand;
 import frc.robot.commands.swerve.ManualRotationVelocityDirective;
 import frc.robot.commands.swerve.ManualTranslationVelocityDirective;
 import frc.robot.subsystems.DriveSubsystem;

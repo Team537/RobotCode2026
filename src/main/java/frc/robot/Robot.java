@@ -19,6 +19,11 @@ public class Robot extends TimedRobot {
   }
 
   @Override
+  public void robotInit() {
+    DeployMetadata.publishAtStartup();
+  }
+
+  @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
     SmartDashboard.putData("Command Scheduler", CommandScheduler.getInstance());

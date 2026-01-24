@@ -4,6 +4,8 @@ import static edu.wpi.first.units.Units.Rotation;
 
 import java.io.File;
 
+import com.ctre.phoenix6.signals.InvertedValue;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Filesystem;
@@ -73,4 +75,30 @@ public class Constants {
 
     }
     
+    public static class Turret {
+        public static final int TURRET_ID = 1;
+        public static final int TURRET_MOTOR_CURRENT_LIMIT = 40;
+
+        //PID
+        public static final double TURRET_KP = 2.5;
+        public static final double TURRET_KI = 0;
+        public static final double TURRET_KD = 0.4;
+
+        public static final InvertedValue MOTOR_INVERTED = InvertedValue.CounterClockwise_Positive;
+
+        public static final double TURRET_GEAR_RADIUS = .065;
+        public static final double TURRET_GEAR_CIRFUMFERENCE = TURRET_GEAR_RADIUS * 2.0 * Math.PI;
+        public static final double MOTOR_GEAR_REDUCTION = 12.0;
+        public static final double ENCODER_FACTOR = TURRET_GEAR_CIRFUMFERENCE / MOTOR_GEAR_REDUCTION;
+
+        public static final double OUTPUT_RANGE_MAX = 1;
+        public static final double OUTPUT_RANGE_MIN = -1;
+
+        public static final int CURRENT_LOWER_LIMIT = 25;
+        public static final double CURRENT_LOWER_TIME = 0.5;
+
+        public static final Rotation2d START_POS = Rotation2d.kZero;
+
+    }
+
 }

@@ -42,9 +42,9 @@ public class PatrolRegionCommand extends SequentialCommandGroup {
             new ConditionalCommand(
                 // IF we are outside the region:
                 drive.getPathfindToPoseCommand(
-                    // Dynamically generate a target pose using the desired patrol position
+                    // Generate a target pose using the desired patrol position
                     // while preserving the robot's current rotation
-                    () -> new Pose2d(
+                    new Pose2d(
                         patrolPosition,
                         drive.getPose().getRotation()
                     )

@@ -61,7 +61,7 @@ public class Constants {
         public static final double TRANSLATIONAL_KI = 0.0;
         public static final double TRANSLATIONAL_KD = 0.05;
 
-        public static final double ROTATIONAL_KP = 5.0;
+        public static final double ROTATIONAL_KP = 10.0;
         public static final double ROTATIONAL_KI = 0.0;
         public static final double ROTATIONAL_KD = 0.1;
 
@@ -82,6 +82,7 @@ public class Constants {
         public static final double BALL_HUNT_REPLANNING_DISTANCE = 0.2; // How far the the target must travel before the path is recalculated, in meters
         public static final double BALL_HUNT_DIRECT_DRIVE_DISTANCE = 1.0; // How far away the target must be before the robot desides its better to pathfind, in meters
         public static final double BALL_HUNT_TARGET_VELOCITY = 2.0; // The velocity the robot should travel to pick up the balls in m/s
+        public static final double BALL_HUNT_ROTATION_FORCE_POWER = 1000.0; // The power to scale the translation component of velocity when forcing rotation for ball hunt
         public static final double PATROL_REGION_TIME = 2.0; // The amount of time the robot must spend in the region before it starts spinning, in seconds
         public static final double PATROL_ANGULAR_VELOCITY = 1.0; // The angular speed that the robot should spin while patrolling
 
@@ -228,9 +229,16 @@ public class Constants {
                 )
             );
 
+        public static final Translation2d fieldCenter = new Translation2d(FIELD_LENGTH, FIELD_WIDTH).div(2.0);
+
+        public static final RectangularRegion3d TEST_REGION = 
+            new RectangularRegion3d(
+                fieldCenter.minus(new Translation2d(2.0,3.0)),
+                fieldCenter.plus(new Translation2d(2.0,3.0))
+            );
+
 
         }
-
 
     }
 
@@ -238,7 +246,7 @@ public class Constants {
 
         public static final Transform2d intakeTransform = new Transform2d(
             new Translation2d(
-                    0.3,
+                    0.15,
                     0.0),
             Rotation2d.kZero);
 

@@ -26,24 +26,25 @@ public class BallHuntCommand extends Command {
     private final DriveSubsystem drive;
     private final Supplier<List<Fuel>> fuelsSupplier;
     private final Region3d huntingRegion;
-    private final Command searchBehavior;
+    private final Supplier<Command> searchCommandSupplier;
 
     /** The currently active sub-behavior (searching or collecting). */
     private Command activeCommand;
 
     /** Tracks whether a valid target existed on the previous cycle. */
     private boolean hasTarget = false;
+    private Fuel bestFuel;
 
     public BallHuntCommand(
             DriveSubsystem drive,
             Supplier<List<Fuel>> fuelsSupplier,
             Region3d huntingRegion,
-            Command searchBehavior
+            Supplier<Command> searchCommandSupplier
     ) {
         this.drive = drive;
         this.fuelsSupplier = fuelsSupplier;
         this.huntingRegion = huntingRegion;
-        this.searchBehavior = searchBehavior;
+        this.searchCommandSupplier = searchCommandSupplier;
 
         // Ball hunt owns the drivetrain while active
         addRequirements(drive);
@@ -62,14 +63,14 @@ public class BallHuntCommand extends Command {
             drive,
             fuelsSupplier,
             huntingRegion,
-            new PatrolRegionCommand(drive, huntingRegion)
+            () -> new PatrolRegionCommand(drive, huntingRegion)
         );
     }
 
     @Override
     public void initialize() {
         // Begin in search mode until a valid target is detected
-        activeCommand = searchBehavior;
+        activeCommand = searchCommandSupplier.get().repeatedly();
         activeCommand.initialize();
     }
 
@@ -87,23 +88,27 @@ public class BallHuntCommand extends Command {
             if (hasTarget) {
                 // Switch to a repeated collection behavior that continuously
                 // re-evaluates the best target each cycle
+                this.bestFuel = bestFuel.get();
                 activeCommand =
                     new CollectTargetCommand(
                         drive,
-                        () -> findBestFuel()
-                                .orElse(null)
+                        () -> this.bestFuel
                                 .getTranslation()
                                 .toTranslation2d()
                     ).repeatedly();
             } else {
                 // Fall back to the search behavior when no valid targets exist
-                activeCommand = searchBehavior.repeatedly();
+                activeCommand = searchCommandSupplier.get().repeatedly();
             }
 
             activeCommand.initialize();
         }
 
         // Manually forward execution to the active sub-command
+
+        if (bestFuel.isPresent()) {
+            this.bestFuel = bestFuel.get();
+        }
         activeCommand.execute();
     }
 

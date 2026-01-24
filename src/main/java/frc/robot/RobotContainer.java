@@ -9,6 +9,7 @@ import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.XboxController;
@@ -30,7 +31,9 @@ import frc.robot.util.field.Fuel;
 import frc.robot.util.field.FuelFieldSimulation;
 import frc.robot.util.field.regions.Region3d;
 import frc.robot.util.swerve.requests.RotationDirective;
+import frc.robot.util.swerve.requests.RotationRequest;
 import frc.robot.util.swerve.requests.TranslationDirective;
+import frc.robot.util.swerve.requests.TranslationRequest;
 
 public class RobotContainer {
 
@@ -99,10 +102,10 @@ public class RobotContainer {
   public void scheduleAutonomous() {
 
     FuelFieldSimulation fuelSim = new FuelFieldSimulation(driveSubsystem::getPose, driveSubsystem::getVelocity,
-        Constants.Intake.intakeTransform, Constants.Drive.Field.NEUTRAL_REGION,
-        0, 0.1, 0.3, 0.1);
+        Constants.Intake.intakeTransform, Constants.Drive.Field.TEST_REGION,
+        20, 10.0, 0.3, 0.9);
     Command ballHuntCommand = new BallHuntCommand(driveSubsystem, fuelSim::getFuels,
-        Constants.Drive.Field.NEUTRAL_REGION);
+        Constants.Drive.Field.TEST_REGION);
 
     CommandScheduler.getInstance().schedule(ballHuntCommand);
     CommandScheduler.getInstance().schedule(new RunCommand(fuelSim::update));

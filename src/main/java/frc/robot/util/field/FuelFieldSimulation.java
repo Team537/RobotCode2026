@@ -64,6 +64,10 @@ public class FuelFieldSimulation {
         this.spawnPeriod = spawnPeriod;
         this.pickupDistance = pickupDistance;
         this.minForwardSpeed = minForwardSpeed;
+
+        for (int i = 1; i < maxFuelCount; i++) {
+            spawnFuel();
+        }
     }
 
     /**
@@ -100,7 +104,7 @@ public class FuelFieldSimulation {
 
             // 2 Check that intake is moving generally forward toward the fuel
             // Project velocity onto the vector toward fuel
-            double forwardComponent = robotTransVel.dot(toFuel.div(dist));
+            double forwardComponent = robotTransVel.div(robotTransVel.getNorm()).dot(toFuel.div(dist));
 
             // Only collect if moving mostly toward the target
             if (forwardComponent < minForwardSpeed) {

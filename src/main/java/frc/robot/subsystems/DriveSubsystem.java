@@ -44,7 +44,7 @@ public class DriveSubsystem extends SubsystemBase {
 
     PIDController xController;
     PIDController yController;
-    ProfiledPIDController thetaController;
+    PIDController thetaController;
     HolonomicDriveController driveController;
 
     private double translationalTolerance = Constants.Drive.TRANSLATIONAL_TOLERANCE;
@@ -53,7 +53,7 @@ public class DriveSubsystem extends SubsystemBase {
     private List<Supplier<List<Obstacle>>> obstaclesSuppliers;
     
     // Feature Flags 
-    private boolean useVisionOdometry = true;
+    private boolean useVisionOdometry = false;
 
     public DriveSubsystem() {
 
@@ -100,7 +100,7 @@ public class DriveSubsystem extends SubsystemBase {
 
         xController = new PIDController(Constants.Drive.TRANSLATIONAL_KP,Constants.Drive.TRANSLATIONAL_KI,Constants.Drive.TRANSLATIONAL_KD);
         yController = new PIDController(Constants.Drive.TRANSLATIONAL_KP,Constants.Drive.TRANSLATIONAL_KI,Constants.Drive.TRANSLATIONAL_KD);
-        thetaController = new ProfiledPIDController(Constants.Drive.ROTATIONAL_KP,Constants.Drive.ROTATIONAL_KI,Constants.Drive.ROTATIONAL_KD,new Constraints(Constants.Drive.MAX_ROTATIONAL_SPEED, Constants.Drive.MAX_ROTATIONAL_ACCELERATION));
+        thetaController = new PIDController(Constants.Drive.ROTATIONAL_KP,Constants.Drive.ROTATIONAL_KI,Constants.Drive.ROTATIONAL_KD);
         thetaController.enableContinuousInput(-Math.PI,Math.PI);
 
         obstaclesSuppliers = new ArrayList<>();
@@ -279,7 +279,7 @@ public class DriveSubsystem extends SubsystemBase {
                     0.0,
                     1.0
                 ),
-                1.0
+                rotPos.forcePower()
             );
             vx *= translationalScale;
             vy *= translationalScale;
@@ -291,6 +291,10 @@ public class DriveSubsystem extends SubsystemBase {
         }
 
         ChassisSpeeds chassisSpeeds = new ChassisSpeeds(vx,vy,omega);
+
+        SmartDashboard.putNumber("X Velocity", vx);
+        SmartDashboard.putNumber("Y Velocity", vy);
+        SmartDashboard.putNumber("Omega Velocity", omega);
 
         // --- Drive: field-oriented unless robot-relative velocity ---
         if (tReq instanceof TranslationRequest.Velocity vel && !vel.fieldRelative()) {

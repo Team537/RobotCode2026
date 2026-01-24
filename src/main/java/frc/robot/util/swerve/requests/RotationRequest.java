@@ -16,6 +16,6 @@ public sealed interface RotationRequest
     record Position(Rotation2d position)
         implements RotationRequest {}
 
-    record ForcePosition(Rotation2d rotation) 
+    record ForcePosition(Rotation2d rotation, double forcePower) 
         implements RotationRequest {}
 }

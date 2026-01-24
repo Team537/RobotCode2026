@@ -7,6 +7,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -29,6 +31,8 @@ public class CollectTargetCommand extends SequentialCommandGroup {
     private final DriveSubsystem drive;
     private final Transform2d intakeTransform = Constants.Intake.intakeTransform;
 
+    private final Field2d testField = new Field2d();
+
     /** The most recent pose used for path planning, used to decide when to replan. */
     private Pose2d lastPlannedPose;
 
@@ -48,6 +52,7 @@ public class CollectTargetCommand extends SequentialCommandGroup {
 
             // Builds a new pathfinding command toward the intake-aligned pose
             () -> {
+                SmartDashboard.putBoolean("Is Ball Hunt Pathfinding", true);
                 Pose2d targetPose = getIntakeAlignedPose(targetSupplier.get());
                 lastPlannedPose = targetPose;
                 return drive.getRawPathfindToPoseCommand(targetPose, 2.0);
@@ -58,11 +63,11 @@ public class CollectTargetCommand extends SequentialCommandGroup {
             // the current path is considered invalid and should be regenerated.
             () -> {
                 Pose2d currentTargetPose = getIntakeAlignedPose(targetSupplier.get());
-                return lastPlannedPose != null
-                        && currentTargetPose.getTranslation()
-                                .getDistance(
-                                        lastPlannedPose.getTranslation())
-                                > Constants.Drive.BALL_HUNT_REPLANNING_DISTANCE;
+                return lastPlannedPose != null &&
+                    currentTargetPose.getTranslation()
+                        .getDistance(lastPlannedPose.getTranslation())
+                        > Constants.Drive.BALL_HUNT_REPLANNING_DISTANCE ||
+                    Math.abs(currentTargetPose.getRotation().minus(lastPlannedPose.getRotation()).getRadians()) > 0.1;
             },
             Set.of(drive)
         );
@@ -74,6 +79,7 @@ public class CollectTargetCommand extends SequentialCommandGroup {
         // velocity-based translation while strictly enforcing intake heading.
         Command directDriveCommand = new RunCommand(
             () -> {
+                SmartDashboard.putBoolean("Is Ball Hunt Pathfinding", false);
                 drive.driveWithCompositeRequests(
                     // Drive toward the intake-aligned pose at a constant velocity
                     new TranslationRequest.PositionWithVelocity(
@@ -84,7 +90,8 @@ public class CollectTargetCommand extends SequentialCommandGroup {
                     // Force the robot's rotation to match the intake-aligned pose
                     // while scaling translation until alignment is achieved
                     new RotationRequest.ForcePosition(
-                        getIntakeAlignedPose(targetSupplier.get()).getRotation()
+                        getIntakeAlignedPose(targetSupplier.get()).getRotation(),
+                        Constants.Drive.BALL_HUNT_ROTATION_FORCE_POWER
                     )
                 );
             },
@@ -101,7 +108,9 @@ public class CollectTargetCommand extends SequentialCommandGroup {
                 lastPlannedPose != null &&
                 currentTargetPose.getTranslation()
                     .getDistance(lastPlannedPose.getTranslation())
-                    > Constants.Drive.BALL_HUNT_REPLANNING_DISTANCE;
+                    > Constants.Drive.BALL_HUNT_REPLANNING_DISTANCE ||
+                Math.abs(currentTargetPose.getRotation().minus(lastPlannedPose.getRotation()).getRadians()) > 0.1;
+
 
             boolean tooFar =
                 drive.getPose().transformBy(intakeTransform).getTranslation()
@@ -127,19 +136,34 @@ public class CollectTargetCommand extends SequentialCommandGroup {
      */
     private Pose2d getIntakeAlignedPose(Translation2d target) {
 
-        // Current robot pose and derived intake pose
         Pose2d robotPose = drive.getPose();
-        Pose2d currentIntakePose = robotPose.transformBy(intakeTransform);
 
-        // Compute the desired intake heading based on the direction to the target
-        Rotation2d intakeRotation =
-            target.minus(currentIntakePose.getTranslation()).getAngle();
+        // Vector from robot to target (world frame)
+        Translation2d toTarget =
+            target.minus(robotPose.getTranslation());
 
-        // Desired intake pose: located on the target and facing into it
-        Pose2d desiredIntakePose = new Pose2d(target, intakeRotation);
+        // Desired robot rotation:
+        // point at target, minus intake angular offset
+        Rotation2d robotRotation =
+            toTarget.getAngle()
+                .minus(intakeTransform.getRotation());
 
-        // Invert the intake transform to recover the robot pose that would
-        // place the intake at the desired pose
-        return desiredIntakePose.transformBy(intakeTransform.inverse());
+        // Desired robot translation:
+        // back out intake offset at that rotation
+        Translation2d robotTranslation =
+            target.minus(
+                intakeTransform
+                    .getTranslation()
+                    .rotateBy(robotRotation)
+            );
+
+        Pose2d pose = new Pose2d(robotTranslation, robotRotation);
+
+        testField.getObject("Target")
+            .setPose(pose);
+        SmartDashboard.putData("Target Field", testField);
+
+        return pose;
     }
+
 }

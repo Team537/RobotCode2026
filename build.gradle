@@ -17,6 +17,7 @@ def deployMetadataFile = layout.buildDirectory.file("deploy/537metadata.txt")
 
 tasks.register("generateDeployMetadata") {
     outputs.file(deployMetadataFile)
+    outputs.upToDateWhen { false } // Always regenerate - timestamp should always be current
     doLast {
         def user = System.getProperty("user.name") ?: "unknown"
         def host = { ->
@@ -47,7 +48,7 @@ tasks.register("generateDeployMetadata") {
 host=${host}
 gitBranch=${gitBranch}
 gitCommit=${gitCommit}
-timestamp=${ts}
+deployTimestamp=${ts}
 """.stripIndent()
     }
 }

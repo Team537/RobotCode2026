@@ -6,6 +6,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.OffsetDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,7 @@ public final class DeployMetadata {
     public static void publishFromFile(String absolutePath) {
         NetworkTable table = NetworkTableInstance.getDefault().getTable(Configs.NT_TABLE);
 
+        String currentTime = java.time.OffsetDateTime.now().toString();
         String status;
         String raw = "";
         Map<String, String> parsed = new LinkedHashMap<>();
@@ -28,16 +30,25 @@ public final class DeployMetadata {
             Path p = Path.of(absolutePath);
             if (!Files.exists(p)) {
                 status = "missing: " + absolutePath;
+                System.err.println("[DeployMetadata @ " + currentTime + "] File not found: " + absolutePath);
             } else {
                 raw = Files.readString(p, StandardCharsets.UTF_8);
                 parsed = parseKeyValueLines(Files.readAllLines(p, StandardCharsets.UTF_8));
                 status = "ok";
+                System.out.println("[DeployMetadata @ " + currentTime + "] Successfully read metadata from: " + absolutePath);
+                System.out.println("[DeployMetadata @ " + currentTime + "] File contents:");
+                for (Map.Entry<String, String> entry : parsed.entrySet()) {
+                    System.out.println("  " + entry.getKey() + " = " + entry.getValue());
+                }
             }
         } catch (Exception e) {
             status = "error: " + e.getClass().getSimpleName();
+            System.err.println("[DeployMetadata @ " + currentTime + "] Error reading file: " + e.getMessage());
+            e.printStackTrace();
         }
 
         publishToNetworkTable(table, status, raw, parsed);
+        System.out.println("[DeployMetadata @ " + currentTime + "] Published to NetworkTables with status: " + status);
     }
 
     /**

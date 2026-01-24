@@ -51,8 +51,10 @@ public class Shooter extends SubsystemBase {
                 Translation2d robotTranslation = targetTranslationSupplier.get().toTranslation2d();
 
                 Translation2d displacement = targetTranslation.minus(robotTranslation);
-                Rotation2d angle = new Rotation2d(displacement.getX(), displacement.getY());
-            }
+                
+                setVelocity(displacement.getNorm());
+            },
+            this
         );
     }
 }

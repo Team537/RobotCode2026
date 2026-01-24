@@ -4,24 +4,16 @@ import java.util.function.Supplier;
 
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.revrobotics.PersistMode;
-import com.revrobotics.ResetMode;
-import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.SparkBase.ControlType;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.SparkMaxConfig;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
-import edu.wpi.first.cscore.raw.RawSource;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Configs;
 import frc.robot.Constants;
-import frc.robot.Constants.Turret;;
 
 public class TurretSubystem extends SubsystemBase {
     private final TalonFX turret;
@@ -62,15 +54,16 @@ public class TurretSubystem extends SubsystemBase {
     }
 
     public Command getAngleCommand(Supplier<Rotation2d> angleSupplier){
-        return run(
+        return new RunCommand(
             () -> {
                 setTurretAngle(angleSupplier.get());
-            }
+            },
+            this
         );
     }
 
     public Command getTargetCommand(Supplier<Translation3d> targetTranslationSupplier) {
-        return run(
+        return new RunCommand(
             ()-> {
                 Translation3d targetTranslation3d = targetTranslationSupplier.get();
                 Translation2d targetTranslation = new Translation2d(targetTranslation3d.getX(),targetTranslation3d.getY());
@@ -81,7 +74,8 @@ public class TurretSubystem extends SubsystemBase {
                 Rotation2d angle = new Rotation2d(displacement.getX(), displacement.getY());
 
                 setTurretAngleFieldRelative(angle);
-            }
+            },
+            this
         );
     }
 }

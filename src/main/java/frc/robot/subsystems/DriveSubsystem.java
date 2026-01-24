@@ -27,6 +27,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.subsystems.vision.PhotonVisionOdometry;
 import frc.robot.util.swerve.Obstacle;
 import frc.robot.util.swerve.requests.RotationRequest;
 import frc.robot.util.swerve.requests.TranslationRequest;
@@ -38,6 +39,7 @@ import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 public class DriveSubsystem extends SubsystemBase {
 
     private SwerveDrive swerveDrive;
+    private PhotonVisionOdometry visionOdometry;
 
     PIDController xController;
     PIDController yController;
@@ -48,6 +50,9 @@ public class DriveSubsystem extends SubsystemBase {
     private Rotation2d rotationalTolerance = Constants.Drive.ROTATIONAL_TOLERANCE;
 
     private List<Supplier<List<Obstacle>>> obstaclesSuppliers;
+    
+    // Feature Flags 
+    private boolean useVisionOdometry = true;
 
     public DriveSubsystem() {
 
@@ -103,6 +108,14 @@ public class DriveSubsystem extends SubsystemBase {
 
         SmartDashboard.putNumber("Compensation Coefficient", Constants.Drive.ANGULAR_VELOCITY_COMPENSATION_COEFFICIENT);
 
+        // Setup vision odometry (if enabled).
+        if (useVisionOdometry) {
+            visionOdometry = new PhotonVisionOdometry(
+                () -> swerveDrive.getPose(),
+                swerveDrive.field
+            );
+        }
+
     }
 
     // ------------------------------
@@ -131,11 +144,16 @@ public class DriveSubsystem extends SubsystemBase {
 
         swerveDrive.setAngularVelocityCompensation(true, true, SmartDashboard.getNumber("Compensation Coefficient", Constants.Drive.ANGULAR_VELOCITY_COMPENSATION_COEFFICIENT));
 
+        // Update vision odometry if enabled.
+        if (useVisionOdometry) {
+            swerveDrive.updateOdometry(); // Vision being enabled requires manual updates to odometry.
+            visionOdometry.updatePoseEstimation(swerveDrive);
+          }
+
         Pose2d pose = getPose();
         SmartDashboard.putNumber("X Position", pose.getX());
         SmartDashboard.putNumber("Y Position", pose.getY());
-        SmartDashboard.putNumber("Theta Position", pose.getRotation().getRadians());
-
+        SmartDashboard.putNumber("Theta Position", pose.getRotation().getDegrees());
     }
 
     /**

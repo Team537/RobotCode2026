@@ -21,7 +21,7 @@ public final class DeployMetadata {
     public static void publishFromFile(String absolutePath) {
         NetworkTable table = NetworkTableInstance.getDefault().getTable(Configs.NT_TABLE);
 
-        String currentTime = java.time.OffsetDateTime.now().toString();
+        String currentTime = OffsetDateTime.now().toString();
         String status;
         String raw = "";
         Map<String, String> parsed = new LinkedHashMap<>();
@@ -92,10 +92,13 @@ public final class DeployMetadata {
     static Map<String, String> parseKeyValueLines(List<String> lines) {
         Map<String, String> out = new LinkedHashMap<>();
         for (String line : lines) {
-            if (line == null) continue;
+            if (line == null)
+                continue;
             String trimmed = line.trim();
-            if (trimmed.isEmpty()) continue;
-            if (trimmed.startsWith("#") || trimmed.startsWith(";")) continue;
+            if (trimmed.isEmpty())
+                continue;
+            if (trimmed.startsWith("#") || trimmed.startsWith(";"))
+                continue;
 
             int eq = trimmed.indexOf('=');
             int colon = trimmed.indexOf(':');

@@ -71,7 +71,7 @@ public final class FieldUtil {
 
     /** @return true if the robot is currently in teleop mode */
     public static boolean isTeleOp() {
-        return DriverStation.isTeleop();
+        return DriverStation.isTeleopEnabled();
     }
 
     /* --------------------------------------------------------------------- */

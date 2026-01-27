@@ -109,12 +109,30 @@ public class FieldStatePublisher {
 
 			// Notify at the start of the period
 			CommandTimeline.schedule(startTime, () -> {
+				String ourHubStatus;
+				if (FieldUtil.getAlliance().isPresent()) {
+					Alliance alliance = FieldUtil.getAlliance().get();
+					boolean isActive = FieldUtil.isHubActive(period, alliance).orElse(false);
+					ourHubStatus = isActive ? "ACTIVE" : "INACTIVE";
+				} else {
+					ourHubStatus = "UNKNOWN";
+				}
+
+				String opposingHubStatus;
+				if (FieldUtil.getOpposingAlliance().isPresent()) {
+					Alliance opposingAlliance = FieldUtil.getOpposingAlliance().get();
+					boolean isOpposingActive = FieldUtil.isHubActive(period, opposingAlliance).orElse(false);
+					opposingHubStatus = isOpposingActive ? "ACTIVE" : "INACTIVE";
+				} else {
+					opposingHubStatus = "UNKNOWN";
+				}
+
 				String msg = String.format(
 					"%s Period Begun (Duration: %.1f seconds). Our hub is %s, Opposing hub is %s.",
 					period.name,
 					period.endTime - period.startTime,
-					FieldUtil.isHubActive(period, FieldUtil.getAlliance().orElse(Alliance.BLUE)).orElse(false) ? "ACTIVE" : "INACTIVE",
-					FieldUtil.isHubActive(period, FieldUtil.getOpposingAlliance().orElse(Alliance.RED)).orElse(false) ? "ACTIVE" : "INACTIVE"
+					ourHubStatus,
+					opposingHubStatus
 				);
 				Elastic.sendNotification(new Elastic.Notification(
 					Elastic.NotificationLevel.INFO,

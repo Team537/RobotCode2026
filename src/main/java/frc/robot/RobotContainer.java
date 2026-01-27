@@ -7,7 +7,6 @@ package frc.robot;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -16,8 +15,8 @@ import frc.robot.commands.swerve.DriveToSequenceCommand;
 import frc.robot.commands.swerve.ManualRotationVelocityDirective;
 import frc.robot.commands.swerve.ManualTranslationVelocityDirective;
 import frc.robot.subsystems.DriveSubsystem;
-import frc.robot.util.EnumPrettifier;
 import frc.robot.util.field.Alliance;
+import frc.robot.util.field.FieldUtil;
 import frc.robot.util.swerve.requests.RotationDirective;
 import frc.robot.util.swerve.requests.TranslationDirective;
 
@@ -28,25 +27,22 @@ public class RobotContainer {
 
   DriveSubsystem driveSubsystem;
 
-  private final SendableChooser<Alliance> allianceSelector = new SendableChooser<>();
-
   public RobotContainer() {
     driveSubsystem = new DriveSubsystem();
   }
 
   public void setupSmartDashboard() {
 
-    // Alliance
-    EnumPrettifier.setupSendableChooserFromEnum(allianceSelector, Alliance.class, Alliance.RED);
-    SmartDashboard.putData("Alliance",allianceSelector);
-
-    // Pose Rest
+    // Pose Reset
     Command resetPoseCommand = new InstantCommand(() -> {
-        Pose2d pose =
-            allianceSelector.getSelected() == Alliance.BLUE
-                ? Constants.Drive.BLUE_STARTING_POSE
-                : Constants.Drive.RED_STARTING_POSE;
+        Pose2d pose = FieldUtil.getAlliance()
+            .map(alliance -> switch (alliance) {
+                case BLUE -> Constants.Drive.BLUE_STARTING_POSE;
+                case RED  -> Constants.Drive.RED_STARTING_POSE;
+            })
+            .orElse(Constants.Drive.BLUE_STARTING_POSE);
 
+        // apply the pose
         driveSubsystem.setPose(pose);
     }).ignoringDisable(true);
 
@@ -70,7 +66,7 @@ public class RobotContainer {
       Constants.Operator.Drive.NORMAL_TRANSLATION_MAX_SPEED, 
       Constants.Operator.Drive.THROTTLE_TRANSLATION_MAX_SPEED, 
       Constants.Operator.Drive.SLOW_TRANSLATION_MAX_SPEED, 
-      allianceSelector.getSelected().driverRotation
+      FieldUtil.getAlliance().orElse(Alliance.BLUE).driverRotation
     );
 
     // Setup the rotational directive for drive subsystem

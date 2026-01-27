@@ -47,7 +47,7 @@ public class Constants {
         public static final double AUTO_START = 0.0;
         public static final double AUTO_END   = 20.0;
 
-        // Teleop phase boundaries (elapsed seconds since teleop start)
+        // Match period boundaries (elapsed seconds since match start, including autonomous)
 
         public static final double TRANSITION_START = 20.0;
         public static final double TRANSITION_END   = 30.0;

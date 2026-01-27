@@ -1,5 +1,6 @@
 package frc.robot.util.field;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -46,6 +47,9 @@ public class FuelFieldSimulation {
 
     private static final Field2d field = new Field2d();
 
+    private static final double RATE_WINDOW_SEC = 60.0;
+    private final ArrayDeque<Double> fuelPickupTimes = new ArrayDeque<>();
+
     public FuelFieldSimulation(
             Supplier<Pose2d> robotPoseSupplier,
             Supplier<ChassisSpeeds> robotVelocitySupplier,
@@ -72,17 +76,19 @@ public class FuelFieldSimulation {
 
     /**
      * Call this periodically (e.g. every robot loop).
+     *
+     * <p>Tracks a rolling average fuel collection rate over the
+     * last RATE_WINDOW_SEC seconds.
      */
     public void update() {
         double now = Timer.getFPGATimestamp();
 
-        // Remove collected fuels based on intake alignment and forward motion
+        // Remove collected fuels
         Pose2d robotPose = robotPoseSupplier.get();
-        Transform2d intakeTransform = this.intakeTransform; // your intake offset
-        Translation2d intakePos = robotPose.transformBy(intakeTransform).getTranslation();
+        Translation2d intakePos =
+            robotPose.transformBy(intakeTransform).getTranslation();
 
-        // Robot velocity (field-relative)
-        ChassisSpeeds robotVel = robotVelocitySupplier.get(); // meters/sec in field frame
+        ChassisSpeeds robotVel = robotVelocitySupplier.get();
         Translation2d robotTransVel = new Translation2d(
             robotVel.vxMetersPerSecond,
             robotVel.vyMetersPerSecond
@@ -93,37 +99,48 @@ public class FuelFieldSimulation {
             Fuel fuel = it.next();
             Translation2d fuelPos = fuel.getTranslation().toTranslation2d();
 
-            // Vector from intake to fuel
             Translation2d toFuel = fuelPos.minus(intakePos);
-
-            // 1️ Check distance from intake to fuel
             double dist = toFuel.getNorm();
-            if (dist > pickupDistance) {
+
+            if (dist > pickupDistance || robotTransVel.getNorm() < 1e-3) {
                 continue;
             }
 
-            // 2 Check that intake is moving generally forward toward the fuel
-            // Project velocity onto the vector toward fuel
-            double forwardComponent = robotTransVel.div(robotTransVel.getNorm()).dot(toFuel.div(dist));
+            double forwardComponent =
+                robotTransVel.div(robotTransVel.getNorm())
+                            .dot(toFuel.div(dist));
 
-            // Only collect if moving mostly toward the target
             if (forwardComponent < minForwardSpeed) {
                 continue;
             }
 
-            // Passed all checks: remove this fuel
+            // Fuel collected
             it.remove();
+            fuelPickupTimes.addLast(now);
         }
 
-        // Spawn new fuel if allowed
+        // --- Rolling 10-second average ---
+        while (!fuelPickupTimes.isEmpty()
+            && fuelPickupTimes.peekFirst() < now - RATE_WINDOW_SEC) {
+            fuelPickupTimes.removeFirst();
+        }
+
+        double fuelsPerSecond =
+            fuelPickupTimes.size() / RATE_WINDOW_SEC;
+
+        // Spawn logic unchanged
         if (fuels.size() < maxFuelCount && now - lastSpawnTime >= spawnPeriod) {
             spawnFuel();
             lastSpawnTime = now;
         }
 
-        SmartDashboard.putNumber("Number of Fuel",getFuels().size());
+        SmartDashboard.putNumber("Fuel Count", fuels.size());
+        SmartDashboard.putNumber("Fuel Rate (avg)", fuelsPerSecond);
+
         visualizeFuels();
     }
+
+
 
     /**
      * Returns the current list of fuels.
@@ -156,7 +173,7 @@ public class FuelFieldSimulation {
             Translation3d candidate = new Translation3d(x, y, 0.0);
 
             if (spawnRegion.contains(candidate)) {
-                fuels.add(new Fuel(candidate));
+                fuels.add(new Fuel(candidate,1.0));
                 return;
             }
         }

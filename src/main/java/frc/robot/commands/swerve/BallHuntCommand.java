@@ -1,10 +1,16 @@
 package frc.robot.commands.swerve;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.util.field.Fuel;
 import frc.robot.util.field.regions.Region3d;
@@ -72,10 +78,14 @@ public class BallHuntCommand extends Command {
         // Begin in search mode until a valid target is detected
         activeCommand = searchCommandSupplier.get().repeatedly();
         activeCommand.initialize();
+        initScoringWeights();
     }
 
     @Override
     public void execute() {
+
+        updateScoringWeights();
+
         Optional<Fuel> bestFuel = findBestFuel();
 
         // Detect transitions between "no target" and "target available"
@@ -119,14 +129,69 @@ public class BallHuntCommand extends Command {
      * matching element is treated as the best candidate.
      */
     private Optional<Fuel> findBestFuel() {
-        return Optional.ofNullable(
-            fuelsSupplier.get().stream()
-                .filter(fuel ->
-                    huntingRegion.contains(fuel.getTranslation())
-                )
-                .findFirst()
-                .orElse(null)
+        return fuelsSupplier.get().stream()
+            .filter(fuel -> huntingRegion.contains(fuel.getTranslation()))
+            .max(Comparator.comparingDouble(this::scoreFuel));
+    }
+
+    /**
+     * Computes a heuristic desirability score for a fuel.
+     *
+     * <p>Higher scores indicate fuels that are closer, better aligned with the
+     * intake, already being moved toward by the robot's current motion, and
+     * detected with higher confidence.
+     */
+    private double scoreFuel(Fuel fuel) {
+
+        Translation2d fuelTranslation = fuel.getTranslation().toTranslation2d();
+
+        Pose2d intakePose =
+            drive.getPose().transformBy(Constants.Intake.intakeTransform);
+
+        // Vector from intake to fuel
+        Translation2d translationToFuel =
+            fuelTranslation.minus(intakePose.getTranslation());
+
+        // Angular difference between intake heading and fuel direction
+        Rotation2d angularError =
+            translationToFuel.getAngle().minus(intakePose.getRotation());
+
+        Translation2d robotVelocity = new Translation2d(
+            drive.getVelocity().vxMetersPerSecond,
+            drive.getVelocity().vyMetersPerSecond
         );
+
+        double score = 0.0;
+
+        // Prefer closer fuels
+        double distance = translationToFuel.getNorm();
+        score += -distance * translationDistanceWeight;
+
+        // Prefer fuels aligned with the intake direction
+        score += -Math.abs(angularError.getRadians())
+            * rotationDistanceWeight;
+
+        // Prefer fuels the robot is already moving toward
+        if (distance > 1e-6) {
+            Translation2d directionToFuel = translationToFuel.div(distance);
+            double translationalVelocityScore =
+                robotVelocity.dot(directionToFuel);
+            score += translationalVelocityScore
+                * translationalVelocityWeight;
+        }
+
+        // Prefer fuels that match current rotational motion
+        double rotationalVelocityScore =
+            drive.getVelocity().omegaRadiansPerSecond
+                * Math.signum(angularError.getRadians());
+        score += rotationalVelocityScore
+            * rotationalVelocityWeight;
+
+        // Prefer high-confidence detections
+        score += fuel.getConfidence()
+            * confidenceWeight;
+
+        return score;
     }
 
     @Override
@@ -142,4 +207,35 @@ public class BallHuntCommand extends Command {
             activeCommand.end(interrupted);
         }
     }
+
+
+    //TEST STUFF DELETE BEFORE MERGE LATER
+
+    private double translationDistanceWeight;
+    private double rotationDistanceWeight;
+    private double translationalVelocityWeight;
+    private double rotationalVelocityWeight;
+    private double confidenceWeight;
+
+    private void initScoringWeights() {
+        SmartDashboard.putNumber("FuelScore/TranslationDistanceWeight", 0.5);
+        SmartDashboard.putNumber("FuelScore/RotationDistanceWeight", 1.0);
+        SmartDashboard.putNumber("FuelScore/TranslationalVelocityWeight", 0.5);
+        SmartDashboard.putNumber("FuelScore/RotationalVelocityWeight", 0.5);
+        SmartDashboard.putNumber("FuelScore/ConfidenceWeight", 1.0);
+    }
+
+    private void updateScoringWeights() {
+        translationDistanceWeight =
+            SmartDashboard.getNumber("FuelScore/TranslationDistanceWeight", 0.5);
+        rotationDistanceWeight =
+            SmartDashboard.getNumber("FuelScore/RotationDistanceWeight", 1.0);
+        translationalVelocityWeight =
+            SmartDashboard.getNumber("FuelScore/TranslationalVelocityWeight", 0.5);
+        rotationalVelocityWeight =
+            SmartDashboard.getNumber("FuelScore/RotationalVelocityWeight", 0.5);
+        confidenceWeight =
+            SmartDashboard.getNumber("FuelScore/ConfidenceWeight", 1.0);
+    }
+
 }

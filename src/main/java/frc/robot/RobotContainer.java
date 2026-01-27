@@ -102,10 +102,10 @@ public class RobotContainer {
   public void scheduleAutonomous() {
 
     FuelFieldSimulation fuelSim = new FuelFieldSimulation(driveSubsystem::getPose, driveSubsystem::getVelocity,
-        Constants.Intake.intakeTransform, Constants.Drive.Field.TEST_REGION,
-        20, 10.0, 0.3, 0.9);
+        Constants.Intake.intakeTransform, Constants.Drive.Field.TEST_REGION_COMPOSITE,
+        200, 1000, 0.4, 0.9);
     Command ballHuntCommand = new BallHuntCommand(driveSubsystem, fuelSim::getFuels,
-        Constants.Drive.Field.TEST_REGION);
+        Constants.Drive.Field.TEST_REGION_COMPOSITE);
 
     CommandScheduler.getInstance().schedule(ballHuntCommand);
     CommandScheduler.getInstance().schedule(new RunCommand(fuelSim::update));

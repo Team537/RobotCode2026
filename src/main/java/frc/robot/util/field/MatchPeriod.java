@@ -1,7 +1,6 @@
 package frc.robot.util.field;
 
 import frc.robot.Constants;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 public enum MatchPeriod {
 

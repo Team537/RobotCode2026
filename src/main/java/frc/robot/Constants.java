@@ -92,8 +92,8 @@ public class Constants {
         public static final double ROTATIONAL_KI = 0.0;
         public static final double ROTATIONAL_KD = 0.1;
 
-        public static final double MAX_TRANSLATIONAL_SPEED = 5.0; // Meters per second
-        public static final double MAX_ROTATIONAL_SPEED = 8.0; // Radians per second
+        public static final double MAX_TRANSLATIONAL_SPEED = 2.5; // Meters per second
+        public static final double MAX_ROTATIONAL_SPEED = 4.0; // Radians per second
         
         // NOTE: This value is only used in the trapezoidal motion profiling of the robot. Other maximums are stored in deploy settings.
         public static final double MAX_TRANSLATIONAL_ACCELERATION = 2.0; // Meters per second squared

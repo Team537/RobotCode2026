@@ -16,11 +16,13 @@ import frc.robot.Constants;
 public class IntakePivotSystem extends SubsystemBase {
     public TalonFX Intake;
 
+    //Configuration
     public IntakePivotSystem() {
         Intake = new TalonFX(Constants.IntakePivot.INTAKE_ID);
         Intake.getConfigurator().apply(Configs.IntakePivot.INTAKE_PIVOT_CONFIGURATION);
     }
 
+    //Sets the angle for the intake subsystem
     public void setIntakeAngle(Rotation2d angle) {
         PositionVoltage angleRequest;
 
@@ -29,17 +31,19 @@ public class IntakePivotSystem extends SubsystemBase {
         Intake.setControl(angleRequest);
     }
 
+    //Returns the angle as a double
     public Rotation2d getAngle(){
         return Rotation2d.fromRadians(Intake.getPosition().getValueAsDouble());
     }
 
     
-
+    //Lowers the intake
     public Command setIntakeAngleCommand(Supplier<Rotation2d> angleSupplier){
         return new RunCommand(
             () -> {
                 setIntakeAngle(angleSupplier.get());
 
+                //Prevents the intake from suprassing the maximum angle (pushing down on the floor)
                 if (getAngle().getRadians() > Constants.IntakePivot.INTAKE_MAX_ANGLE.getRadians()) {
                     setIntakeAngle(Constants.IntakePivot.INTAKE_MAX_ANGLE);
                 }
@@ -47,6 +51,7 @@ public class IntakePivotSystem extends SubsystemBase {
         );
     }
 
+    //Raises the intake to the start position
     public Command raiseIntakeCommand() {
         return new RunCommand(
             () -> {

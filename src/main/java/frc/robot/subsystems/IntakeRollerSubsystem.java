@@ -14,16 +14,19 @@ import frc.robot.Constants;
 public class IntakeRollerSubsystem extends SubsystemBase {
     private TalonFX intakeRoller;
 
+    //Configuration
     public IntakeRollerSubsystem() {
         intakeRoller = new TalonFX(Constants.Intake.INTAKE_LEAD_ID);
         intakeRoller.getConfigurator().apply(Configs.Intake.INTAKE_CONFIGURATION);
     }
 
+    //Sets the velocity of the intake roller
     public void setVelocity(double velocity) {
         VelocityVoltage velocityRequest = new VelocityVoltage(velocity);
         intakeRoller.setControl(velocityRequest);
     }
 
+    //Runs the command for the intake roller at a given velocity
     public Command getVelocityCommand(Supplier<Double> velocitySupplier) {
         return new RunCommand(
             () -> {

@@ -132,7 +132,7 @@ public class Constants {
         public static final InvertedValue LEAD_MOTOR_INVERTED = InvertedValue.CounterClockwise_Positive;
         public static final MotorAlignmentValue FOLLOWER_MOTOR_ALIGNMENT = MotorAlignmentValue.Aligned;
 
-        public static final Rotation2d INTAKE_START_POS = Rotation2d.kZero;
-        public static final Rotation2d INTAKE_MAX_ANGLE = Rotation2d.fromDegrees(45.0);
+        public static final Rotation2d INTAKE_START_POS = Rotation2d.kZero; //Prevents the intake from going beyond its start positon
+        public static final Rotation2d INTAKE_MAX_ANGLE = Rotation2d.fromDegrees(45.0); //Prevents the robot from going beyond its maxiumum angle
     }
 }

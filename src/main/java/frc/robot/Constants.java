@@ -4,6 +4,9 @@ import static edu.wpi.first.units.Units.Rotation;
 
 import java.io.File;
 
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
+
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.numbers.N3;
@@ -91,5 +94,45 @@ public class Constants {
         
         public static final Vector<N3> CENTER_SINGLE_TAG_STANDARD_DEVIATION = VecBuilder.fill(4, 4, 8); 
         public static final Vector<N3> CENTER_MULTI_TAG_STANDARD_DEVIATION = VecBuilder.fill(0.5, 0.5, 1);
+    }
+
+    public static class Intake {
+        public static final int INTAKE_LEAD_ID = 1;
+        
+        public static final int CURRENT_LIMIT = 75;
+        public static final int CURRENT_LOWER_LIMIT = 25;
+        public static final double CURRENT_LOWER_TIME = 0.5;
+
+        public static final double KP = .7;
+        public static final double KI = 0;
+        public static final double KD = 0.2;
+
+        public static final double GEAR_RATIO = 20;
+        public static final double ENCODER_FACTOR = Math.PI * 2 / GEAR_RATIO;
+
+        public static final InvertedValue LEAD_MOTOR_INVERTED = InvertedValue.CounterClockwise_Positive;
+
+        public static final MotorAlignmentValue MOTOR_ALIGNMENT = MotorAlignmentValue.Aligned;
+    }
+
+    public static class IntakePivot {
+        public static final int INTAKE_ID = 2;
+
+        public static final int CURRENT_LIMIT = 75;
+        public static final int CURRENT_LOWER_LIMIT = 25;
+        public static final double CURRENT_LOWER_TIME = .5;
+
+        public static final double KP = .7;
+        public static final double KI = 0;
+        public static final double KD = .2;
+
+        public static final double GEAR_RATIO = 20;
+        public static final double ENCODER_FACTOR = Math.PI * 2 / GEAR_RATIO;
+
+        public static final InvertedValue LEAD_MOTOR_INVERTED = InvertedValue.CounterClockwise_Positive;
+        public static final MotorAlignmentValue FOLLOWER_MOTOR_ALIGNMENT = MotorAlignmentValue.Aligned;
+
+        public static final Rotation2d INTAKE_START_POS = Rotation2d.kZero;
+        public static final Rotation2d INTAKE_MAX_ANGLE = Rotation2d.fromDegrees(45.0);
     }
 }

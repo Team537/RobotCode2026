@@ -92,11 +92,11 @@ public class Constants {
         public static final double ROTATIONAL_KI = 0.0;
         public static final double ROTATIONAL_KD = 0.1;
 
-        public static final double MAX_TRANSLATIONAL_SPEED = 2.5; // Meters per second
+        public static final double MAX_TRANSLATIONAL_SPEED = 1.0; // Meters per second
         public static final double MAX_ROTATIONAL_SPEED = 4.0; // Radians per second
         
         // NOTE: This value is only used in the trapezoidal motion profiling of the robot. Other maximums are stored in deploy settings.
-        public static final double MAX_TRANSLATIONAL_ACCELERATION = 2.0; // Meters per second squared
+        public static final double MAX_TRANSLATIONAL_ACCELERATION = 1.0; // Meters per second squared
         public static final double MAX_ROTATIONAL_ACCELERATION = 2.0;
 
         public static final File YAGSL_CONFIG = new File(Filesystem.getDeployDirectory(),"swerve/ourSetup");
@@ -113,7 +113,7 @@ public class Constants {
 
         // Center Camera Constants (OLD / EXAMPLE)
         public static final String CENTER_CAMERA_NAME = "back";
-        public static final Rotation3d CENTER_CAMERA_ROTATION = new Rotation3d(0, 0, Units.degreesToRadians(180));
+        public static final Rotation3d CENTER_CAMERA_ROTATION = new Rotation3d(0, 0, Units.degreesToRadians(0));
         public static final Translation3d CENTER_CAMERA_TRANSLATION = new Translation3d(
                 Units.inchesToMeters(-10), 
                 Units.inchesToMeters(0), 

@@ -64,7 +64,7 @@ public class DriveSubsystem extends SubsystemBase {
             throw new RuntimeException(e);
         }
 
-        swerveDrive.setMaximumAttainableSpeeds(Constants.Drive.MAX_TRANSLATIONAL_SPEED, Constants.Drive.MAX_ROTATIONAL_SPEED);
+        swerveDrive.setMaximumAllowableSpeeds(Constants.Drive.MAX_TRANSLATIONAL_SPEED, Constants.Drive.MAX_ROTATIONAL_SPEED);
         swerveDrive.setHeadingCorrection(true);
         swerveDrive.setCosineCompensator(true);
         swerveDrive.setAngularVelocityCompensation(true, true, Constants.Drive.ANGULAR_VELOCITY_COMPENSATION_COEFFICIENT);
@@ -255,6 +255,23 @@ public class DriveSubsystem extends SubsystemBase {
         }
 
         ChassisSpeeds chassisSpeeds = new ChassisSpeeds(vx,vy,omega);
+
+        // Clamp chassis speeds to max velocities
+        double currentSpeed = Math.hypot(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond);
+        if (currentSpeed > Constants.Drive.MAX_TRANSLATIONAL_SPEED) {
+            double scale = Constants.Drive.MAX_TRANSLATIONAL_SPEED / currentSpeed;
+            chassisSpeeds.vxMetersPerSecond *= scale;
+            chassisSpeeds.vyMetersPerSecond *= scale;
+        }
+        
+        // Clamp rotational speed
+        if (Math.abs(chassisSpeeds.omegaRadiansPerSecond) > Constants.Drive.MAX_ROTATIONAL_SPEED) {
+            chassisSpeeds.omegaRadiansPerSecond = Math.copySign(
+                Constants.Drive.MAX_ROTATIONAL_SPEED, 
+                chassisSpeeds.omegaRadiansPerSecond
+            );
+        }
+
 
         // --- Drive: field-oriented unless robot-relative velocity ---
         if (tReq instanceof TranslationRequest.Velocity vel && !vel.fieldRelative()) {

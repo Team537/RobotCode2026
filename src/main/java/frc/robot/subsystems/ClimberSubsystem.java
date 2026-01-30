@@ -13,11 +13,13 @@ import frc.robot.Constants;
 public class ClimberSubsystem extends SubsystemBase {
     private TalonFX climber;
 
+    //Configuration
     public ClimberSubsystem() {
         climber = new TalonFX(Constants.Climber.CLIMBER_ID);
         climber.getConfigurator().apply(Configs.CLIMBER_CONFIG);
     }
 
+    //Converts the angle to radians allowing for it to be changed from Rotation2d to double
     public void setClimberAngle(Rotation2d angle) {
         PositionVoltage angleRequest;
 
@@ -25,6 +27,7 @@ public class ClimberSubsystem extends SubsystemBase {
         climber.setControl(angleRequest);
     }
 
+    //Sets the robot up for climbing
     public Command goToDeployAngleCommand() {
         return new RunCommand(
             () -> {
@@ -34,6 +37,7 @@ public class ClimberSubsystem extends SubsystemBase {
         );
     }
 
+    //Makes the robot start climbing
     public Command climbCommand() {
         return new RunCommand(
             () -> {
@@ -43,12 +47,16 @@ public class ClimberSubsystem extends SubsystemBase {
         );
     }
 
+
+    //Checks if the climber is at the correct angle for climbing
     public boolean isAtClimbAngle() {
         double current_pos = climber.getPosition().getValueAsDouble();
 
         return Math.abs(current_pos - Constants.Climber.CLIMB_WINCH_ROTATIONS.getRotations()) < Constants.Climber.CLIMBER_ANGLE_TOLERANCE.getRotations();
     }
 
+
+    //Checks if the climber is at the correct angle deployed
     public boolean isAtDeployAngle() {
         double current_pos = climber.getPosition().getValueAsDouble();
 

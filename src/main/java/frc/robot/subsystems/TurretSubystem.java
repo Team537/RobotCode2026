@@ -19,6 +19,7 @@ public class TurretSubystem extends SubsystemBase {
     private final TalonFX turret;
     private Supplier<Pose2d> robotPoseSupplier = () -> Pose2d.kZero;
 
+    //Turret Configuration
     public TurretSubystem(){
         
         turret = new TalonFX(Constants.Turret.TURRET_ID);
@@ -26,12 +27,15 @@ public class TurretSubystem extends SubsystemBase {
         turret.setPosition(Constants.Turret.START_POS.getRadians());
     }
 
+    //Converts the angle to radians allowing for it to be changed from Rotation2d to double
     public void setTurretAngle(Rotation2d angle) {
         PositionVoltage angleRequest;
 
         angleRequest = new PositionVoltage(angle.getRadians());
         turret.setControl(angleRequest);
     }
+
+    //Sets the turret angle relative to the field
     public void setTurretAngleFieldRelative(Rotation2d angle) {
         Rotation2d robotHeading = robotPoseSupplier.get().getRotation();
 
@@ -39,20 +43,24 @@ public class TurretSubystem extends SubsystemBase {
 
     }
 
+    //Finds the current angle of the turret
     public Rotation2d getAngle(){
         return Rotation2d.fromRadians(turret.getPosition().getValueAsDouble());
     }
 
+    //Finds the current angle of the turret relative to the field
     public Rotation2d getAngleFieldRelative(Rotation2d angle) {
         Rotation2d robotHeading = robotPoseSupplier.get().getRotation();
 
         return getAngle().plus(robotHeading);
     }
 
+    //Sets up the supplier for the robot pose
     public void setPoseSupplier(Supplier<Pose2d> robotPoseSupplier){
         this.robotPoseSupplier = robotPoseSupplier;
     }
 
+    //Runs the command for setting the turret angle
     public Command getAngleCommand(Supplier<Rotation2d> angleSupplier){
         return new RunCommand(
             () -> {
@@ -62,6 +70,7 @@ public class TurretSubystem extends SubsystemBase {
         );
     }
 
+    //Sets the target for shooting
     public Command getTargetCommand(Supplier<Translation3d> targetTranslationSupplier) {
         return new RunCommand(
             ()-> {

@@ -50,7 +50,7 @@ public class Configs {
 
             INTAKE_CONFIGURATION
                 .MotorOutput
-                    .Inverted = Constants.Intake.LEAD_MOTOR_INVERTED;
+                    .Inverted = Constants.Intake.MOTOR_INVERTED;
         }
 
 
@@ -91,6 +91,10 @@ public class Configs {
                 INTAKE_PIVOT_CONFIGURATION
                     .MotorOutput
                         .NeutralMode = NeutralModeValue.Brake;
+
+                INTAKE_PIVOT_CONFIGURATION
+                    .MotorOutput
+                        .Inverted = Constants.IntakePivot.MOTOR_INVERTED;
             }
         }
 }

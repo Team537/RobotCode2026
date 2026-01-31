@@ -24,9 +24,21 @@ public class IntakePivotSystem extends SubsystemBase {
 
     //Sets the angle for the intake subsystem
     public void setIntakeAngle(Rotation2d angle) {
+
+        //Prevents the intake from suprassing the maximum angle (going past its start pos)        
+        if (angle.getRadians() > Constants.IntakePivot.INTAKE_MAX_ANGLE.getRadians()) {
+            angle = Constants.IntakePivot.INTAKE_MAX_ANGLE;
+        }
+                
+        //Prevents the intake from surpassing its minimum angle (going too far down)
+        if (angle.getRadians() > Constants.IntakePivot.INTAKE_MIN_ANGLE.getRadians()) {
+            angle = Constants.IntakePivot.INTAKE_MIN_ANGLE;
+        }
+
         PositionVoltage angleRequest;
 
         angleRequest = new PositionVoltage(angle.getRadians());
+
         
         Intake.setControl(angleRequest);
     }
@@ -37,26 +49,25 @@ public class IntakePivotSystem extends SubsystemBase {
     }
 
     
-    //Lowers the intake
-    public Command setIntakeAngleCommand(Supplier<Rotation2d> angleSupplier){
+    //Command for setting hte intake angle
+    public Command setIntakeAngleCommand(Rotation2d angle){
         return new RunCommand(
             () -> {
-                setIntakeAngle(angleSupplier.get());
-
-                //Prevents the intake from suprassing the maximum angle (pushing down on the floor)
-                if (getAngle().getRadians() > Constants.IntakePivot.INTAKE_MAX_ANGLE.getRadians()) {
-                    setIntakeAngle(Constants.IntakePivot.INTAKE_MAX_ANGLE);
-                }
+                setIntakeAngle(angle);
             }
-        );
+        ).until(() -> {
+            Rotation2d difference = getAngle().minus(angle);        
+            return Math.abs(difference.getRadians()) < Constants.IntakePivot.INTAKE_TOLERANCE_ANGLE.getRadians();
+        });
     }
 
     //Raises the intake to the start position
     public Command raiseIntakeCommand() {
-        return new RunCommand(
-            () -> {
-                setIntakeAngle(Constants.IntakePivot.INTAKE_START_POS);
-            }
-        );
+        return setIntakeAngleCommand(Constants.IntakePivot.INTAKE_START_POS);
+    }
+
+    //Deploys intake 
+    public Command deployIntakeCommand() {
+        return setIntakeAngleCommand(Constants.IntakePivot.INTAKE_DEPLOYED_ANGLE);
     }
 }

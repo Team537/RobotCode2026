@@ -110,7 +110,7 @@ public class Constants {
         public static final double GEAR_RATIO = 20;
         public static final double ENCODER_FACTOR = Math.PI * 2 / GEAR_RATIO;
 
-        public static final InvertedValue LEAD_MOTOR_INVERTED = InvertedValue.CounterClockwise_Positive;
+        public static final InvertedValue MOTOR_INVERTED = InvertedValue.CounterClockwise_Positive;
 
         public static final MotorAlignmentValue MOTOR_ALIGNMENT = MotorAlignmentValue.Aligned;
     }
@@ -129,10 +129,14 @@ public class Constants {
         public static final double GEAR_RATIO = 20;
         public static final double ENCODER_FACTOR = Math.PI * 2 / GEAR_RATIO;
 
-        public static final InvertedValue LEAD_MOTOR_INVERTED = InvertedValue.CounterClockwise_Positive;
-        public static final MotorAlignmentValue FOLLOWER_MOTOR_ALIGNMENT = MotorAlignmentValue.Aligned;
+        public static final InvertedValue MOTOR_INVERTED = InvertedValue.CounterClockwise_Positive;
 
-        public static final Rotation2d INTAKE_START_POS = Rotation2d.kZero; //Prevents the intake from going beyond its start positon
-        public static final Rotation2d INTAKE_MAX_ANGLE = Rotation2d.fromDegrees(45.0); //Prevents the robot from going beyond its maxiumum angle
+        public static final Rotation2d INTAKE_START_POS = Rotation2d.fromDegrees(90); //Prevents the intake from going beyond its start positon
+        public static final Rotation2d INTAKE_MIN_ANGLE = Rotation2d.fromDegrees(0);
+        public static final Rotation2d INTAKE_MAX_ANGLE = INTAKE_START_POS; //Prevents the robot from going beyond its maxiumum angle
+        public static final Rotation2d INTAKE_RAISED_ANGLE = INTAKE_MIN_ANGLE;
+        public static final Rotation2d INTAKE_DEPLOYED_ANGLE = Rotation2d.fromDegrees(30);        
+
+        public static final Rotation2d INTAKE_TOLERANCE_ANGLE = Rotation2d.fromDegrees(5);
     }
 }

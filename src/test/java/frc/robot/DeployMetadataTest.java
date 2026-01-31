@@ -403,7 +403,7 @@ class DeployMetadataTest {
             "host=DESKTOP-ABC123",
             "gitBranch=feature/track-deployment",
             "gitCommit=a1b2c3d4e5f6g7h8i9j0",
-            "timestamp=2026-01-21T10:30:45.123-05:00"
+            "deployTimestamp=2026-01-21T10:30:45.123-05:00"
         );
 
         Map<String, String> result = DeployMetadata.parseKeyValueLines(lines);
@@ -413,7 +413,7 @@ class DeployMetadataTest {
         assertEquals("DESKTOP-ABC123", result.get("host"));
         assertEquals("feature/track-deployment", result.get("gitBranch"));
         assertEquals("a1b2c3d4e5f6g7h8i9j0", result.get("gitCommit"));
-        assertEquals("2026-01-21T10:30:45.123-05:00", result.get("timestamp"));
+        assertEquals("2026-01-21T10:30:45.123-05:00", result.get("deployTimestamp"));
 
         // Now publish it
         DeployMetadata.publishFromLines(mockTable, lines);
@@ -423,6 +423,6 @@ class DeployMetadataTest {
         verify(mockTable).getEntry(Configs.NT_PREFIX_PARSED + "host");
         verify(mockTable).getEntry(Configs.NT_PREFIX_PARSED + "gitBranch");
         verify(mockTable).getEntry(Configs.NT_PREFIX_PARSED + "gitCommit");
-        verify(mockTable).getEntry(Configs.NT_PREFIX_PARSED + "timestamp");
+        verify(mockTable).getEntry(Configs.NT_PREFIX_PARSED + "deployTimestamp");
     }
 }

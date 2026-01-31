@@ -101,7 +101,7 @@ public class PhotonVisionOdometry {
     }
 
   }
-
+  
   /**
    * Update the pose estimation inside of {@link SwerveDrive} with all of the
    * given poses.
@@ -128,7 +128,7 @@ public class PhotonVisionOdometry {
 
         var pose = poseEst.get();
         swerveDrive.addVisionMeasurement(
-            new Pose2d(pose.estimatedPose.toPose2d().getTranslation(), swerveDrive.getPose().getRotation()),
+            pose.estimatedPose.toPose2d(),
             pose.timestampSeconds,
             camera.curStdDevs);
 

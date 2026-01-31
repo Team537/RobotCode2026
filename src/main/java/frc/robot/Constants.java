@@ -2,6 +2,8 @@ package frc.robot;
 
 import java.io.File;
 
+import com.ctre.phoenix6.signals.InvertedValue;
+
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -121,5 +123,24 @@ public class Constants {
         
         public static final Vector<N3> CENTER_SINGLE_TAG_STANDARD_DEVIATION = VecBuilder.fill(4, 4, 8); 
         public static final Vector<N3> CENTER_MULTI_TAG_STANDARD_DEVIATION = VecBuilder.fill(0.5, 0.5, 1);
+    }
+
+    public static class Transfer {
+        public static final int TRANSFER_MOTOR_ID = 1;
+
+        public static final int CURRENT_LIMIT = 75; //Amps
+        public static final int CURRENT_LOWER_LIMIT = 25;
+        public static final double CURRENT_LOWER_TIME = 0.5;
+
+        public static final double KP = 0.7;
+        public static final double KI = 0.0;
+        public static final double KD = 0.2;
+
+        public static final double GEAR_RATIO = 20;
+        public static final double ENCODER_FACTOR = Math.PI * 2 / GEAR_RATIO;
+
+        public static final InvertedValue MOTOR_INVERTED = InvertedValue.CounterClockwise_Positive;
+
+        public static final double LOAD_SPEED = 1.0;
     }
 }

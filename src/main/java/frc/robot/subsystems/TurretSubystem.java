@@ -4,6 +4,9 @@ import java.util.function.Supplier;
 
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.SparkMax;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -12,27 +15,50 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Configs;
 import frc.robot.Constants;
 
 public class TurretSubystem extends SubsystemBase {
-    private final TalonFX turret;
+    private TalonFX turret;
+
+    private SparkMax turretNeo;
+    private SparkMaxConfig turretConfig;
+
     private Supplier<Pose2d> robotPoseSupplier = () -> Pose2d.kZero;
 
     //Turret Configuration
     public TurretSubystem(){
         
-        turret = new TalonFX(Constants.Turret.TURRET_ID);
-        turret.getConfigurator().apply(Configs.TURRET_CONFIG);
-        turret.setPosition(Constants.Turret.START_POS.getRadians());
+        //turret = new TalonFX(Constants.Turret.TURRET_ID);
+        //turret.getConfigurator().apply(Configs.TURRET_CONFIG);
+        //turret.setPosition(Constants.Turret.START_POS.getRadians());
+
+        turretConfig = new SparkMaxConfig();
+
+        turretConfig
+            .idleMode(IdleMode.kBrake)
+            .smartCurrentLimit(Constants.Turret.TURRET_MOTOR_CURRENT_LIMIT)
+            .inverted(false);
+
+        turretConfig.encoder
+            .positionConversionFactor(Constants.Turret.ENCODER_FACTOR)
+            .velocityConversionFactor(Constants.Turret.ENCODER_FACTOR / 60.0);
+        
+        turretConfig.closedLoop
+            .pid(
+                Constants.Turret.TURRET_KP,
+                Constants.Turret.TURRET_KI,
+                Constants.Turret.TURRET_KD
+            );
     }
 
     //Converts the angle to radians allowing for it to be changed from Rotation2d to double
     public void setTurretAngle(Rotation2d angle) {
-        PositionVoltage angleRequest;
+        //PositionVoltage angleRequest;
 
-        angleRequest = new PositionVoltage(angle.getRadians());
-        turret.setControl(angleRequest);
+        //angleRequest = new PositionVoltage(angle.getRadians());
+        //turret.setControl(angleRequest);
+
+        turretNeo.getClosedLoopController().setSetpoint(angle.getRadians(), com.revrobotics.spark.SparkBase.ControlType.kPosition);
     }
 
     //Sets the turret angle relative to the field
@@ -45,7 +71,7 @@ public class TurretSubystem extends SubsystemBase {
 
     //Finds the current angle of the turret
     public Rotation2d getAngle(){
-        return Rotation2d.fromRadians(turret.getPosition().getValueAsDouble());
+        return Rotation2d.fromRadians(turretNeo.getEncoder().getPosition());
     }
 
     //Finds the current angle of the turret relative to the field

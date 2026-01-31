@@ -19,20 +19,24 @@ public class Shooter extends SubsystemBase {
     private final TalonFX shooter;
      private Supplier<Pose2d> robotPoseSupplier = () -> Pose2d.kZero;
 
+     //Shooter configuration
     public Shooter(){
         shooter = new TalonFX(Constants.Shooter.SHOOTER_ID);
         shooter.getConfigurator().apply(Configs.Shooter.SHOOTER_CONFIGURATION);
     }
 
+    //Used for setting the velocity of the shooter wheel(s)
     public void setVelocity(double velocity) {
         VelocityVoltage velocityRequest = new VelocityVoltage(velocity);
         shooter.setControl(velocityRequest);
     }
 
+    //Sets up the supplier for the robot pose, used in the pid to determine the shooting power
     public void setPoseSupplier(Supplier<Pose2d> robotPoseSupplier){
         this.robotPoseSupplier = robotPoseSupplier;
     }
 
+    //Runs the command for setting the shooter velocity
     public Command setVelocityCommand(Supplier<Double> velocitySupplier) {
         return new RunCommand(
             () -> {
@@ -42,6 +46,7 @@ public class Shooter extends SubsystemBase {
         );
     }
 
+    //Sets the target for shooting, this is for determining the power
     public Command getTargetCommand(Supplier<Translation3d> targetTranslationSupplier) {
         return new RunCommand(
             () -> {

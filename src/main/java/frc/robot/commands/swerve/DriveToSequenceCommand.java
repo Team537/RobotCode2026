@@ -6,6 +6,7 @@ import java.util.List;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.subsystems.DriveSubsystem;
 
 /**
@@ -35,7 +36,7 @@ public class DriveToSequenceCommand extends SequentialCommandGroup {
     public DriveToSequenceCommand(DriveSubsystem driveSubsystem, List<Pose2d> poses) {
         // Add each drive-to-pose command to the sequence
         for (Pose2d pose : poses) {
-            addCommands(driveSubsystem.getDriveToPoseCommand(pose));
+            addCommands(driveSubsystem.getDriveToPoseCommand(pose).andThen(new WaitCommand(1.0)));
         }
         
         addRequirements(driveSubsystem);

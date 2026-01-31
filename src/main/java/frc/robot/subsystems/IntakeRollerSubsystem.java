@@ -28,7 +28,7 @@ public class IntakeRollerSubsystem extends SubsystemBase {
 
     //Runs the command for the intake roller at a given velocity
     public Command getVelocityCommand(Supplier<Double> velocitySupplier) {
-        return new RunCommand(
+        return new InstantCommand(
             () -> {
                 setVelocity(velocitySupplier.get());
             },

@@ -4,6 +4,10 @@ import java.util.function.Supplier;
 
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -16,19 +20,43 @@ import frc.robot.Configs;
 import frc.robot.Constants;
 
 public class Shooter extends SubsystemBase {
-    private final TalonFX shooter;
+    private TalonFX shooter;
+    private SparkMax shooterNeo;
+    private SparkMaxConfig shooterConfig;
+
      private Supplier<Pose2d> robotPoseSupplier = () -> Pose2d.kZero;
 
      //Shooter configuration
     public Shooter(){
-        shooter = new TalonFX(Constants.Shooter.SHOOTER_ID);
-        shooter.getConfigurator().apply(Configs.Shooter.SHOOTER_CONFIGURATION);
+        //shooter = new TalonFX(Constants.Shooter.SHOOTER_ID);
+        //shooter.getConfigurator().apply(Configs.Shooter.SHOOTER_CONFIGURATION);
+
+        shooterConfig = new SparkMaxConfig();
+
+        shooterConfig
+            .idleMode(IdleMode.kBrake)
+            .smartCurrentLimit(Constants.Shooter.CURRENT_LIMIT)
+            .inverted(false);
+
+        shooterConfig.encoder
+            .positionConversionFactor(Constants.Shooter.ENCOER_FACTOR)
+            .velocityConversionFactor(Constants.Shooter.ENCOER_FACTOR / 60.0);
+
+        shooterConfig.closedLoop
+            .pid(
+                Constants.Shooter.KP,
+                Constants.Shooter.KI,
+                Constants.Shooter.KD
+                );
+
     }
 
     //Used for setting the velocity of the shooter wheel(s)
     public void setVelocity(double velocity) {
-        VelocityVoltage velocityRequest = new VelocityVoltage(velocity);
-        shooter.setControl(velocityRequest);
+        //VelocityVoltage velocityRequest = new VelocityVoltage(velocity);
+        //shooter.setControl(velocityRequest);
+
+        shooterNeo.getClosedLoopController().setSetpoint(1.0, ControlType.kVelocity);
     }
 
     //Sets up the supplier for the robot pose, used in the pid to determine the shooting power

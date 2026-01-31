@@ -73,9 +73,9 @@ public class Constants {
 
         // Starting Poses
         public static final Pose2d BLUE_STARTING_POSE = new Pose2d(
-            2.0,
-            6.0,
-            Rotation2d.kZero
+            7.013,
+            6.085,
+            Rotation2d.fromDegrees(-152.5)
         );
         public static final Pose2d RED_STARTING_POSE = new Pose2d(
             2.0,
@@ -84,7 +84,7 @@ public class Constants {
         );
 
         // Drive PID Controller Coefficients
-        public static final double TRANSLATIONAL_KP = 3.2;
+        public static final double TRANSLATIONAL_KP = 3.0;
         public static final double TRANSLATIONAL_KI = 0.0;
         public static final double TRANSLATIONAL_KD = 0.05;
 
@@ -115,7 +115,7 @@ public class Constants {
         public static final String CENTER_CAMERA_NAME = "back";
         public static final Rotation3d CENTER_CAMERA_ROTATION = new Rotation3d(0, 0, Units.degreesToRadians(0));
         public static final Translation3d CENTER_CAMERA_TRANSLATION = new Translation3d(
-                Units.inchesToMeters(-10), 
+                Units.inchesToMeters(10), 
                 Units.inchesToMeters(0), 
                 Units.inchesToMeters(0));
         

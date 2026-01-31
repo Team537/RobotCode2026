@@ -275,7 +275,6 @@ public class DriveSubsystem extends SubsystemBase {
             );
         }
 
-
         // --- Drive: field-oriented unless robot-relative velocity ---
         if (tReq instanceof TranslationRequest.Velocity vel && !vel.fieldRelative()) {
             swerveDrive.drive(chassisSpeeds); // robot-relative velocity

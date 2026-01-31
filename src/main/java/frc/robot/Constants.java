@@ -111,6 +111,7 @@ public class Constants {
         public static final double ENCODER_FACTOR = Math.PI * 2 / GEAR_RATIO;
 
         public static final InvertedValue MOTOR_INVERTED = InvertedValue.CounterClockwise_Positive;
+        public static final boolean MOTOR_INVERTED_NEO = false;
 
         public static final MotorAlignmentValue MOTOR_ALIGNMENT = MotorAlignmentValue.Aligned;
     }

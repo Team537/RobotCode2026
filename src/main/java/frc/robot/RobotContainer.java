@@ -94,9 +94,9 @@ public class RobotContainer {
     // Close new Pose2d(2.63, 3.51, Rotation2d.fromDegrees(0))
     new DriveToSequenceCommand(
       driveSubsystem,
-      new Pose2d(1.46, 2.91, Rotation2d.fromDegrees(0)),
-      new Pose2d(2.63, 3.51, Rotation2d.fromDegrees(0))
-    ).schedule();
+      new Pose2d(1.977,6.274,Rotation2d.kPi),
+      new Pose2d(7.013, 6.085,Rotation2d.fromDegrees(-152.5))
+    ).repeatedly().schedule();
 
     // Alternative builder pattern syntax:
     // new DriveToSequenceCommand.Builder(driveSubsystem)

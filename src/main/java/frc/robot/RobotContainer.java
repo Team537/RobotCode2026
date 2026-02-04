@@ -6,18 +6,17 @@ package frc.robot;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.commands.swerve.CompositeDriveCommand;
+import frc.robot.commands.swerve.DriveToSequenceCommand;
 import frc.robot.commands.swerve.ManualRotationVelocityDirective;
 import frc.robot.commands.swerve.ManualTranslationVelocityDirective;
 import frc.robot.subsystems.DriveSubsystem;
-import frc.robot.util.EnumPrettifier;
 import frc.robot.util.field.Alliance;
+import frc.robot.util.field.FieldUtil;
 import frc.robot.util.swerve.requests.RotationDirective;
 import frc.robot.util.swerve.requests.TranslationDirective;
 
@@ -28,25 +27,22 @@ public class RobotContainer {
 
   DriveSubsystem driveSubsystem;
 
-  private final SendableChooser<Alliance> allianceSelector = new SendableChooser<>();
-
   public RobotContainer() {
     driveSubsystem = new DriveSubsystem();
   }
 
   public void setupSmartDashboard() {
 
-    // Alliance
-    EnumPrettifier.setupSendableChooserFromEnum(allianceSelector, Alliance.class, Alliance.RED);
-    SmartDashboard.putData("Alliance",allianceSelector);
-
-    // Pose Rest
+    // Pose Reset
     Command resetPoseCommand = new InstantCommand(() -> {
-        Pose2d pose =
-            allianceSelector.getSelected() == Alliance.BLUE
-                ? Constants.Drive.BLUE_STARTING_POSE
-                : Constants.Drive.RED_STARTING_POSE;
+        Pose2d pose = FieldUtil.getAlliance()
+            .map(alliance -> switch (alliance) {
+                case BLUE -> Constants.Drive.BLUE_STARTING_POSE;
+                case RED  -> Constants.Drive.RED_STARTING_POSE;
+            })
+            .orElse(Constants.Drive.BLUE_STARTING_POSE);
 
+        // apply the pose
         driveSubsystem.setPose(pose);
     }).ignoringDisable(true);
 
@@ -70,7 +66,7 @@ public class RobotContainer {
       Constants.Operator.Drive.NORMAL_TRANSLATION_MAX_SPEED, 
       Constants.Operator.Drive.THROTTLE_TRANSLATION_MAX_SPEED, 
       Constants.Operator.Drive.SLOW_TRANSLATION_MAX_SPEED, 
-      allianceSelector.getSelected().driverRotation
+      FieldUtil.getAlliance().orElse(Alliance.BLUE).driverRotation
     );
 
     // Setup the rotational directive for drive subsystem
@@ -92,7 +88,23 @@ public class RobotContainer {
 
   public void scheduleAutonomous() {
     
-    driveSubsystem.getDriveToPoseCommand(new Pose2d(2.0,6.0,Rotation2d.kZero)).schedule();
+    // Example: Drive to multiple coordinates in sequence
+    // The robot will drive to coordinate 1, then coordinate 2, then coordinate 3
+    // Far new Pose2d(1.46, 2.91, Rotation2d.fromDegrees(0))
+    // Close new Pose2d(2.63, 3.51, Rotation2d.fromDegrees(0))
+    new DriveToSequenceCommand(
+      driveSubsystem,
+      new Pose2d(1.977,6.274,Rotation2d.kPi),
+      new Pose2d(7.013, 6.085,Rotation2d.fromDegrees(-152.5))
+    ).repeatedly().schedule();
+
+    // Alternative builder pattern syntax:
+    // new DriveToSequenceCommand.Builder(driveSubsystem)
+    //   .addPose(2.0, 6.0, 0)      // x, y, rotation in degrees
+    //   .addPose(4.0, 6.0, 90)
+    //   .addPose(4.0, 4.0, 180)
+    //   .build()
+    //   .schedule();
 
   }
 

@@ -27,6 +27,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.subsystems.vision.PhotonVisionOdometry;
 import frc.robot.util.swerve.Obstacle;
 import frc.robot.util.swerve.requests.RotationRequest;
 import frc.robot.util.swerve.requests.TranslationRequest;
@@ -38,6 +39,7 @@ import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 public class DriveSubsystem extends SubsystemBase {
 
     private SwerveDrive swerveDrive;
+    private PhotonVisionOdometry visionOdometry;
 
     PIDController xController;
     PIDController yController;
@@ -48,6 +50,9 @@ public class DriveSubsystem extends SubsystemBase {
     private Rotation2d rotationalTolerance = Constants.Drive.ROTATIONAL_TOLERANCE;
 
     private List<Supplier<List<Obstacle>>> obstaclesSuppliers;
+    
+    // Feature Flags 
+    private boolean useVisionOdometry = true;
 
     public DriveSubsystem() {
 
@@ -59,7 +64,7 @@ public class DriveSubsystem extends SubsystemBase {
             throw new RuntimeException(e);
         }
 
-        swerveDrive.setMaximumAttainableSpeeds(Constants.Drive.MAX_TRANSLATIONAL_SPEED, Constants.Drive.MAX_ROTATIONAL_SPEED);
+        swerveDrive.setMaximumAllowableSpeeds(Constants.Drive.MAX_TRANSLATIONAL_SPEED, Constants.Drive.MAX_ROTATIONAL_SPEED);
         swerveDrive.setHeadingCorrection(true);
         swerveDrive.setCosineCompensator(true);
         swerveDrive.setAngularVelocityCompensation(true, true, Constants.Drive.ANGULAR_VELOCITY_COMPENSATION_COEFFICIENT);
@@ -103,6 +108,15 @@ public class DriveSubsystem extends SubsystemBase {
 
         SmartDashboard.putNumber("Compensation Coefficient", Constants.Drive.ANGULAR_VELOCITY_COMPENSATION_COEFFICIENT);
 
+        // Setup vision odometry (if enabled).
+        if (useVisionOdometry) {
+            visionOdometry = new PhotonVisionOdometry(
+                () -> swerveDrive.getPose(),
+                swerveDrive.field
+            );
+        }
+
+
     }
 
     // ------------------------------
@@ -131,10 +145,17 @@ public class DriveSubsystem extends SubsystemBase {
 
         swerveDrive.setAngularVelocityCompensation(true, true, SmartDashboard.getNumber("Compensation Coefficient", Constants.Drive.ANGULAR_VELOCITY_COMPENSATION_COEFFICIENT));
 
+        // Update vision odometry if enabled.
+        if (useVisionOdometry) {
+            swerveDrive.updateOdometry(); // Vision being enabled requires manual updates to odometry.
+            visionOdometry.updatePoseEstimation(swerveDrive);
+          }
+
         Pose2d pose = getPose();
         SmartDashboard.putNumber("X Position", pose.getX());
         SmartDashboard.putNumber("Y Position", pose.getY());
-        SmartDashboard.putNumber("Theta Position", pose.getRotation().getRadians());
+        SmartDashboard.putNumber("Theta Position", pose.getRotation().getDegrees());
+
 
     }
 
@@ -237,6 +258,22 @@ public class DriveSubsystem extends SubsystemBase {
         }
 
         ChassisSpeeds chassisSpeeds = new ChassisSpeeds(vx,vy,omega);
+
+        // Clamp chassis speeds to max velocities
+        double currentSpeed = Math.hypot(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond);
+        if (currentSpeed > Constants.Drive.MAX_TRANSLATIONAL_SPEED) {
+            double scale = Constants.Drive.MAX_TRANSLATIONAL_SPEED / currentSpeed;
+            chassisSpeeds.vxMetersPerSecond *= scale;
+            chassisSpeeds.vyMetersPerSecond *= scale;
+        }
+        
+        // Clamp rotational speed
+        if (Math.abs(chassisSpeeds.omegaRadiansPerSecond) > Constants.Drive.MAX_ROTATIONAL_SPEED) {
+            chassisSpeeds.omegaRadiansPerSecond = Math.copySign(
+                Constants.Drive.MAX_ROTATIONAL_SPEED, 
+                chassisSpeeds.omegaRadiansPerSecond
+            );
+        }
 
         // --- Drive: field-oriented unless robot-relative velocity ---
         if (tReq instanceof TranslationRequest.Velocity vel && !vel.fieldRelative()) {

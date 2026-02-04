@@ -3,9 +3,15 @@ package frc.robot;
 import java.io.File;
 import java.util.List;
 
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Filesystem;
 import frc.robot.util.field.regions.CompositeRegion3d;
 import frc.robot.util.field.regions.RectangularRegion3d;
@@ -35,13 +41,45 @@ public class Constants {
 
     }
 
+    public static class Field {
+
+        public static final double AUTONOMOUS_PERIOD = 20.0;
+        public static final double TELEOP_PERIOD = 140.0;
+
+        // Shifts
+
+        public static final double AUTO_START = 0.0;
+        public static final double AUTO_END   = 20.0;
+
+        // Match period boundaries (elapsed seconds since match start, including autonomous)
+
+        public static final double TRANSITION_START = 20.0;
+        public static final double TRANSITION_END   = 30.0;
+
+        public static final double SHIFT_1_START = 30.0;
+        public static final double SHIFT_1_END   = 55.0;
+
+        public static final double SHIFT_2_START = 55.0;
+        public static final double SHIFT_2_END   = 80.0;
+
+        public static final double SHIFT_3_START = 80.0;
+        public static final double SHIFT_3_END   = 105.0;
+
+        public static final double SHIFT_4_START = 105.0;
+        public static final double SHIFT_4_END   = 130.0;
+
+        public static final double ENDGAME_START = 130.0;
+        public static final double ENDGAME_END    = 160.0;
+
+    }
+
     public static class Drive {
 
         // Starting Poses
         public static final Pose2d BLUE_STARTING_POSE = new Pose2d(
-            2.0,
-            6.0,
-            Rotation2d.kZero
+            7.013,
+            6.085,
+            Rotation2d.fromDegrees(-152.5)
         );
         public static final Pose2d RED_STARTING_POSE = new Pose2d(
             2.0,
@@ -52,7 +90,7 @@ public class Constants {
         // Drive PID Controller Coefficients
         public static final double TRANSLATIONAL_KP = 3.0;
         public static final double TRANSLATIONAL_KI = 0.0;
-        public static final double TRANSLATIONAL_KD = 0.1;
+        public static final double TRANSLATIONAL_KD = 0.05;
 
         public static final double ROTATIONAL_KP = 5.0;
         public static final double ROTATIONAL_KI = 0.0;
@@ -69,7 +107,7 @@ public class Constants {
         public static final double ANGULAR_VELOCITY_COMPENSATION_COEFFICIENT = 0.1;     
         public static final Rotation2d ENCODER_AUTO_SYNCHRONIZE_DEADBAND = Rotation2d.fromDegrees(1.0);
 
-        public static final double TRANSLATIONAL_TOLERANCE = 0.1;
+        public static final double TRANSLATIONAL_TOLERANCE = 0.025; // Meters
         public static final Rotation2d ROTATIONAL_TOLERANCE = Rotation2d.fromDegrees(3.5);
 
         public static final class Field {
@@ -221,4 +259,17 @@ public class Constants {
 
     }
     
+    public static class VisionOdometryConstants {
+
+        // Center Camera Constants (OLD / EXAMPLE)
+        public static final String CENTER_CAMERA_NAME = "back";
+        public static final Rotation3d CENTER_CAMERA_ROTATION = new Rotation3d(0, 0, Units.degreesToRadians(0));
+        public static final Translation3d CENTER_CAMERA_TRANSLATION = new Translation3d(
+                Units.inchesToMeters(10), 
+                Units.inchesToMeters(0), 
+                Units.inchesToMeters(0));
+        
+        public static final Vector<N3> CENTER_SINGLE_TAG_STANDARD_DEVIATION = VecBuilder.fill(4, 4, 8); 
+        public static final Vector<N3> CENTER_MULTI_TAG_STANDARD_DEVIATION = VecBuilder.fill(0.5, 0.5, 1);
+    }
 }

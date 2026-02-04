@@ -35,7 +35,7 @@ public class Configs {
                 .SupplyCurrentLimit = Constants.Turret.CURRENT_LOWER_TIME;
 
         TURRET_CONFIG
-            .MotorOutput.Inverted = Constants.Turret.MOTOR_INVERTED ? InvertedValue.CounterClockwise_Positive : InvertedValue.Clockwise_Positive;
+            .MotorOutput.Inverted = Constants.Turret.MOTOR_INVERTED ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
 
         TURRET_CONFIG
             .Slot0

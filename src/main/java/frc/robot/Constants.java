@@ -123,7 +123,7 @@ public class Constants {
         public static final double TURRET_KI = 0;
         public static final double TURRET_KD = 0.4;
 
-        public static final InvertedValue MOTOR_INVERTED = InvertedValue.CounterClockwise_Positive;
+        public static final boolean MOTOR_INVERTED = false;
 
         public static final double TURRET_GEAR_REDUCTION = 5.0;
         public static final double TURN_TABLE_RATIO = 24.0 / 200.0;

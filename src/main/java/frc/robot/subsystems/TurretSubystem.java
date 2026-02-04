@@ -2,6 +2,8 @@ package frc.robot.subsystems;
 
 import java.util.function.Supplier;
 
+import com.revrobotics.PersistMode;
+import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -85,7 +87,7 @@ public class TurretSubystem extends SubsystemBase {
         turretConfig
             .idleMode(IdleMode.kBrake)
             .smartCurrentLimit(Constants.Turret.TURRET_MOTOR_CURRENT_LIMIT)
-            .inverted(false);
+            .inverted(Constants.Turret.MOTOR_INVERTED);
 
         turretConfig.encoder
             .positionConversionFactor(Constants.Turret.ENCODER_FACTOR)
@@ -104,8 +106,8 @@ public class TurretSubystem extends SubsystemBase {
 
         turretMotor.configure(
             turretConfig,
-            SparkMax.ResetMode.kResetSafeParameters,
-            SparkMax.PersistMode.kPersistParameters
+            ResetMode.kResetSafeParameters,
+            PersistMode.kPersistParameters
         );
     }
 

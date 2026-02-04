@@ -15,6 +15,7 @@ import frc.robot.commands.swerve.DriveToSequenceCommand;
 import frc.robot.commands.swerve.ManualRotationVelocityDirective;
 import frc.robot.commands.swerve.ManualTranslationVelocityDirective;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.TurretSubystem;
 import frc.robot.util.field.Alliance;
 import frc.robot.util.field.FieldUtil;
 import frc.robot.util.swerve.requests.RotationDirective;
@@ -26,9 +27,14 @@ public class RobotContainer {
   XboxController controller = new XboxController(0);
 
   DriveSubsystem driveSubsystem;
+  TurretSubystem turretSubystem;
 
   public RobotContainer() {
     driveSubsystem = new DriveSubsystem();
+    turretSubystem = new TurretSubystem();
+
+    turretSubystem.setRobotPoseSupplier(() -> driveSubsystem.getPose());
+    turretSubystem.setRobotVelocitySupplier(() -> driveSubsystem.getVelocity());
   }
 
   public void setupSmartDashboard() {
@@ -81,8 +87,18 @@ public class RobotContainer {
       Constants.Operator.Drive.SLOW_ROTATION_MAX_SPEED
     );
 
+    //TODO: NOT READY FOR MERGE, NEED TO RENABLE DRIVE SUBSYSTEM!!!!!!
     Command manualDriveCommand = new CompositeDriveCommand(driveSubsystem, manualTranslationVelocityDirective, manualRotationVelocityDirective, null, null);
-    driveSubsystem.setDefaultCommand(manualDriveCommand);
+    driveSubsystem.setDefaultCommand(driveSubsystem.getStopCommand());
+
+    turretSubystem.setDefaultCommand(
+      turretSubystem.getAngleCommand(() ->
+        new Rotation2d(
+          -controller.getRightY(),
+          controller.getRightX()
+        )
+      )
+    );
 
   }
 

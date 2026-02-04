@@ -4,8 +4,6 @@ import java.io.File;
 
 import com.ctre.phoenix6.signals.InvertedValue;
 
-import com.ctre.phoenix6.signals.InvertedValue;
-
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -15,6 +13,7 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Filesystem;
+import frc.robot.util.turret.TurretSolver;
 
 public class Constants {
 
@@ -42,6 +41,8 @@ public class Constants {
     }
 
     public static class Field {
+
+        public static final double GRAVITY = 9.81; // N/kg
 
         public static final double AUTONOMOUS_PERIOD = 20.0;
         public static final double TELEOP_PERIOD = 140.0;
@@ -113,6 +114,7 @@ public class Constants {
     }
 
     public static class Turret {
+
         public static final int TURRET_ID = 1;
         public static final int TURRET_MOTOR_CURRENT_LIMIT = 40;
 
@@ -123,10 +125,9 @@ public class Constants {
 
         public static final InvertedValue MOTOR_INVERTED = InvertedValue.CounterClockwise_Positive;
 
-        public static final double TURRET_GEAR_RADIUS = .065;
-        public static final double TURRET_GEAR_CIRFUMFERENCE = TURRET_GEAR_RADIUS * 2.0 * Math.PI;
-        public static final double MOTOR_GEAR_REDUCTION = 12.0;
-        public static final double ENCODER_FACTOR = TURRET_GEAR_CIRFUMFERENCE / MOTOR_GEAR_REDUCTION;
+        public static final double TURRET_GEAR_REDUCTION = 5.0;
+        public static final double TURN_TABLE_RATIO = 24.0 / 200.0;
+        public static final double ENCODER_FACTOR = 1.0 / (TURRET_GEAR_REDUCTION * TURN_TABLE_RATIO);
 
         public static final double OUTPUT_RANGE_MAX = 1;
         public static final double OUTPUT_RANGE_MIN = -1;
@@ -134,7 +135,26 @@ public class Constants {
         public static final int CURRENT_LOWER_LIMIT = 25;
         public static final double CURRENT_LOWER_TIME = 0.5;
 
-        public static final Rotation2d START_POS = Rotation2d.kZero;
+        public static final Rotation2d START_POSITION = Rotation2d.kPi;
+        public static final Rotation2d MIN_ROTATION = Rotation2d.fromRadians(0.0);
+        public static final Rotation2d MAX_ROTATION = Rotation2d.fromRadians(2.0 * Math.PI);
+
+        public static final Rotation2d TURRET_TOLERANCE = Rotation2d.fromRadians(3.0);
+
+        public static final Translation3d TURRET_TRANSLATION = new Translation3d(
+            -0.089,
+            0.0,
+            0.537 //537!!!
+        );
+        public static final Rotation2d PITCH = Rotation2d.fromDegrees(70.0);
+        public static final TurretSolver.Config SOLVER_CONFIG = new TurretSolver.Config(
+            Field.GRAVITY,
+            0.02,
+            15.0, //TODO: replace with actual maximum launch speed once turret constants are added       
+            TURRET_TRANSLATION,
+            PITCH
+        );
+
     }
 
     public static class VisionOdometryConstants {

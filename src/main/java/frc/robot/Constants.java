@@ -136,10 +136,11 @@ public class Constants {
         public static final double KI = 0.0;
         public static final double KD = 0.2;
 
-        public static final double GEAR_RATIO = 20;
-        public static final double ENCODER_FACTOR = Math.PI * 2 / GEAR_RATIO;
+        public static final double TRANSFER_GEAR_REDUCTION = 1.0;
+        public static final double TRANSFER_WHEEL_RADIUS = 1.0;
+        public static final double ENCODER_FACTOR = 2.0 * Math.PI * TRANSFER_WHEEL_RADIUS / TRANSFER_GEAR_REDUCTION;
 
-        public static final InvertedValue MOTOR_INVERTED = InvertedValue.CounterClockwise_Positive;
+        public static final boolean MOTOR_INVERTED = false;
 
         public static final double LOAD_SPEED = 1.0;
     }

@@ -13,69 +13,53 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Configs;
 import frc.robot.Constants;
 
 public class Shooter extends SubsystemBase {
+    
     private TalonFX shooter;
-    private SparkMax shooterNeo;
-    private SparkMaxConfig shooterConfig;
 
-     private Supplier<Pose2d> robotPoseSupplier = () -> Pose2d.kZero;
+    private boolean atTarget = false;
 
-     //Shooter configuration
+    //Shooter configuration
     public Shooter(){
-        //shooter = new TalonFX(Constants.Shooter.SHOOTER_ID);
-        //shooter.getConfigurator().apply(Configs.Shooter.SHOOTER_CONFIGURATION);
-
-        shooterConfig = new SparkMaxConfig();
-
-        shooterConfig
-            .idleMode(IdleMode.kBrake)
-            .smartCurrentLimit(Constants.Shooter.CURRENT_LIMIT)
-            .inverted(false);
-
-        shooterConfig.encoder
-            .positionConversionFactor(Constants.Shooter.ENCOER_FACTOR)
-            .velocityConversionFactor(Constants.Shooter.ENCOER_FACTOR / 60.0);
-
-        shooterConfig.closedLoop
-            .pid(
-                Constants.Shooter.KP,
-                Constants.Shooter.KI,
-                Constants.Shooter.KD
-                );
+        shooter = new TalonFX(Constants.Shooter.SHOOTER_ID);
+        shooter.getConfigurator().apply(Configs.Shooter.SHOOTER_CONFIGURATION);
 
     }
 
     //Used for setting the velocity of the shooter wheel(s)
     public void setVelocity(double velocity) {
-        //VelocityVoltage velocityRequest = new VelocityVoltage(velocity);
-        //shooter.setControl(velocityRequest);
-
-        shooterNeo.getClosedLoopController().setSetpoint(1.0, ControlType.kVelocity);
+        VelocityVoltage velocityRequest = new VelocityVoltage(velocity);
+        shooter.setControl(velocityRequest);
     }
 
-    //Sets up the supplier for the robot pose, used in the pid to determine the shooting power
-    public void setPoseSupplier(Supplier<Pose2d> robotPoseSupplier){
-        this.robotPoseSupplier = robotPoseSupplier;
+    public double getVelocity() {
+        return shooter.getVelocity().getValueAsDouble();
     }
 
     //Runs the command for setting the shooter velocity
     public Command setVelocityCommand(Supplier<Double> velocitySupplier) {
-        return new RunCommand(
+        return new FunctionalCommand(
+            () -> {},
             () -> {
                 setVelocity(velocitySupplier.get());
+                atTarget = Math.abs(velocitySupplier.get() - getVelocity()) < Constants.Shooter.TOLERANCE;
             },
+            interrupted -> atTarget = false,
+            () -> false,
             this
         );
     }
 
     //Sets the target for shooting, this is for determining the power
-    public Command getTargetCommand(Supplier<Translation3d> targetTranslationSupplier) {
+    public Command getTargetCommand(Supplier<Translation3d> targetTranslationSupplier, Supplier<Pose2d> robotPoseSupplier, Supplier<ChassisSpeeds> robotVelocitySupplier ) {
         return new RunCommand(
             () -> {
                 Translation3d targetTranslation3d = targetTranslationSupplier.get();
@@ -90,4 +74,9 @@ public class Shooter extends SubsystemBase {
             this
         );
     }
+
+    public boolean atTarget() {
+        return atTarget;
+    }
+
 }

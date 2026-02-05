@@ -268,7 +268,7 @@ public final class TurretSolver {
 
     }
 
-    public static double calculateF(double t, double rx, double ry, double rz,
+    private static double calculateF(double t, double rx, double ry, double rz,
                                     double vrx, double vry,
                                     double phi, double g) {
 

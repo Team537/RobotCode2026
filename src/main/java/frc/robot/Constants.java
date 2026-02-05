@@ -187,5 +187,25 @@ public class Constants {
         public static final double ENCOER_FACTOR = 2.0 * Math.PI * WHEEL_RADIUS / GEAR_RATIO;
 
         public static final double TOLERANCE = 0.1;
+        
+    }
+    public static class Transfer {
+        public static final int TRANSFER_MOTOR_ID = 1;
+
+        public static final int CURRENT_LIMIT = 75; //Amps
+        public static final int CURRENT_LOWER_LIMIT = 25;
+        public static final double CURRENT_LOWER_TIME = 0.5;
+
+        public static final double KP = 0.7;
+        public static final double KI = 0.0;
+        public static final double KD = 0.2;
+
+        public static final double TRANSFER_GEAR_REDUCTION = 1.0;
+        public static final double TRANSFER_WHEEL_RADIUS = 1.0;
+        public static final double ENCODER_FACTOR = 2.0 * Math.PI * TRANSFER_WHEEL_RADIUS / TRANSFER_GEAR_REDUCTION;
+
+        public static final boolean MOTOR_INVERTED = false;
+
+        public static final double LOAD_SPEED = 1.0;
     }
 }

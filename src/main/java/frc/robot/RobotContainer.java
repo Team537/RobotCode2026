@@ -10,12 +10,14 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.swerve.CompositeDriveCommand;
 import frc.robot.commands.swerve.DriveToSequenceCommand;
 import frc.robot.commands.swerve.ManualRotationVelocityDirective;
 import frc.robot.commands.swerve.ManualTranslationVelocityDirective;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.TurretSubystem;
+import frc.robot.subsystems.TransferSubsystem;
 import frc.robot.util.field.Alliance;
 import frc.robot.util.field.FieldUtil;
 import frc.robot.util.swerve.requests.RotationDirective;
@@ -28,13 +30,12 @@ public class RobotContainer {
 
   DriveSubsystem driveSubsystem;
   TurretSubystem turretSubystem;
+  TransferSubsystem transferSubsystem;
 
   public RobotContainer() {
     driveSubsystem = new DriveSubsystem();
     turretSubystem = new TurretSubystem();
-
-    turretSubystem.setRobotPoseSupplier(() -> driveSubsystem.getPose());
-    turretSubystem.setRobotVelocitySupplier(() -> driveSubsystem.getVelocity());
+    transferSubsystem = new TransferSubsystem();
   }
 
   public void setupSmartDashboard() {
@@ -89,16 +90,11 @@ public class RobotContainer {
 
     //TODO: NOT READY FOR MERGE, NEED TO RENABLE DRIVE SUBSYSTEM!!!!!!
     Command manualDriveCommand = new CompositeDriveCommand(driveSubsystem, manualTranslationVelocityDirective, manualRotationVelocityDirective, null, null);
-    driveSubsystem.setDefaultCommand(driveSubsystem.getStopCommand());
-
-    turretSubystem.setDefaultCommand(
-      turretSubystem.getAngleCommand(() ->
-        new Rotation2d(
-          -controller.getRightY(),
-          controller.getRightX()
-        )
-      )
-    );
+    driveSubsystem.setDefaultCommand(manualDriveCommand);
+  
+    Trigger transferTrigger = new Trigger(() -> controller.getAButton());
+    transferTrigger.onTrue(transferSubsystem.getLoadCommand());
+    transferTrigger.onFalse(transferSubsystem.getStopCommand());
 
   }
 

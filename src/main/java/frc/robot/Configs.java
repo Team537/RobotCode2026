@@ -2,7 +2,6 @@ package frc.robot;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.InvertedValue;
-import com.ctre.phoenix6.signals.MotorOutputStatusValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 public class Configs {
@@ -92,5 +91,44 @@ public class Configs {
                 .MotorOutput
                     .NeutralMode = NeutralModeValue.Brake;
         }
+    }
+
+    public static final TalonFXConfiguration TRANSFER_CONFIG = new TalonFXConfiguration();
+
+    static {
+        TRANSFER_CONFIG
+            .Feedback.SensorToMechanismRatio = Constants.Transfer.ENCODER_FACTOR;
+
+        TRANSFER_CONFIG
+            .Slot0
+                .kP = Constants.Transfer.KP;
+
+        TRANSFER_CONFIG
+            .Slot0
+                .kI = Constants.Transfer.KI;
+
+        TRANSFER_CONFIG
+            .Slot0
+                .kD = Constants.Transfer.KD;
+
+        TRANSFER_CONFIG
+            .CurrentLimits
+                .SupplyCurrentLimit = Constants.Transfer.CURRENT_LIMIT;
+        
+        TRANSFER_CONFIG
+            .CurrentLimits
+                .SupplyCurrentLimit = Constants.Transfer.CURRENT_LOWER_LIMIT;
+
+        TRANSFER_CONFIG
+            .CurrentLimits
+                .SupplyCurrentLimit = Constants.Transfer.CURRENT_LOWER_TIME;
+
+        TRANSFER_CONFIG
+            .MotorOutput
+                .Inverted = Constants.Transfer.MOTOR_INVERTED ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
+        
+        TRANSFER_CONFIG
+            .MotorOutput
+                .NeutralMode = NeutralModeValue.Brake;
     }
 }

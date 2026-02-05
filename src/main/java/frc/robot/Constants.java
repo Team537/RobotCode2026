@@ -170,4 +170,22 @@ public class Constants {
         public static final Vector<N3> CENTER_SINGLE_TAG_STANDARD_DEVIATION = VecBuilder.fill(4, 4, 8);
         public static final Vector<N3> CENTER_MULTI_TAG_STANDARD_DEVIATION = VecBuilder.fill(0.5, 0.5, 1);
     }
+
+    public static final class Shooter {
+
+        public static final int SHOOTER_ID = 0;
+        public static final int CURRENT_LIMIT = 75;
+        public static final int CURRENT_LOWER_LIMIT = 25;
+        public static final double CURRENT_LOWER_TIME = .5;
+
+        public static final double KP = .7;
+        public static final double KI = 0;
+        public static final double KD = .2;
+
+        public static final double GEAR_RATIO = 1.0;
+        public static final double WHEEL_RADIUS = 1.985; 
+        public static final double ENCOER_FACTOR = 2.0 * Math.PI * WHEEL_RADIUS / GEAR_RATIO;
+
+        public static final double TOLERANCE = 0.1;
+    }
 }

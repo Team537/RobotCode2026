@@ -55,4 +55,42 @@ public class Configs {
     }
 
 
+
+    public static final class Shooter {
+        public static final TalonFXConfiguration SHOOTER_CONFIGURATION = new TalonFXConfiguration();
+
+        static {
+
+            SHOOTER_CONFIGURATION
+                .Feedback.SensorToMechanismRatio = Constants.Shooter.ENCOER_FACTOR;
+
+            SHOOTER_CONFIGURATION
+                .CurrentLimits
+                    .SupplyCurrentLimit = Constants.Shooter.CURRENT_LIMIT;
+            
+            SHOOTER_CONFIGURATION
+                .CurrentLimits
+                    .SupplyCurrentLimit = Constants.Shooter.CURRENT_LOWER_TIME;
+
+            SHOOTER_CONFIGURATION
+                .CurrentLimits
+                    .SupplyCurrentLimit = Constants.Shooter.CURRENT_LOWER_LIMIT;
+
+            SHOOTER_CONFIGURATION
+                .Slot0
+                    .kI = Constants.Shooter.KI;
+
+            SHOOTER_CONFIGURATION
+                .Slot0
+                    .kP = Constants.Shooter.KP;
+
+            SHOOTER_CONFIGURATION
+                .Slot0
+                    .kD = Constants.Shooter.KD;
+
+            SHOOTER_CONFIGURATION
+                .MotorOutput
+                    .NeutralMode = NeutralModeValue.Brake;
+        }
+    }
 }

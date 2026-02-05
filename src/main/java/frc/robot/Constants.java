@@ -120,6 +120,7 @@ public class Constants {
         public static final double KP = 2.5;
         public static final double KI = 0;
         public static final double KD = 0.4;
+        public static final double KS = 0.0;
         public static final double KV = 2.36;
         public static final double KA = 0.18;
 
@@ -167,6 +168,7 @@ public class Constants {
         public static final double KP = .7;
         public static final double KI = 0;
         public static final double KD = .2;
+        public static final double KS = 0.0;
         public static final double KV = 2.36;
         public static final double KA = 0.18;
 
@@ -187,6 +189,7 @@ public class Constants {
         public static final double KP = 0.7;
         public static final double KI = 0.0;
         public static final double KD = 0.2;
+        public static final double KS = 0.0;
         public static final double KV = 2.36;
         public static final double KA = 0.18;
 

@@ -84,6 +84,7 @@ public class TurretSubystem extends SubsystemBase {
             Constants.Turret.KD
         );
 
+        turretConfig.closedLoop.feedForward.kV(Constants.Turret.KS);
         turretConfig.closedLoop.feedForward.kV(Constants.Turret.KV);
         turretConfig.closedLoop.feedForward.kA(Constants.Turret.KA);
 

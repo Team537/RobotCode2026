@@ -8,6 +8,7 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -61,6 +62,10 @@ public class TransferSubsystem extends SubsystemBase {
             Constants.Transfer.KD
         );
 
+        transferConfig.closedLoop.feedForward.kS(Constants.Transfer.KS);
+        transferConfig.closedLoop.feedForward.kV(Constants.Transfer.KV);
+        transferConfig.closedLoop.feedForward.kA(Constants.Transfer.KA);
+
         // Instantiate motor controller
         transferMotor = new SparkMax(
             Constants.Transfer.TRANSFER_MOTOR_ID,
@@ -73,6 +78,11 @@ public class TransferSubsystem extends SubsystemBase {
             ResetMode.kResetSafeParameters,
             PersistMode.kPersistParameters
         );
+    }
+
+    @Override
+    public void periodic() {
+        SmartDashboard.putNumber("Transfer Velocity",getVelocity());
     }
 
     // --------------------------------------------------------------------
@@ -88,6 +98,10 @@ public class TransferSubsystem extends SubsystemBase {
         transferMotor
             .getClosedLoopController()
             .setSetpoint(velocity, ControlType.kVelocity);
+    }
+
+    public double getVelocity() {
+        return transferMotor.getEncoder().getVelocity();
     }
 
     // --------------------------------------------------------------------

@@ -50,6 +50,10 @@ public class Configs {
 
         TURRET_CONFIG
             .Slot0
+                .kS = Constants.Turret.KS;     
+
+        TURRET_CONFIG
+            .Slot0
                 .kV = Constants.Turret.KV;
         
         TURRET_CONFIG
@@ -97,6 +101,10 @@ public class Configs {
 
             SHOOTER_CONFIGURATION
                 .Slot0
+                    .kS = Constants.Shooter.KS;
+
+            SHOOTER_CONFIGURATION
+                .Slot0
                     .kV = Constants.Shooter.KV;
 
             SHOOTER_CONFIGURATION
@@ -126,6 +134,10 @@ public class Configs {
         TRANSFER_CONFIG
             .Slot0
                 .kD = Constants.Transfer.KD;
+
+        TRANSFER_CONFIG
+            .Slot0
+                .kS = Constants.Transfer.KS;
 
         TRANSFER_CONFIG
             .Slot0

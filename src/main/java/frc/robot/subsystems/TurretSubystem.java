@@ -7,6 +7,7 @@ import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.FeedForwardConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -78,10 +79,13 @@ public class TurretSubystem extends SubsystemBase {
             .velocityConversionFactor(Constants.Turret.ENCODER_FACTOR / 60.0);
 
         turretConfig.closedLoop.pid(
-            Constants.Turret.TURRET_KP,
-            Constants.Turret.TURRET_KI,
-            Constants.Turret.TURRET_KD
+            Constants.Turret.KP,
+            Constants.Turret.KI,
+            Constants.Turret.KD
         );
+
+        turretConfig.closedLoop.feedForward.kV(Constants.Turret.KV);
+        turretConfig.closedLoop.feedForward.kA(Constants.Turret.KA);
 
         turretMotor = new SparkMax(
             Constants.Turret.TURRET_ID,

@@ -38,15 +38,23 @@ public class Configs {
 
         TURRET_CONFIG
             .Slot0
-                .kP = Constants.Turret.TURRET_KP;
+                .kP = Constants.Turret.KP;
                 
         TURRET_CONFIG
             .Slot0
-                .kI = Constants.Turret.TURRET_KI;
+                .kI = Constants.Turret.KI;
 
         TURRET_CONFIG
             .Slot0
-                .kD = Constants.Turret.TURRET_KD;
+                .kD = Constants.Turret.KD;
+
+        TURRET_CONFIG
+            .Slot0
+                .kV = Constants.Turret.KV;
+        
+        TURRET_CONFIG
+            .Slot0
+                .kA = Constants.Turret.KA;
 
         TURRET_CONFIG
             .MotorOutput
@@ -88,6 +96,14 @@ public class Configs {
                     .kD = Constants.Shooter.KD;
 
             SHOOTER_CONFIGURATION
+                .Slot0
+                    .kV = Constants.Shooter.KV;
+
+            SHOOTER_CONFIGURATION
+                .Slot0
+                    .kA = Constants.Shooter.KA;
+
+            SHOOTER_CONFIGURATION
                 .MotorOutput
                     .NeutralMode = NeutralModeValue.Brake;
         }
@@ -110,6 +126,14 @@ public class Configs {
         TRANSFER_CONFIG
             .Slot0
                 .kD = Constants.Transfer.KD;
+
+        TRANSFER_CONFIG
+            .Slot0
+                .kV = Constants.Transfer.KV;
+
+        TRANSFER_CONFIG
+            .Slot0
+                .kA = Constants.Transfer.KA;
 
         TRANSFER_CONFIG
             .CurrentLimits

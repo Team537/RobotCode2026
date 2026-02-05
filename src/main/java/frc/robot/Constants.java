@@ -117,9 +117,11 @@ public class Constants {
         public static final int TURRET_MOTOR_CURRENT_LIMIT = 40;
 
         // PID
-        public static final double TURRET_KP = 2.5;
-        public static final double TURRET_KI = 0;
-        public static final double TURRET_KD = 0.4;
+        public static final double KP = 2.5;
+        public static final double KI = 0;
+        public static final double KD = 0.4;
+        public static final double KV = 2.36;
+        public static final double KA = 0.18;
 
         public static final boolean MOTOR_INVERTED = false;
 
@@ -165,6 +167,8 @@ public class Constants {
         public static final double KP = .7;
         public static final double KI = 0;
         public static final double KD = .2;
+        public static final double KV = 2.36;
+        public static final double KA = 0.18;
 
         public static final double GEAR_RATIO = 1.0;
         public static final double WHEEL_RADIUS = 1.985; 
@@ -183,6 +187,8 @@ public class Constants {
         public static final double KP = 0.7;
         public static final double KI = 0.0;
         public static final double KD = 0.2;
+        public static final double KV = 2.36;
+        public static final double KA = 0.18;
 
         public static final double TRANSFER_GEAR_REDUCTION = 1.0;
         public static final double TRANSFER_WHEEL_RADIUS = 1.0;

@@ -48,22 +48,6 @@ public class TurretSubystem extends SubsystemBase {
     private final SparkMaxConfig turretConfig;
 
     // --------------------------------------------------------------------
-    // Robot State Suppliers
-    // --------------------------------------------------------------------
-
-    /**
-     * Supplies the robot's current estimated pose.
-     * Defaults to zero pose until overridden.
-     */
-    private Supplier<Pose2d> robotPoseSupplier = () -> Pose2d.kZero;
-
-    /**
-     * Supplies the robot's current field-relative chassis speeds.
-     * Defaults to zero velocity until overridden.
-     */
-    private Supplier<ChassisSpeeds> robotVelocitySupplier = ChassisSpeeds::new;
-
-    // --------------------------------------------------------------------
     // Internal State
     // --------------------------------------------------------------------
 
@@ -149,8 +133,8 @@ public class TurretSubystem extends SubsystemBase {
      *
      * @param fieldAngle desired turret yaw in the field frame
      */
-    public void setTurretAngleFieldRelative(Rotation2d fieldAngle) {
-        Rotation2d robotHeading = robotPoseSupplier.get().getRotation();
+    public void setTurretAngleFieldRelative(Rotation2d fieldAngle, Rotation2d robotRotation) {
+        Rotation2d robotHeading = robotRotation;
         setTurretAngle(fieldAngle.minus(robotHeading));
     }
 
@@ -166,29 +150,10 @@ public class TurretSubystem extends SubsystemBase {
     /**
      * @return the current turret yaw in the field frame
      */
-    public Rotation2d getAngleFieldRelative() {
-        return getAngle().plus(robotPoseSupplier.get().getRotation());
+    public Rotation2d getAngleFieldRelative(Rotation2d robotRotation) {
+        return getAngle().plus(robotRotation);
     }
 
-    // --------------------------------------------------------------------
-    // Robot State Injection
-    // --------------------------------------------------------------------
-
-    /**
-     * Sets the supplier used to obtain the robot's estimated pose.
-     */
-    public void setRobotPoseSupplier(Supplier<Pose2d> robotPoseSupplier) {
-        this.robotPoseSupplier = robotPoseSupplier;
-    }
-
-    /**
-     * Sets the supplier used to obtain the robot's chassis speeds.
-     */
-    public void setRobotVelocitySupplier(
-        Supplier<ChassisSpeeds> robotVelocitySupplier
-    ) {
-        this.robotVelocitySupplier = robotVelocitySupplier;
-    }
 
     // --------------------------------------------------------------------
     // Commands
@@ -239,7 +204,9 @@ public class TurretSubystem extends SubsystemBase {
      * @return a turret-aiming command driven by the solver
      */
     public Command getTargetCommand(
-        Supplier<Translation3d> targetTranslationSupplier
+        Supplier<Translation3d> targetTranslationSupplier,
+        Supplier<Pose2d> robotPoseSupplier,
+        Supplier<ChassisSpeeds> robotVelocitySupplier
     ) {
         return getAngleCommand(() -> {
             TurretSolver.State solution =

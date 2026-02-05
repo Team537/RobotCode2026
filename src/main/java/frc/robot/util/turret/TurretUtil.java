@@ -69,4 +69,25 @@ public class TurretUtil {
         return new Rotation2d(bestAngle);
     }
 
+    //TODO: Set the actual regression models
+
+    /**
+     * Gets the wheel speed that would shoot the ball at provided speed from a regression model.
+     * @param ballSpeed The speed of the ball in meters per second.
+     * @return The wheel surface speed that will shoot the ball in meters per second.
+     */
+    public static double wheelSurfaceSpeedFromBallSpeed(double ballSpeed) {
+        return ballSpeed;
+    }
+
+    /**
+     * Gets the ball speed that a given wheel speed would shoot it out from a regression model.
+     * @param ballSpeed The speed of the surface of the flywheel in meters per second.
+     * @return The speed the ball with shoot out in meters per second.
+     */
+    public static double ballSpeedFromWheelSurfaceSpeed(double wheelSurfaceSpeed) {
+        return wheelSurfaceSpeed;
+    }
+
+
 }

@@ -2,8 +2,6 @@ package frc.robot;
 
 import java.io.File;
 
-import com.ctre.phoenix6.signals.InvertedValue;
-
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -115,7 +113,7 @@ public class Constants {
 
     public static class Turret {
 
-        public static final int TURRET_ID = 1;
+        public static final int TURRET_ID = 20;
         public static final int TURRET_MOTOR_CURRENT_LIMIT = 40;
 
         // PID
@@ -157,23 +155,9 @@ public class Constants {
 
     }
 
-    public static class VisionOdometryConstants {
-
-        // Center Camera Constants (OLD / EXAMPLE)
-        public static final String CENTER_CAMERA_NAME = "back";
-        public static final Rotation3d CENTER_CAMERA_ROTATION = new Rotation3d(0, 0, Units.degreesToRadians(0));
-        public static final Translation3d CENTER_CAMERA_TRANSLATION = new Translation3d(
-                Units.inchesToMeters(10), 
-                Units.inchesToMeters(0), 
-                Units.inchesToMeters(0));
-
-        public static final Vector<N3> CENTER_SINGLE_TAG_STANDARD_DEVIATION = VecBuilder.fill(4, 4, 8);
-        public static final Vector<N3> CENTER_MULTI_TAG_STANDARD_DEVIATION = VecBuilder.fill(0.5, 0.5, 1);
-    }
-
     public static final class Shooter {
 
-        public static final int SHOOTER_ID = 0;
+        public static final int SHOOTER_ID = 21;
         public static final int CURRENT_LIMIT = 75;
         public static final int CURRENT_LOWER_LIMIT = 25;
         public static final double CURRENT_LOWER_TIME = .5;
@@ -190,7 +174,7 @@ public class Constants {
         
     }
     public static class Transfer {
-        public static final int TRANSFER_MOTOR_ID = 1;
+        public static final int TRANSFER_MOTOR_ID = 22;
 
         public static final int CURRENT_LIMIT = 75; //Amps
         public static final int CURRENT_LOWER_LIMIT = 25;
@@ -208,4 +192,19 @@ public class Constants {
 
         public static final double LOAD_SPEED = 1.0;
     }
+
+    public static class VisionOdometryConstants {
+
+        // Center Camera Constants (OLD / EXAMPLE)
+        public static final String CENTER_CAMERA_NAME = "back";
+        public static final Rotation3d CENTER_CAMERA_ROTATION = new Rotation3d(0, 0, Units.degreesToRadians(0));
+        public static final Translation3d CENTER_CAMERA_TRANSLATION = new Translation3d(
+                Units.inchesToMeters(10), 
+                Units.inchesToMeters(0), 
+                Units.inchesToMeters(0));
+
+        public static final Vector<N3> CENTER_SINGLE_TAG_STANDARD_DEVIATION = VecBuilder.fill(4, 4, 8);
+        public static final Vector<N3> CENTER_MULTI_TAG_STANDARD_DEVIATION = VecBuilder.fill(0.5, 0.5, 1);
+    }
+
 }

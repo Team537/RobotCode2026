@@ -16,6 +16,7 @@ import frc.robot.commands.swerve.DriveToSequenceCommand;
 import frc.robot.commands.swerve.ManualRotationVelocityDirective;
 import frc.robot.commands.swerve.ManualTranslationVelocityDirective;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.TurretSubystem;
 import frc.robot.subsystems.TransferSubsystem;
 import frc.robot.util.field.Alliance;
@@ -30,11 +31,13 @@ public class RobotContainer {
 
   DriveSubsystem driveSubsystem;
   TurretSubystem turretSubystem;
+  ShooterSubsystem shooterSubsystem;
   TransferSubsystem transferSubsystem;
 
   public RobotContainer() {
     driveSubsystem = new DriveSubsystem();
     turretSubystem = new TurretSubystem();
+    shooterSubsystem = new ShooterSubsystem();
     transferSubsystem = new TransferSubsystem();
   }
 
@@ -88,9 +91,18 @@ public class RobotContainer {
       Constants.Operator.Drive.SLOW_ROTATION_MAX_SPEED
     );
 
-    //TODO: NOT READY FOR MERGE, NEED TO RENABLE DRIVE SUBSYSTEM!!!!!!
     Command manualDriveCommand = new CompositeDriveCommand(driveSubsystem, manualTranslationVelocityDirective, manualRotationVelocityDirective, null, null);
     driveSubsystem.setDefaultCommand(manualDriveCommand);
+
+    SmartDashboard.putNumber("Turret Angle", 180.0);
+    SmartDashboard.putData("Set Turret Angle", turretSubystem.getAngleCommand(
+      () -> Rotation2d.fromDegrees(SmartDashboard.getNumber("Turret Angle", 180.0))
+    ));
+
+    SmartDashboard.putNumber("Shooter Speed", 0.0);
+    SmartDashboard.putData("Set Shooter Speed", shooterSubsystem.getRawVelocityCommand(
+      () -> SmartDashboard.getNumber("Shooter Speed", 0.0)
+    ));
   
     Trigger transferTrigger = new Trigger(() -> controller.getAButton());
     transferTrigger.onTrue(transferSubsystem.getLoadCommand());

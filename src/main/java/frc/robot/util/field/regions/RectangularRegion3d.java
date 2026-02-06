@@ -80,7 +80,7 @@ public class RectangularRegion3d implements Region3d {
 
     /**
      * Gets the minimum corner of the region
-     * @return The minimunm corner of the region
+     * @return The minimum corner of the region
      */
     public Translation3d getMinimumCorner() {
         return minCorner;

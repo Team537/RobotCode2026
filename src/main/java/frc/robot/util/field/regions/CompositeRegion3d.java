@@ -72,6 +72,7 @@ public class CompositeRegion3d implements Region3d {
     /**
      * Gets the area's rectangular bounding box
      */
+    @Override
     public RectangularRegion3d getBounds() {
         if (allowed.isEmpty()) {
             return null;

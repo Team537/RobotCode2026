@@ -50,6 +50,7 @@ public class CompositeRegion3d implements Region3d {
      * @return true if the point is inside at least one allowed area
      *         and not inside any forbidden area
      */
+    @Override
     public boolean contains(Translation3d point) {
         // First, reject points inside any forbidden area
         for (Region3d area : forbidden) {

@@ -15,7 +15,7 @@ import edu.wpi.first.math.geometry.Translation3d;
  *
  * This is useful for defining zones with exclusions, such as:
  *  - "Anywhere in the alliance zone but not below the tower"
- *  - "Anywhere in the neutral zone but net below the hub"
+ *  - "Anywhere in the neutral zone but not below the hub"
  */
 public class CompositeRegion3d implements Region3d {
 

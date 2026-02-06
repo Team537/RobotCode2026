@@ -61,6 +61,7 @@ public class RectangularRegion3d implements Region3d {
      * Check whether a 3D point lies inside this field area.
      * Boundaries are inclusive.
      */
+    @Override
     public boolean contains(Translation3d point) {
         return point.getX() >= minCorner.getX() &&
                point.getX() <= maxCorner.getX() &&

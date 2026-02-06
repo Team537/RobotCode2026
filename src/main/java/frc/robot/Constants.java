@@ -113,7 +113,7 @@ public class Constants {
 
     public static class Turret {
 
-        public static final int TURRET_ID = 20;
+        public static final int TURRET_ID = 56;
         public static final int TURRET_MOTOR_CURRENT_LIMIT = 40;
 
         // PID
@@ -160,9 +160,9 @@ public class Constants {
 
     public static final class Shooter {
 
-        public static final int SHOOTER_ID = 21;
+        public static final int SHOOTER_ID = 53;
         public static final int CURRENT_LIMIT = 75;
-        public static final int CURRENT_LOWER_LIMIT = 25;
+        public static final int CURRENT_LOWER_LIMIT = 25; 
         public static final double CURRENT_LOWER_TIME = .5;
 
         public static final double KP = .7;
@@ -180,7 +180,7 @@ public class Constants {
         
     }
     public static class Transfer {
-        public static final int TRANSFER_MOTOR_ID = 22;
+        public static final int TRANSFER_MOTOR_ID = 58;
 
         public static final int CURRENT_LIMIT = 75; //Amps
         public static final int CURRENT_LOWER_LIMIT = 25;

@@ -201,7 +201,7 @@ public class Constants {
             flipTranslation(BLUE_HUB_OUTPUT_C2);
 
         /* --------------------------------------------------------------------- */
-        /*  FieldArea3d Definitions (2D → Infinite Z)                             */
+        /*  RectangularRegion3d Definitions (2D → Infinite Z)                    */
         /* --------------------------------------------------------------------- */
 
         public static final RectangularRegion3d BLUE_ALLIANCE_ZONE =

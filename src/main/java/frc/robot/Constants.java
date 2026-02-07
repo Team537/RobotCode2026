@@ -143,5 +143,10 @@ public class Constants {
         public static final double HOOK_RETRACT_POSITION = RETRACTED_POSITION;
 
         public static final double CLIMBER_TOLERANCE = .1;
+        
+        // Timeout values in seconds for climber commands
+        public static final double DEPLOY_TIMEOUT = 3.0;
+        public static final double RETRACT_TIMEOUT = 3.0;
+        public static final double CLIMB_TIMEOUT = 3.0;
     }
 }

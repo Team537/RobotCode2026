@@ -38,8 +38,8 @@ public class ClimberSubsystem extends SubsystemBase {
             },
             // Execute: Do nothing, motor controller handles position control
             () -> {},
-            // End: Stop the climber at current position
-            (interrupted) -> setClimberPosition(getPosition()),
+            // End: Do nothing
+            (interrupted) -> {},
             // Stop condition: Check if within tolerance
             () -> Math.abs(Constants.Climber.DEPLOYED_POSITION - getPosition()) < Constants.Climber.CLIMBER_TOLERANCE,
             this
@@ -56,8 +56,8 @@ public class ClimberSubsystem extends SubsystemBase {
             },
             // Execute: Do nothing, motor controller handles position control
             () -> {},
-            // End: Stop the climber at current position
-            (interrupted) -> setClimberPosition(getPosition()),
+            // End: Do Nothing
+            (interrupted) -> {},
             // Stop condition: Check if within tolerance
             () -> Math.abs(Constants.Climber.RETRACTED_POSITION - getPosition()) < Constants.Climber.CLIMBER_TOLERANCE,
             this
@@ -74,8 +74,8 @@ public class ClimberSubsystem extends SubsystemBase {
             },
             // Execute: Do nothing, motor controller handles position control
             () -> {},
-            // End: Stop the climber at current position
-            (interrupted) -> setClimberPosition(getPosition()),
+            // End: Do nothing
+            (interrupted) -> {},
             // Stop condition: Check if within tolerance
             () -> Math.abs(Constants.Climber.RETRACTED_POSITION - getPosition()) < Constants.Climber.CLIMBER_TOLERANCE,
             this

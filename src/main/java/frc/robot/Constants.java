@@ -125,17 +125,12 @@ public class Constants {
 
     public static class Climber {
         public static final int CLIMBER_ID = 1;
+        public static final int HOOK_ID = 2;
 
-        public static final double GEAR_REDUCTION = 125.0;
-        public static final double CLIMBER_ANGLE_TO_MOTOR_ANGLE = GEAR_REDUCTION;
+        public static final double DEPLOYED_POSITION = 1;
+        public static final double RETRACTED_POSITION = 0;
 
-        public static final double KP = 8.5;
-        public static final double KI = 0;
-        public static final double KD = .1;
-
-        public static final Rotation2d DEPLOYED_WINCH_ROTATIONS = Rotation2d.fromDegrees(1035);
-        public static final Rotation2d CLIMB_WINCH_ROTATIONS = Rotation2d.fromDegrees(270);
-
-        public static final Rotation2d CLIMBER_ANGLE_TOLERANCE = Rotation2d.fromDegrees(3);
+        public static final double HOOK_CLIMB_POSITION = .5;
+        public static final double HOOK_RETRACT_POSITION = RETRACTED_POSITION;
     }
 }

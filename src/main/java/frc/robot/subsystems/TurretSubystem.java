@@ -159,6 +159,14 @@ public class TurretSubystem extends SubsystemBase {
         return getAngle().plus(robotRotation);
     }
 
+    /**
+     * Sets the position of the turret
+     * @param rotation The position to set to
+     */
+    public void resetTurretAngle(Rotation2d rotation) {
+        turretMotor.getEncoder().setPosition(rotation.getRadians());
+    }
+
 
     // --------------------------------------------------------------------
     // Commands

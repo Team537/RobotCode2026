@@ -59,6 +59,12 @@ public class RobotContainer {
 
     SmartDashboard.putData("Reset Pose", resetPoseCommand);
 
+    Command resetTurretCommand = new InstantCommand(() -> {
+      turretSubystem.resetTurretAngle(Constants.Turret.START_POSITION);
+    }).ignoringDisable(true);
+
+    SmartDashboard.putData("Reset Turret Angle", resetTurretCommand);
+
   }
 
   

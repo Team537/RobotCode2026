@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
@@ -28,6 +29,10 @@ public class ClimberSubsystem extends SubsystemBase {
         climber.setControl(positionRequest);
     }
 
+    public void stopClimber() {
+        climber.setControl(new NeutralOut());
+    }
+
     //Deploy both climber and hook to allow the robot to position itself to climb
     public Command getDeployedPositionCommand() {
         return new FunctionalCommand(
@@ -38,8 +43,10 @@ public class ClimberSubsystem extends SubsystemBase {
             },
             // Execute: Do nothing, motor controller handles position control
             () -> {},
-            // End: Do nothing
-            (interrupted) -> {},
+            // End: Stop the climber and retract hook to safe position if interrupted/timed out
+            (interrupted) -> {
+                stopClimber();
+            },
             // Stop condition: Check if within tolerance
             () -> Math.abs(Constants.Climber.DEPLOYED_POSITION - getPosition()) < Constants.Climber.CLIMBER_TOLERANCE,
             this
@@ -56,8 +63,10 @@ public class ClimberSubsystem extends SubsystemBase {
             },
             // Execute: Do nothing, motor controller handles position control
             () -> {},
-            // End: Do Nothing
-            (interrupted) -> {},
+            // End: Stop the climber if interrupted/timed out
+            (interrupted) -> {
+                stopClimber();
+            },
             // Stop condition: Check if within tolerance
             () -> Math.abs(Constants.Climber.RETRACTED_POSITION - getPosition()) < Constants.Climber.CLIMBER_TOLERANCE,
             this
@@ -74,8 +83,10 @@ public class ClimberSubsystem extends SubsystemBase {
             },
             // Execute: Do nothing, motor controller handles position control
             () -> {},
-            // End: Do nothing
-            (interrupted) -> {},
+            // End: Stop the climber if interrupted/timed out
+            (interrupted) -> {
+                stopClimber();
+            },
             // Stop condition: Check if within tolerance
             () -> Math.abs(Constants.Climber.RETRACTED_POSITION - getPosition()) < Constants.Climber.CLIMBER_TOLERANCE,
             this

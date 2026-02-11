@@ -67,7 +67,7 @@ public class ClimberSubsystem extends SubsystemBase {
             },
             // Execute: Do nothing, motor controller handles position control
             () -> {},
-            // End: Stop the climber if interrupted/timed out
+            // End: Stop the climber if interrupted/timed out, otherwise keep holding position
             (interrupted) -> {
                 if (interrupted) {
                     stopClimber();
@@ -90,7 +90,7 @@ public class ClimberSubsystem extends SubsystemBase {
             },
             // Execute: Do nothing, motor controller handles position control
             () -> {},
-            // End: Stop the climber if interrupted/timed out
+            // End: Stop the climber if interrupted/timed out, otherwise keep holding position
             (interrupted) -> {
                 if (interrupted) {
                     stopClimber();

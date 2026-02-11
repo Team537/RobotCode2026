@@ -22,6 +22,8 @@ public class Configs {
 
         CLIMBER_CONFIGURATION
             .CurrentLimits.SupplyCurrentLimit = Constants.Climber.MOTOR_LIMIT;
+        CLIMBER_CONFIGURATION
+            .CurrentLimits.SupplyCurrentLimitEnable = true;
 
         CLIMBER_CONFIGURATION
             .Slot0.kP = Constants.Climber.KP;

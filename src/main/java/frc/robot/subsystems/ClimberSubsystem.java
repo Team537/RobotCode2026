@@ -1,9 +1,11 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
@@ -14,10 +16,19 @@ import frc.robot.Constants;
 public class ClimberSubsystem extends SubsystemBase {
     private TalonFX climber;
     private Servo hook = new Servo(Constants.Climber.HOOK_ID);
+    private final PositionVoltage positionRequest = new PositionVoltage(0);
 
     public ClimberSubsystem() {
         climber = new TalonFX(Constants.Climber.CLIMBER_ID);
-        climber.getConfigurator().apply(Configs.CLIMBER_CONFIGURATION);
+        StatusCode status = climber.getConfigurator().apply(Configs.CLIMBER_CONFIGURATION);
+        
+        if (!status.isOK()) {
+            DriverStation.reportError(
+                "ClimberSubsystem: Failed to configure TalonFX (ID: " + Constants.Climber.CLIMBER_ID + 
+                "). Status: " + status.getName() + " - " + status.getDescription(), 
+                false
+            );
+        }
     }
 
     public double getPosition() {
@@ -25,7 +36,7 @@ public class ClimberSubsystem extends SubsystemBase {
     }
 
     public void setClimberPosition(double position) {
-        PositionVoltage positionRequest = new PositionVoltage(position);
+        positionRequest.Position = position;
         climber.setControl(positionRequest);
     }
 

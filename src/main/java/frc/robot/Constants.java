@@ -110,6 +110,10 @@ public class Constants {
         public static final double TRANSLATIONAL_TOLERANCE = 0.025; // Meters
         public static final Rotation2d ROTATIONAL_TOLERANCE = Rotation2d.fromDegrees(3.5);
 
+        public static final double ANTITIPPING_KP = .04;
+        public static final double ANTITIPPING_TIPPING_THRESHOLD = 3.0; // degrees
+        public static final double ANTITIPPING_MAX_CORRECTION_SPEED = 2.5; // m/s
+
         public static final class Field {
 
             public static final double FIELD_LENGTH = 16.54;
@@ -272,4 +276,5 @@ public class Constants {
         public static final Vector<N3> CENTER_SINGLE_TAG_STANDARD_DEVIATION = VecBuilder.fill(4, 4, 8); 
         public static final Vector<N3> CENTER_MULTI_TAG_STANDARD_DEVIATION = VecBuilder.fill(0.5, 0.5, 1);
     }
+    
 }

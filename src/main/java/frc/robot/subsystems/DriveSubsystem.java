@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.subsystems.vision.PhotonVisionOdometry;
+import frc.robot.util.swerve.AntiTipping;
 import frc.robot.util.swerve.Obstacle;
 import frc.robot.util.swerve.requests.RotationRequest;
 import frc.robot.util.swerve.requests.TranslationRequest;
@@ -50,6 +51,8 @@ public class DriveSubsystem extends SubsystemBase {
     private Rotation2d rotationalTolerance = Constants.Drive.ROTATIONAL_TOLERANCE;
 
     private List<Supplier<List<Obstacle>>> obstaclesSuppliers;
+
+    private AntiTipping antiTippling;
     
     // Feature Flags 
     private boolean useVisionOdometry = true;
@@ -104,6 +107,15 @@ public class DriveSubsystem extends SubsystemBase {
 
         obstaclesSuppliers = new ArrayList<>();
 
+        AntiTipping antiTipping = new AntiTipping(
+            () -> swerveDrive.getPitch().getDegrees(),
+            () -> swerveDrive.getRoll().getDegrees(),
+
+            Constants.Drive.ANTITIPPING_KP,
+            Constants.Drive.ANTITIPPING_TIPPING_THRESHOLD,
+            Constants.Drive.ANTITIPPING_MAX_CORRECTION_SPEED
+        );
+
         PathfindingCommand.warmupCommand().schedule();
 
         SmartDashboard.putNumber("Compensation Coefficient", Constants.Drive.ANGULAR_VELOCITY_COMPENSATION_COEFFICIENT);
@@ -156,7 +168,7 @@ public class DriveSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("Y Position", pose.getY());
         SmartDashboard.putNumber("Theta Position", pose.getRotation().getDegrees());
 
-
+        antiTippling.calculate();
     }
 
     /**
@@ -226,6 +238,12 @@ public class DriveSubsystem extends SubsystemBase {
      * @param rReq the rotation request (velocity, position, or stop)
      */
     public void driveWithCompositeRequests(TranslationRequest tReq, RotationRequest rReq) {
+        if (antiTippling.isTipping()) {
+            //stops the robot once it starts tipping and corrects it
+            swerveDrive.drive(antiTippling.getVelocityAntiTipping());
+            return;
+        }
+
         // Default to stopped requests if null
         if (tReq == null) tReq = new TranslationRequest.Stop();
         if (rReq == null) rReq = new RotationRequest.Stop();

@@ -115,7 +115,7 @@ public class Raycast {
      */
     public void start() {
 
-        // Return if this opperation has already been completed.
+        // Return if this operation has already been completed.
         if (this.started) {
             return;
         }
@@ -239,7 +239,7 @@ public class Raycast {
     /**
      * Returns the `RobotDetection` instance that is closest to the given team number. 
      * NOTE!! This will still return an instance by default even if there is no robot that would reasonably fit the given team number.
-     * Make sure to tune the maxAcceptedScore to prevent this from happening. (Try 3-5 to start).
+     * Make sure to tune the maxAcceptedScore to prevent this from happening. (Try 1-2 to start).
      * 
      * @param teamNumber The team # of the robot that will be returned.
      * @param maxAcceptedScore The maximum Levenshtein Distance score that will be accepted as a valid robot.

@@ -185,10 +185,11 @@ public class DriveSubsystem extends SubsystemBase {
 
     /**
      * Returns the current estimated robot pose on the field.
-     *
+     * Synchronized to ensure thread safety.
+     * 
      * @return The robot's pose as a {@link Pose2d}.
      */
-    public Pose2d getPose() {
+    public synchronized Pose2d getPose() {
         return swerveDrive.getPose();
     }
 

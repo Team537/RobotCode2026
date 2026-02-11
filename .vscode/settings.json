@@ -59,7 +59,9 @@
   ],
   "java.dependency.enableDependencyCheckup": false,
   "cSpell.words": [
+    "dataclass",
     "gson",
+    "Jetson",
     "YAGSL"
   ]
 }

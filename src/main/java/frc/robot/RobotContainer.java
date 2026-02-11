@@ -15,6 +15,7 @@ import frc.robot.commands.swerve.DriveToSequenceCommand;
 import frc.robot.commands.swerve.ManualRotationVelocityDirective;
 import frc.robot.commands.swerve.ManualTranslationVelocityDirective;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.vision.Raycast;
 import frc.robot.util.field.Alliance;
 import frc.robot.util.field.FieldUtil;
 import frc.robot.util.swerve.requests.RotationDirective;
@@ -26,9 +27,15 @@ public class RobotContainer {
   XboxController controller = new XboxController(0);
 
   DriveSubsystem driveSubsystem;
+  Raycast raycast;
 
   public RobotContainer() {
     driveSubsystem = new DriveSubsystem();
+
+    // Setup Raycast.
+    raycast = Raycast.getInstance();
+    raycast.setRobotPoseSupplier(driveSubsystem::getPose);
+    raycast.start();
   }
 
   public void setupSmartDashboard() {

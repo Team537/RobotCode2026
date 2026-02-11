@@ -5,7 +5,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Configs;
 import frc.robot.Constants;
@@ -28,34 +28,61 @@ public class ClimberSubsystem extends SubsystemBase {
         climber.setControl(positionRequest);
     }
 
-    //Deploy both climber and hook to allow the robot to position itself to climb
+    // Deploy both climber and hook to allow the robot to position itself to climb
     public Command getDeployedPositionCommand() {
-        return new InstantCommand(() -> {
-            setClimberPosition(Constants.Climber.DEPLOYED_POSITION);
-            hook.set(Constants.Climber.HOOK_CLIMB_POSITION);
+        final double target = Constants.Climber.DEPLOYED_POSITION;
+        // Start with the hook retracted. Once the climber reaches the target within
+        // tolerance, lower the hook to the climb position and hold the climber.
+        java.util.function.BooleanSupplier isFinished = () -> Math.abs(getPosition() - target) <= Constants.Climber.CLIMBER_TOLERANCE;
 
-            if (Math.abs(Constants.Climber.DEPLOYED_POSITION - getPosition()) >= Constants.Climber.CLIMBER_TOLERANCE) {
-                setClimberPosition(getPosition());
-            }
-        }, this);
-    }
-
-    //Reset the climber and hook
-    public Command getRetractPositionCommand() {
-        return new InstantCommand(
-            () -> {
-                setClimberPosition(Constants.Climber.RETRACTED_POSITION);
+        return Commands.sequence(
+            // initialize: set climber target and ensure hook is retracted
+            Commands.runOnce(() -> {
+                setClimberPosition(target);
                 hook.set(Constants.Climber.HOOK_RETRACT_POSITION);
-            }, this
+            }, this),
+            // keep commanding climber until within tolerance
+            Commands.run(() -> setClimberPosition(target), this).until(isFinished),
+            // once within tolerance, lower the hook to the climb position
+            Commands.runOnce(() -> hook.set(Constants.Climber.HOOK_CLIMB_POSITION), this),
+            // hold the current climber position
+            Commands.runOnce(() -> setClimberPosition(getPosition()), this)
         );
     }
 
-    //Lower the climber but keep hook raised allowing for robot to climb
+    
+
+    // Reset the climber and hook
+    public Command getRetractPositionCommand() {
+        final double target = Constants.Climber.RETRACTED_POSITION;
+        final double hookPos = Constants.Climber.HOOK_RETRACT_POSITION;
+
+        java.util.function.BooleanSupplier isFinished = () -> Math.abs(getPosition() - target) <= Constants.Climber.CLIMBER_TOLERANCE;
+
+        return Commands.sequence(
+            Commands.runOnce(() -> {
+                setClimberPosition(target);
+                hook.set(hookPos);
+            }, this),
+            Commands.run(() -> setClimberPosition(target), this).until(isFinished),
+            Commands.runOnce(() -> setClimberPosition(getPosition()), this)
+        );
+    }
+
+    // Lower the climber but keep hook raised allowing for robot to climb
     public Command getClimbPositionCommand() {
-        return new InstantCommand(() -> {
-            setClimberPosition(Constants.Climber.RETRACTED_POSITION);
-            hook.set(Constants.Climber.HOOK_CLIMB_POSITION);
-        }, this);
+        final double target = Constants.Climber.RETRACTED_POSITION;
+        final double hookPos = Constants.Climber.HOOK_CLIMB_POSITION;
+        java.util.function.BooleanSupplier isFinished = () -> Math.abs(getPosition() - target) <= Constants.Climber.CLIMBER_TOLERANCE;
+
+        return Commands.sequence(
+            Commands.runOnce(() -> {
+                setClimberPosition(target);
+                hook.set(hookPos);
+            }, this),
+            Commands.run(() -> setClimberPosition(target), this).until(isFinished),
+            Commands.runOnce(() -> setClimberPosition(getPosition()), this)
+        );
     }
    
 }

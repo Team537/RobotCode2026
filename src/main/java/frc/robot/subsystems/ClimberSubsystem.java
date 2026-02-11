@@ -45,7 +45,11 @@ public class ClimberSubsystem extends SubsystemBase {
             () -> {},
             // End: Stop the climber and retract hook to safe position if interrupted/timed out
             (interrupted) -> {
-                stopClimber();
+                if (interrupted) {
+                    stopClimber();
+                    hook.set(Constants.Climber.HOOK_RETRACT_POSITION);
+                }
+                // Otherwise keep holding position (TalonFX continues position control)
             },
             // Stop condition: Check if within tolerance
             () -> Math.abs(Constants.Climber.DEPLOYED_POSITION - getPosition()) < Constants.Climber.CLIMBER_TOLERANCE,
@@ -65,7 +69,10 @@ public class ClimberSubsystem extends SubsystemBase {
             () -> {},
             // End: Stop the climber if interrupted/timed out
             (interrupted) -> {
-                stopClimber();
+                if (interrupted) {
+                    stopClimber();
+                }
+                // Otherwise keep holding position (TalonFX continues position control)
             },
             // Stop condition: Check if within tolerance
             () -> Math.abs(Constants.Climber.RETRACTED_POSITION - getPosition()) < Constants.Climber.CLIMBER_TOLERANCE,
@@ -85,7 +92,10 @@ public class ClimberSubsystem extends SubsystemBase {
             () -> {},
             // End: Stop the climber if interrupted/timed out
             (interrupted) -> {
-                stopClimber();
+                if (interrupted) {
+                    stopClimber();
+                }
+                // Otherwise keep holding position (TalonFX continues position control)
             },
             // Stop condition: Check if within tolerance
             () -> Math.abs(Constants.Climber.RETRACTED_POSITION - getPosition()) < Constants.Climber.CLIMBER_TOLERANCE,

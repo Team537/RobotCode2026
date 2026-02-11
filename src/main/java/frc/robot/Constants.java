@@ -140,7 +140,7 @@ public class Constants {
         public static final double RETRACTED_POSITION = 0;
 
         public static final double HOOK_CLIMB_POSITION = 0.5;
-        public static final double HOOK_RETRACT_POSITION = RETRACTED_POSITION;
+        public static final double HOOK_RETRACT_POSITION = 0.0;
 
         public static final double CLIMBER_TOLERANCE = 0.1;
         

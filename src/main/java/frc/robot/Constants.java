@@ -132,17 +132,17 @@ public class Constants {
 
         public static final double MOTOR_LIMIT = 75;
 
-        public static final double KP = .05;
+        public static final double KP = 0.05;
         public static final double KI = 0;
         public static final double KD = 0;
 
         public static final double DEPLOYED_POSITION = 1;
         public static final double RETRACTED_POSITION = 0;
 
-        public static final double HOOK_CLIMB_POSITION = .5;
+        public static final double HOOK_CLIMB_POSITION = 0.5;
         public static final double HOOK_RETRACT_POSITION = RETRACTED_POSITION;
 
-        public static final double CLIMBER_TOLERANCE = .1;
+        public static final double CLIMBER_TOLERANCE = 0.1;
         
         // Timeout values in seconds for climber commands
         public static final double DEPLOY_TIMEOUT = 3.0;

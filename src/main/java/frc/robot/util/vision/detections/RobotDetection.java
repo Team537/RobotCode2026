@@ -6,6 +6,8 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 /**
  * A generic dataclass used to represent robot detection data sent from the NVIDIA Jetson Orion Nano Super.
+ * 
+ * <b> AVOID USING PUBLIC ATTRIBUTES!! THEY MAY BE REMOVED LATER </b>
  */
 public class RobotDetection {
 
@@ -14,6 +16,9 @@ public class RobotDetection {
     public final int teamNumber;
     public final double teamNumberConfidence;
     public final Alliance allianceColor;
+
+    /** <b> PLACEHOLDER (Still need to add this in the code ) Use `getRobotRadius` instead.  </b>*/
+    public final double radius = 0.0;
 
     /**
      * Creates a new {@code} RobotDetection} object from given information.
@@ -58,6 +63,9 @@ public class RobotDetection {
         return new Translation3d(this.x, this.y, this.z);
     }
 
+    public double getRobotRadius() {
+        return this.radius;
+    }
 
     /*
      * -----------------------------------------------------

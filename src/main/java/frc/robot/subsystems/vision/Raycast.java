@@ -7,22 +7,24 @@ import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 
 import org.apache.commons.text.similarity.LevenshteinDistance;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.FieldObject2d;
 import frc.robot.Constants.RaycastConstants;
-import frc.robot.network.TCPSender;
+import frc.robot.network.TCPImuResetSender;
 import frc.robot.network.UDPReceiver;
+import frc.robot.network.UDPSender;
+import frc.robot.util.network.UDPPacket;
 import frc.robot.util.vision.detections.RobotDetection;
 
 /**
- * 
+ * <b> NOTE: RAYCAST USES IT'S OWN PERIODIC SYSTEM TO ENSURE RELIABILITY!! </b>
+ * <br> <br>
+ * *This may be subject to change.
  */
 public class Raycast {
     
@@ -30,10 +32,8 @@ public class Raycast {
     private UDPReceiver<RobotDetection[]> robotReceiver;
     //private UDPReceiver<> ballReceiver;
     
-    private TCPSender poseSender;
-
-    // Suppliers
-    private Supplier<Pose2d> getRobotPosSupplier;
+    private TCPImuResetSender tcpImuResetSender;
+    private UDPSender udpSender;
 
     // Storage
     private final String RIO_IP;
@@ -76,7 +76,8 @@ public class Raycast {
         // Setup networking clients.
         try {
             this.robotReceiver = new UDPReceiver<>(RaycastConstants.ROBOT_DETECTION_PORT, RobotDetection[].class);
-            this.poseSender = new TCPSender(RaycastConstants.JETSON_IP, RaycastConstants.TCP_PORT);
+            this.udpSender = new UDPSender(RaycastConstants.JETSON_IP, RaycastConstants.UDP_SENDER_PORT);
+            this.tcpImuResetSender = new TCPImuResetSender(RaycastConstants.JETSON_IP, RaycastConstants.IMU_RESET_PORT);
         } catch (Exception e) {
             System.err.println("!!WARNING!! RIO COULDN'T CONNECT TO THE JETSON! ROBOT DETECTION FUNCTIONALITY WON'T WORK!!");
             this.setupFailed = true;
@@ -135,9 +136,25 @@ public class Raycast {
     /**
      * Closes all networking connections to ensure resources are cleaned up properly.
      */
-    public void close() {
-        this.robotReceiver.close();
-        this.poseSender.close();
+    public synchronized void close() {
+        started = false;
+        if (scheduler != null) scheduler.shutdownNow();
+        if (robotReceiver != null) robotReceiver.close();
+        if (udpSender != null) udpSender.close(); 
+    }
+
+    /**
+     * Resets the coprocessor's IMU.
+     */
+    public void zeroCoprocessorIMU() {
+
+        // Attempt to reset the coprocessor's IMU.
+        long cmdId = System.currentTimeMillis(); // Good enough for a unique ID.
+        try {
+            this.tcpImuResetSender.sendZeroImu(cmdId);
+        } catch (Exception e) {
+            System.err.println("!!WARNING!! IMU RESET FAILED ON COPROCESSOR!");
+        }
     }
 
     /**
@@ -174,27 +191,26 @@ public class Raycast {
     }
 
     /**
-     * TODO: Update to use UDP.
+     * Sends the robot's current position to the coprocessor via UDP.
+     * 
+     * NOTE: This can fail, and is by no means a surefire way of sending over data to the coprocessor.
      */
     private void updateRobotPos() {
 
-        // Do nothing if we cannot get the the robot's pos.
-        if (this.getRobotPosSupplier == null) {
-            System.err.println("!!WARNING!! RAYCAST WAS UNABLE TO UPDATE THE ROBOT'S POSITION! MAKE SURE YOU CALL setRobotPoseSupplier()!!");
-            return;
-        }
-
         // Get the latest robot pose.
-        Pose2d robotPose2d = this.getRobotPosSupplier.get();
-        Translation2d robotTranslation2d = robotPose2d.getTranslation();
-        Rotation2d robotRotation2d = robotPose2d.getRotation();
+        Pose2d robotPose2d = this.latestPose.get();
 
-        // Extract specific key parameters.
-        double xMeters = robotTranslation2d.getX();
-        double yMeters = robotTranslation2d.getY();
-        double zMeters = 0; // We don't really need Z, so we'll assume it's zero. We may want to replace this with the hight of the camera to ensure that the returned heights are distance off the ground.
+        // Build the UDPPacket
+        UDPPacket robotPosePacket = UDPPacket.builder()
+                .pose(robotPose2d)
+                .build();
 
-        double yawRadiance = robotRotation2d.getRadians();
+        // Attempt to update the coprocessor's robot position.
+        try {
+            this.udpSender.send(robotPosePacket);
+        } catch (Exception e) {
+            System.err.println("!!WARNING!! FAILED TO SEND UDP ROBOT POSE UPDATE!!");
+        }
     }
 
 
@@ -225,7 +241,9 @@ public class Raycast {
       * @return An array (RobotDetection[]) containing the latest robot detection. Expect ~100ms latency.
       */
     public RobotDetection[] getRobotDetections() {
-        return this.robotReceiver.getLatest();
+
+        RobotDetection[] robotDetections = robotReceiver.getLatest();
+        return (robotDetections == null) ? new RobotDetection[0] : robotDetections.clone();
     }
 
     /**

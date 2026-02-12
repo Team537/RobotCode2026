@@ -34,7 +34,6 @@ public class RobotContainer {
 
     // Setup Raycast.
     raycast = Raycast.getInstance();
-    raycast.setRobotPoseSupplier(driveSubsystem::getPose);
     raycast.start();
   }
 

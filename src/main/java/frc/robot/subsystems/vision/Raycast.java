@@ -42,14 +42,16 @@ public class Raycast {
     
     private LevenshteinDistance distanceMetric = LevenshteinDistance.getDefaultInstance();
 
+    private final java.util.concurrent.atomic.AtomicReference<Pose2d> latestPose =
+        new java.util.concurrent.atomic.AtomicReference<>(new Pose2d());
+
     // Runnables
     private ScheduledExecutorService scheduler; // Separate independent scheduler to ensure that loop overruns do not interfere with performance.
-
     private Runnable raycastPeriodic;
 
     // Flags
-    private boolean started = false;
-    private boolean setupFailed = false;
+    private volatile boolean started = false;
+    private volatile boolean setupFailed = false;
 
     // Singleton Instance.
     private static Raycast singleInstance;
@@ -113,10 +115,10 @@ public class Raycast {
     /**
      * Begins all network communication protocols & starts running the internal periodic.
      */
-    public void start() {
+    public synchronized void start() {
 
         // Return if this operation has already been completed.
-        if (this.started) {
+        if (this.started || this.setupFailed) {
             return;
         }
 
@@ -203,14 +205,13 @@ public class Raycast {
      */
 
     /**
-     * Allows Raycast to update the coprocessor's known robot position.
+     * Updates the internally stored most recent robot pose. This is called in {@code DriveSubsystem} to help ensure thread safety.
      * 
-     * @param getRobotPosSupplier A supplier reference to the position grabbing method in the DriveSubsystem.
+     * @param pose The most recent, up-to-date robot pose.
      */
-    public void setRobotPoseSupplier(Supplier<Pose2d> getRobotPosSupplier ) {
-        this.getRobotPosSupplier = getRobotPosSupplier;
+    public void publishRobotPose(Pose2d pose) {
+        latestPose.set(pose);
     }
-
 
     /*
      * -----------------------------------------------------
@@ -239,7 +240,7 @@ public class Raycast {
     /**
      * Returns the `RobotDetection` instance that is closest to the given team number. 
      * NOTE!! This will still return an instance by default even if there is no robot that would reasonably fit the given team number.
-     * Make sure to tune the maxAcceptedScore to prevent this from happening. (Try 1-2 to start).
+     * Make sure to tune {@code maxAcceptedScore} to prevent this from happening. (Try 1-2 to start).
      * 
      * @param teamNumber The team # of the robot that will be returned.
      * @param maxAcceptedScore The maximum Levenshtein Distance score that will be accepted as a valid robot.
@@ -265,7 +266,7 @@ public class Raycast {
             }
         }
 
-        return Optional.of(closesDetection);
+        return Optional.ofNullable(closesDetection);
     }
 
 

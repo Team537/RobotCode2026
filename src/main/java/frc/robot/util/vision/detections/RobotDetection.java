@@ -63,6 +63,11 @@ public class RobotDetection {
         return new Translation3d(this.x, this.y, this.z);
     }
 
+    /**
+     * Returns the placeholder radius representing a robot.
+     * 
+     * @return 0.0
+     */
     public double getRobotRadius() {
         return this.radius;
     }

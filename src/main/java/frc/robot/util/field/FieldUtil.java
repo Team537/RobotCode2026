@@ -2,9 +2,16 @@ package frc.robot.util.field;
 
 import java.util.Optional;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
+import frc.robot.util.field.regions.RectangularRegion3d;
+import frc.robot.util.field.regions.Region3d;
 
 /**
  * Utility class for querying match timing, alliance state, and hub
@@ -31,6 +38,20 @@ import frc.robot.Constants;
  * This class is intentionally stateless and safe to call from any command.
  */
 public final class FieldUtil {
+
+    /**
+     * Initializes values sent to dashboard
+     */
+    public static void init() {
+
+        String[] alliances = {"Blue", "Red"};
+        for (String alliance : alliances) {
+            for (int station = 1; station <= 3; station++) {
+                SmartDashboard.putString("Robots/" + alliance + "/" + station, "");
+            }
+        }
+
+    }
 
     /* --------------------------------------------------------------------- */
     /* Match timing utilities */
@@ -388,4 +409,175 @@ public final class FieldUtil {
         return getOpposingAlliance()
             .flatMap(alliance -> timeUntilHubState(alliance, false));
     }
+
+    /**
+     * Retrieves the configured team number for a robot at the given alliance
+     * and driver station position from SmartDashboard.
+     *
+     * <p>The dashboard entry is expected at:
+     * <pre>
+     *   Robots/{Alliance}/{Station}
+     * </pre>
+     *
+     * <p>A value <= 0 or invalid input is treated as "no robot selected" and will return
+     * {@link Optional#empty()}.</p>
+     *
+     * @param alliance The alliance (Red or Blue)
+     * @param station  The driver station position (1–3)
+     * @return An {@link Optional} containing the team number if configured,
+     *         or empty if none is set or invalid.
+     */
+    public static Optional<Integer> getRobot(Alliance alliance, int station) {
+        // Validate station index
+        if (station < 1 || station > 3) {
+            return Optional.empty();
+        }
+
+        // Build the NetworkTables key
+        String key = "Robots/" + (alliance == Alliance.BLUE ? "Blue" : "Red") + "/" + station;
+
+        // Get the string from SmartDashboard (default to empty string)
+        String valueStr = SmartDashboard.getString(key, "").trim();
+
+        // Attempt to parse an integer
+        try {
+            int value = Integer.parseInt(valueStr);
+            if (value > 0) {
+                return Optional.of(value);
+            }
+        } catch (NumberFormatException e) {
+            // Ignore invalid input
+        }
+
+        return Optional.empty();
+    }
+
+    /** -----------------------------
+     * TRANSLATION2D
+     * ----------------------------- */
+    /**
+     * Rotates a Translation2d 180° around the field center.
+     */
+    public static Translation2d flip(Translation2d t) {
+        return t.rotateAround(Constants.Field.FIELD_CENTER, Rotation2d.fromDegrees(180.0));
+    }
+
+    /** -----------------------------
+     * TRANSLATION3D
+     * ----------------------------- */
+    /**
+     * Rotates a Translation3d 180° around the field center in XY-plane.
+     * Z value is unchanged.
+     */
+    public static Translation3d flip(Translation3d t) {
+        Translation2d flippedXY = flip(new Translation2d(t.getX(), t.getY()));
+        return new Translation3d(flippedXY.getX(), flippedXY.getY(), t.getZ());
+    }
+
+    /** -----------------------------
+     * ROTATION2D
+     * ----------------------------- */
+    /**
+     * Rotates a Rotation2d 180° (around origin).
+     */
+    public static Rotation2d flip(Rotation2d r) {
+        return r.plus(Rotation2d.kPi);
+    }
+
+    /** -----------------------------
+     * POSE2D
+     * ----------------------------- */
+    /**
+     * Flips a Pose2d 180° around the field center.
+     * Position is flipped in XY-plane and rotation is rotated 180°.
+     */
+    public static Pose2d flip(Pose2d pose) {
+        Translation2d flippedPos = flip(pose.getTranslation());
+        Rotation2d flippedRot = flip(pose.getRotation());
+        return new Pose2d(flippedPos, flippedRot);
+    }
+
+    /** -----------------------------
+     * REGION3D
+     * ----------------------------- */
+    /**
+     * Wraps a Region3d such that all contains() checks and bounds are flipped 180° around field center.
+     */
+    public static Region3d flip(Region3d region) {
+        return new Region3d() {
+            @Override
+            public boolean contains(Translation3d point) {
+                Translation3d flippedPoint = flip(point);
+                return region.contains(flippedPoint);
+            }
+
+            @Override
+            public RectangularRegion3d getBounds() {
+                RectangularRegion3d bounds = region.getBounds();
+                // Flip the min/max corners
+                Translation3d minFlipped = flip(bounds.getMinimumCorner());
+                Translation3d maxFlipped = flip(bounds.getMaximumCorner());
+                return new RectangularRegion3d(minFlipped, maxFlipped);
+            }
+        };
+    }
+
+    // -----------------------------
+    // TRANSLATION2D
+    // -----------------------------
+    /**
+     * Flips a Translation2d 180° around the field center only if the robot is on the red alliance.
+     */
+    public static Translation2d flipIfRed(Translation2d t) {
+        return getAlliance().map(a -> a == Alliance.RED ? flip(t) : t).orElse(t);
+    }
+
+    // -----------------------------
+    // TRANSLATION3D
+    // -----------------------------
+    /**
+     * Flips a Translation3d 180° around the field center in XY-plane only if red alliance.
+     * Z value remains unchanged.
+     */
+    public static Translation3d flipIfRed(Translation3d t) {
+        return getAlliance().map(a -> a == Alliance.RED ? flip(t) : t).orElse(t);
+    }
+
+    // -----------------------------
+    // ROTATION2D
+    // -----------------------------
+    /**
+     * Flips a Rotation2d 180° only if red alliance.
+     */
+    public static Rotation2d flipIfRed(Rotation2d r) {
+        return getAlliance().map(a -> a == Alliance.RED ? flip(r) : r).orElse(r);
+    }
+
+    // -----------------------------
+    // POSE2D
+    // -----------------------------
+    /**
+     * Flips a Pose2d 180° (position + rotation) only if red alliance.
+     */
+    public static Pose2d flipIfRed(Pose2d pose) {
+        return getAlliance().map(a -> a == Alliance.RED ? flip(pose) : pose).orElse(pose);
+    }
+
+    // -----------------------------
+    // REGION3D
+    // -----------------------------
+    /**
+     * Wraps a Region3d such that all contains() checks and bounds are flipped 180° around field center
+     * only if red alliance.
+     */
+    public static Region3d flipIfRed(Region3d region) {
+        return getAlliance().map(a -> {
+            if (a == Alliance.RED) {
+                return flip(region);
+            } else {
+                return region;
+            }
+        }).orElse(region);
+    }
+
 }

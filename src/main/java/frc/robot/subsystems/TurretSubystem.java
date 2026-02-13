@@ -2,6 +2,8 @@ package frc.robot.subsystems;
 
 import java.util.function.Supplier;
 
+import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -18,6 +20,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Configs;
 import frc.robot.Constants;
 import frc.robot.util.turret.TurretSolver;
 import frc.robot.util.turret.TurretUtil;
@@ -43,10 +46,7 @@ public class TurretSubystem extends SubsystemBase {
     // --------------------------------------------------------------------
 
     /** Brushless motor driving the turret rotation. */
-    private final SparkMax turretMotor;
-
-    /** Configuration object for the turret motor controller. */
-    private final SparkMaxConfig turretConfig;
+    private final TalonFX turretMotor;
 
     // --------------------------------------------------------------------
     // Internal State
@@ -66,38 +66,8 @@ public class TurretSubystem extends SubsystemBase {
      * Creates the turret subsystem and configures the motor controller.
      */
     public TurretSubystem() {
-
-        turretConfig = new SparkMaxConfig();
-
-        turretConfig
-            .idleMode(IdleMode.kBrake)
-            .smartCurrentLimit(Constants.Turret.TURRET_MOTOR_CURRENT_LIMIT)
-            .inverted(Constants.Turret.MOTOR_INVERTED);
-
-        turretConfig.encoder
-            .positionConversionFactor(Constants.Turret.ENCODER_FACTOR)
-            .velocityConversionFactor(Constants.Turret.ENCODER_FACTOR / 60.0);
-
-        turretConfig.closedLoop.pid(
-            Constants.Turret.KP,
-            Constants.Turret.KI,
-            Constants.Turret.KD
-        );
-
-        turretConfig.closedLoop.feedForward.kV(Constants.Turret.KS);
-        turretConfig.closedLoop.feedForward.kV(Constants.Turret.KV);
-        turretConfig.closedLoop.feedForward.kA(Constants.Turret.KA);
-
-        turretMotor = new SparkMax(
-            Constants.Turret.TURRET_ID,
-            MotorType.kBrushless
-        );
-
-        turretMotor.configure(
-            turretConfig,
-            ResetMode.kResetSafeParameters,
-            PersistMode.kPersistParameters
-        );
+        turretMotor = new TalonFX(Constants.Turret.TURRET_ID);
+        turretMotor.getConfigurator().apply(Configs.TURRET_CONFIG);
     }
 
     // --------------------------------------------------------------------
@@ -122,12 +92,8 @@ public class TurretSubystem extends SubsystemBase {
                 Constants.Turret.MAX_ROTATION
             );
 
-        turretMotor
-            .getClosedLoopController()
-            .setSetpoint(
-                clampedAngle.getRadians(),
-                com.revrobotics.spark.SparkBase.ControlType.kPosition
-            );
+        PositionVoltage positionRequest = new PositionVoltage(clampedAngle.getRadians());
+        turretMotor.setControl(positionRequest);
 
     }
 
@@ -147,9 +113,7 @@ public class TurretSubystem extends SubsystemBase {
      * @return the current turret yaw (robot-relative)
      */
     public Rotation2d getAngle() {
-        return Rotation2d.fromRadians(
-            turretMotor.getEncoder().getPosition()
-        );
+        return Rotation2d.fromRadians(turretMotor.getPosition().getValueAsDouble());
     }
 
     /**
@@ -164,7 +128,7 @@ public class TurretSubystem extends SubsystemBase {
      * @param rotation The position to set to
      */
     public void resetTurretAngle(Rotation2d rotation) {
-        turretMotor.getEncoder().setPosition(rotation.getRadians());
+        turretMotor.setPosition(rotation.getRadians());
     }
 
 

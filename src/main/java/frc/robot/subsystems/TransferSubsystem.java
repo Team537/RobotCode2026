@@ -2,6 +2,8 @@ package frc.robot.subsystems;
 
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkMax;
@@ -12,6 +14,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Configs;
 import frc.robot.Constants;
 
 /**
@@ -27,11 +30,8 @@ public class TransferSubsystem extends SubsystemBase {
     // Hardware
     // --------------------------------------------------------------------
 
-    /** Motor driving the transfer mechanism. */
-    private final SparkMax transferMotor;
-
-    /** Configuration object applied to the transfer motor controller. */
-    private final SparkMaxConfig transferConfig;
+    /** Motor driving the transfer mechanism. */   
+    private final TalonFX transferMotor;
 
     // --------------------------------------------------------------------
     // Construction / Configuration
@@ -41,43 +41,8 @@ public class TransferSubsystem extends SubsystemBase {
      * Creates and configures the transfer subsystem.
      */
     public TransferSubsystem() {
-
-        transferConfig = new SparkMaxConfig();
-
-        // Basic motor behavior
-        transferConfig
-            .idleMode(IdleMode.kBrake)
-            .smartCurrentLimit(Constants.Transfer.CURRENT_LIMIT)
-            .inverted(false);
-
-        // Encoder conversion factors
-        transferConfig.encoder
-            .positionConversionFactor(Constants.Transfer.ENCODER_FACTOR)
-            .velocityConversionFactor(Constants.Transfer.ENCODER_FACTOR / 60.0);
-
-        // Closed-loop velocity control gains
-        transferConfig.closedLoop.pid(
-            Constants.Transfer.KP,
-            Constants.Transfer.KI,
-            Constants.Transfer.KD
-        );
-
-        transferConfig.closedLoop.feedForward.kS(Constants.Transfer.KS);
-        transferConfig.closedLoop.feedForward.kV(Constants.Transfer.KV);
-        transferConfig.closedLoop.feedForward.kA(Constants.Transfer.KA);
-
-        // Instantiate motor controller
-        transferMotor = new SparkMax(
-            Constants.Transfer.TRANSFER_MOTOR_ID,
-            MotorType.kBrushless
-        );
-
-        // Apply configuration to hardware
-        transferMotor.configure(
-            transferConfig,
-            ResetMode.kResetSafeParameters,
-            PersistMode.kPersistParameters
-        );
+        transferMotor = new TalonFX(Constants.Transfer.TRANSFER_MOTOR_ID);
+        transferMotor.getConfigurator().apply(Configs.TRANSFER_CONFIG);
     }
 
     @Override
@@ -95,13 +60,12 @@ public class TransferSubsystem extends SubsystemBase {
      * @param velocity desired velocity in mechanism units per second
      */
     public void setVelocity(double velocity) {
-        transferMotor
-            .getClosedLoopController()
-            .setSetpoint(velocity, ControlType.kVelocity);
+        VelocityVoltage velocityRequest = new VelocityVoltage(velocity);
+        transferMotor.setControl(velocityRequest);
     }
 
     public double getVelocity() {
-        return transferMotor.getEncoder().getVelocity();
+        return transferMotor.getVelocity().getValueAsDouble();
     }
 
     // --------------------------------------------------------------------

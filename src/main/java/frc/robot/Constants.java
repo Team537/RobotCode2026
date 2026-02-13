@@ -297,7 +297,7 @@ public class Constants {
         public static final TurretSolver.Config SOLVER_CONFIG = new TurretSolver.Config(
             Field.GRAVITY,
             0.02,
-            15.0, //TODO: replace with actual maximum launch speed once turret constants are added       
+            Shooter.MAX_BALL_SPEED, 
             TURRET_TRANSLATION,
             PITCH
         );
@@ -330,6 +330,8 @@ public class Constants {
             {3.0, 3.0},
             {4.0, 4.0}
         }; // Meters per second to meters per second
+
+        public static final double MAX_BALL_SPEED = 15.0; // Meters per second
 
     }
     public static class Transfer {

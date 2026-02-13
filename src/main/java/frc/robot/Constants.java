@@ -1,6 +1,7 @@
 package frc.robot;
 
 import java.io.File;
+import org.apache.commons.text.similarity.LevenshteinDistance;
 import java.util.List;
 
 import edu.wpi.first.math.VecBuilder;
@@ -270,5 +271,22 @@ public class Constants {
 
         public static final Vector<N3> CENTER_SINGLE_TAG_STANDARD_DEVIATION = VecBuilder.fill(4, 4, 8);
         public static final Vector<N3> CENTER_MULTI_TAG_STANDARD_DEVIATION = VecBuilder.fill(0.5, 0.5, 1);
+    }
+
+    public static class RaycastConstants {
+
+        // IPs
+        public static final String JETSON_IP = "10.5.37.42";
+
+        // Ports 
+        // NOTE: THESE MUST ALL BE DIFFERENT AND BE BETWEEN 5800 and 5810!!!!
+        public static final int UDP_SENDER_PORT = 5004;
+        public static final int IMU_RESET_PORT = 5805;
+        public static final int ROBOT_DETECTION_PORT = 5806;
+        public static final int TIME_SYNC_PORT = 5807;
+
+
+        // Visualization.
+        public static final String RAYCAST_FIELD_NAME = "raycast-field";
     }
 }

@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.util.CommandTimeline;
 import frc.robot.util.field.FieldStatePublisher;
+import frc.robot.util.field.FieldUtil;
 
 public class Robot extends TimedRobot {
 
@@ -17,11 +18,11 @@ public class Robot extends TimedRobot {
 
   public Robot() {
     robotContainer = new RobotContainer();
-    robotContainer.setupSmartDashboard();
   }
 
   @Override
   public void robotInit() {
+    FieldUtil.init();
     DeployMetadata.publishAtStartup();
   }
 
@@ -29,6 +30,7 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
     SmartDashboard.putData("Command Scheduler", CommandScheduler.getInstance());
+    robotContainer.updateTargetFieldObjects();
     FieldStatePublisher.update();
     CommandTimeline.run();
   }

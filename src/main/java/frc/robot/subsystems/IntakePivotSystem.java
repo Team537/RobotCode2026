@@ -1,11 +1,6 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SparkMaxConfig;
-
-import java.util.function.Supplier;
 
 import com.ctre.phoenix6.controls.PositionVoltage;
 
@@ -19,28 +14,10 @@ import frc.robot.Constants;
 public class IntakePivotSystem extends SubsystemBase {
     public TalonFX Intake;
 
-    private SparkMax intakeNeo;
-    private SparkMaxConfig intakeConfig;
-
     //Configuration
     public IntakePivotSystem() {
-        //Intake = new TalonFX(Constants.IntakePivot.INTAKE_ID);
-        //Intake.getConfigurator().apply(Configs.IntakePivot.INTAKE_PIVOT_CONFIGURATION);
-
-        intakeConfig = new SparkMaxConfig();
-        intakeConfig
-            .idleMode(IdleMode.kBrake)
-            .smartCurrentLimit(Constants.IntakePivot.CURRENT_LIMIT)
-            .inverted(false);
-        intakeConfig.encoder
-            .positionConversionFactor(Constants.IntakePivot.ENCODER_FACTOR)
-            .velocityConversionFactor(Constants.IntakePivot.ENCODER_FACTOR / 60.0);
-        intakeConfig.closedLoop
-            .pid(
-                Constants.IntakePivot.KP,
-                Constants.IntakePivot.KI,
-                Constants.IntakePivot.KD
-                );
+        Intake = new TalonFX(Constants.IntakePivot.INTAKE_ID);
+        Intake.getConfigurator().apply(Configs.IntakePivot.INTAKE_PIVOT_CONFIGURATION);
     }
 
     //Sets the angle for the intake subsystem
@@ -56,19 +33,17 @@ public class IntakePivotSystem extends SubsystemBase {
             angle = Constants.IntakePivot.INTAKE_MIN_ANGLE;
         }
 
-        // angleRequest;
+        PositionVoltage angleRequest;
 
-        //angleRequest = new PositionVoltage(angle.getRadians());
+        angleRequest = new PositionVoltage(angle.getRadians());
 
         
-        //Intake.setControl(angleRequest);
-
-        intakeNeo.getClosedLoopController().setSetpoint(angle.getRadians(), com.revrobotics.spark.SparkBase.ControlType.kPosition);
+        Intake.setControl(angleRequest);
     }
 
     //Returns the angle as a double
     public Rotation2d getAngle(){
-        return Rotation2d.fromRadians(intakeNeo.getEncoder().getPosition());
+        return Rotation2d.fromRadians(Intake.getPosition().getValueAsDouble());
     }
 
     

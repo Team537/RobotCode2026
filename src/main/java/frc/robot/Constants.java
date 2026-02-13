@@ -293,13 +293,15 @@ public class Constants {
             0.0,
             0.537 //537!!!
         );
-        public static final Rotation2d PITCH = Rotation2d.fromDegrees(70.0);
+        public static final Rotation2d MIN_PITCH = Rotation2d.fromDegrees(70.0);
+        public static final Rotation2d MAX_PITCH = Rotation2d.fromDegrees(70.0);
         public static final TurretSolver.Config SOLVER_CONFIG = new TurretSolver.Config(
             Field.GRAVITY,
             0.02,
             15.0, //TODO: replace with actual maximum launch speed once turret constants are added       
             TURRET_TRANSLATION,
-            PITCH
+            MIN_PITCH,
+            MAX_PITCH
         );
 
     }

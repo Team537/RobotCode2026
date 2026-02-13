@@ -194,7 +194,7 @@ public class TurretSubystem extends SubsystemBase {
                     Constants.Turret.SOLVER_CONFIG
                 );
 
-            return solution.getLaunchAngle();
+            return solution.getYaw();
         });
     }
 

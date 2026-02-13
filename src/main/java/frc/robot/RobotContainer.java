@@ -22,8 +22,8 @@ import frc.robot.commands.swerve.DriveToSequenceCommand;
 import frc.robot.commands.swerve.ManualRotationVelocityDirective;
 import frc.robot.commands.swerve.ManualTranslationVelocityDirective;
 import frc.robot.subsystems.DriveSubsystem;
-import frc.robot.util.dashboard.AdjustableDouble;
 import frc.robot.subsystems.vision.Raycast;
+import frc.robot.util.dashboard.AdjustableDouble;
 import frc.robot.util.field.Alliance;
 import frc.robot.util.field.FieldUtil;
 import frc.robot.util.swerve.requests.RotationDirective;
@@ -53,6 +53,8 @@ public class RobotContainer {
   FixedTarget selectedFixedTarget = FixedTarget.A;
   boolean xHeld = false;
   boolean yHeld = false;
+
+  Supplier<Translation3d> targetingSupplier = () -> Translation3d.kZero;
 
   public RobotContainer() {
     driveSubsystem = new DriveSubsystem();
@@ -234,7 +236,7 @@ public class RobotContainer {
         .onFalse(
             new InstantCommand(() -> yHeld = false));
 
-    Supplier<Translation3d> targetingSupplier = () -> {
+    targetingSupplier = () -> {
       Translation2d robotPosition = driveSubsystem.getPose().getTranslation();
 
       // 1 - Alliance hub targeting

@@ -52,7 +52,7 @@ public class DriveSubsystem extends SubsystemBase {
 
     private List<Supplier<List<Obstacle>>> obstaclesSuppliers;
 
-    private AntiTipping antiTippling;
+    private AntiTipping antiTipping;
     
     // Feature Flags 
     private boolean useVisionOdometry = true;
@@ -168,7 +168,7 @@ public class DriveSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("Y Position", pose.getY());
         SmartDashboard.putNumber("Theta Position", pose.getRotation().getDegrees());
 
-        antiTippling.calculate();
+        antiTipping.calculate();
     }
 
     /**
@@ -238,9 +238,9 @@ public class DriveSubsystem extends SubsystemBase {
      * @param rReq the rotation request (velocity, position, or stop)
      */
     public void driveWithCompositeRequests(TranslationRequest tReq, RotationRequest rReq) {
-        if (antiTippling.isTipping()) {
+        if (antiTipping.isTipping()) {
             //stops the robot once it starts tipping and corrects it
-            swerveDrive.drive(antiTippling.getVelocityAntiTipping());
+            swerveDrive.drive(antiTipping.getVelocityAntiTipping());
             return;
         }
 

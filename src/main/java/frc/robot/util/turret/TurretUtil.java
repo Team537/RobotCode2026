@@ -1,6 +1,8 @@
 package frc.robot.util.turret;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import frc.robot.Constants;
 
 public class TurretUtil {
 
@@ -69,7 +71,18 @@ public class TurretUtil {
         return new Rotation2d(bestAngle);
     }
 
-    //TODO: Set the actual regression models
+    private static InterpolatingDoubleTreeMap wheelToBall = new InterpolatingDoubleTreeMap();
+    private static InterpolatingDoubleTreeMap ballToWheel = new InterpolatingDoubleTreeMap();
+
+    static {
+        for (double[] point : Constants.Shooter.WHEEL_SPEED_TO_BALL_SPEED_POINTS) {
+            double wheel = point[0];
+            double ball = point[1];
+
+            wheelToBall.put(wheel, ball);
+            ballToWheel.put(ball, wheel);
+        }
+    }
 
     /**
      * Gets the wheel speed that would shoot the ball at provided speed from a regression model.
@@ -77,7 +90,7 @@ public class TurretUtil {
      * @return The wheel surface speed that will shoot the ball in meters per second.
      */
     public static double wheelSurfaceSpeedFromBallSpeed(double ballSpeed) {
-        return ballSpeed;
+        return ballToWheel.get(ballSpeed);
     }
 
     /**
@@ -86,7 +99,7 @@ public class TurretUtil {
      * @return The speed the ball with shoot out in meters per second.
      */
     public static double ballSpeedFromWheelSurfaceSpeed(double wheelSurfaceSpeed) {
-        return wheelSurfaceSpeed;
+        return wheelToBall.get(wheelSurfaceSpeed);
     }
 
 

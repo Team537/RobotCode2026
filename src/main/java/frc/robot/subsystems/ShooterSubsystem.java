@@ -71,7 +71,7 @@ public class ShooterSubsystem extends SubsystemBase {
      *
      * @param velocity desired wheel velocity in meters per second
      */
-    public void setRawVelocity(double velocity) {
+    public void setWheelVelocity(double velocity) {
         shooterMotor.setControl(new VelocityVoltage(velocity));
     }
 
@@ -80,22 +80,22 @@ public class ShooterSubsystem extends SubsystemBase {
      *
      * @param velocity desired ball velocity in meters per second
      */
-    public void setVelocity(double velocity) {
-        setRawVelocity(TurretUtil.wheelSurfaceSpeedFromBallSpeed(velocity));
+    public void setBallVelocity(double velocity) {
+        setWheelVelocity(TurretUtil.wheelSurfaceSpeedFromBallSpeed(velocity));
     }
 
     /**
      * @return the current shooter flywheel velocity in meters per second
      */
-    public double getRawVelocity() {
+    public double getWheelVelocity() {
         return shooterMotor.getVelocity().getValueAsDouble();
     }
 
     /**
      * @return the current velocity that a ball shot out would travel in meters per second
      */
-    public double getVelocity() {
-        return TurretUtil.ballSpeedFromWheelSurfaceSpeed(getRawVelocity());
+    public double getBallVelocity() {
+        return TurretUtil.ballSpeedFromWheelSurfaceSpeed(getWheelVelocity());
     }
 
     // --------------------------------------------------------------------
@@ -113,7 +113,7 @@ public class ShooterSubsystem extends SubsystemBase {
      * @param velocitySupplier supplies the desired raw shooter velocity
      * @return a continuously running shooter velocity command
      */
-    public Command getRawVelocityCommand(
+    public Command getWheelVelocityCommand(
         Supplier<Double> velocitySupplier
     ) {
         return new FunctionalCommand(
@@ -121,11 +121,11 @@ public class ShooterSubsystem extends SubsystemBase {
 
             () -> {
                 double targetVelocity = velocitySupplier.get();
-                setRawVelocity(targetVelocity);
+                setWheelVelocity(targetVelocity);
 
                 atTarget =
                     Math.abs(
-                        targetVelocity - getRawVelocity()
+                        targetVelocity - getWheelVelocity()
                     ) < Constants.Shooter.TOLERANCE;
             },
 
@@ -154,11 +154,11 @@ public class ShooterSubsystem extends SubsystemBase {
 
             () -> {
                 double targetVelocity = velocitySupplier.get();
-                setVelocity(targetVelocity);
+                setBallVelocity(targetVelocity);
 
                 atTarget =
                     Math.abs(
-                        targetVelocity - getVelocity()
+                        targetVelocity - getBallVelocity()
                     ) < Constants.Shooter.TOLERANCE;
             },
 

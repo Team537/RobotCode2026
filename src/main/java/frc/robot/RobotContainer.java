@@ -112,7 +112,7 @@ public class RobotContainer {
     shootTrigger.onTrue(
       transferSubsystem.getLoadCommand()
     ).onTrue(
-      shooterSubsystem.getRawVelocityCommand(() -> SmartDashboard.getNumber("Shooter Speed",0.0))
+      shooterSubsystem.getWheelVelocityCommand(() -> SmartDashboard.getNumber("Shooter Speed",0.0))
     ).onFalse(
       transferSubsystem.getStopCommand()
     ).onFalse(

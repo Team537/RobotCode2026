@@ -10,6 +10,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Filesystem;
@@ -321,8 +322,15 @@ public class Constants {
         public static final double WHEEL_RADIUS = 1.985; 
         public static final double ENCOER_FACTOR = 2.0 * Math.PI * WHEEL_RADIUS / GEAR_RATIO;
 
-        public static final double TOLERANCE = 0.1;
-        
+        public static final double TOLERANCE = 0.1; // Meters per second
+
+        public static final double[][] WHEEL_SPEED_TO_BALL_SPEED_POINTS = {
+            {1.0, 1.0},
+            {2.0, 2.0},
+            {3.0, 3.0},
+            {4.0, 4.0}
+        }; // Meters per second to meters per second
+
     }
     public static class Transfer {
         public static final int TRANSFER_MOTOR_ID = 58;

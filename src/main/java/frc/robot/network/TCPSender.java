@@ -10,13 +10,17 @@ import java.nio.charset.StandardCharsets;
 import com.google.gson.Gson;
 
 /**
+ * <b> This class is deprecated! It is recommended to use {@code UDPSender} instead! </b>
+ * <br> <br>
  * TCPSender is responsible for establishing a TCP connection to a remote device
  * (e.g., Raspberry Pi)
  * and sending configuration data in JSON format over the network.
  * 
  * @author Cameron Myhre
  * @since v0.1.0-26
+ * @deprecated Please use {@code UDPSender} instead.
  */
+@Deprecated()
 public class TCPSender implements AutoCloseable {
 
     private Socket socket;

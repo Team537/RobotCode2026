@@ -127,7 +127,7 @@ public class Constants {
     }
 
     public static class Intake {
-        public static final int INTAKE_LEAD_ID = 1;
+        public static final int INTAKE_LEAD_ID = 54;
         
         public static final int CURRENT_LIMIT = 75;
         public static final int CURRENT_LOWER_LIMIT = 25;
@@ -147,7 +147,7 @@ public class Constants {
     }
 
     public static class IntakePivot {
-        public static final int INTAKE_ID = 2;
+        public static final int INTAKE_ID = 55;
 
         public static final int CURRENT_LIMIT = 75;
         public static final int CURRENT_LOWER_LIMIT = 25;
@@ -157,16 +157,16 @@ public class Constants {
         public static final double KI = 0;
         public static final double KD = .2;
 
-        public static final double GEAR_RATIO = 20;
-        public static final double ENCODER_FACTOR = Math.PI * 2 / GEAR_RATIO;
+        public static final double GEAR_RATIO = 75.0;
+        public static final double ENCODER_FACTOR = GEAR_RATIO;
 
         public static final InvertedValue MOTOR_INVERTED = InvertedValue.CounterClockwise_Positive;
 
-        public static final Rotation2d INTAKE_START_POS = Rotation2d.fromDegrees(90); //Prevents the intake from going beyond its start positon
+        public static final Rotation2d INTAKE_START_POS = Rotation2d.fromDegrees(118); //Prevents the intake from going beyond its start positon
         public static final Rotation2d INTAKE_MIN_ANGLE = Rotation2d.fromDegrees(0);
         public static final Rotation2d INTAKE_MAX_ANGLE = INTAKE_START_POS; //Prevents the robot from going beyond its maxiumum angle
-        public static final Rotation2d INTAKE_RAISED_ANGLE = INTAKE_MIN_ANGLE;
-        public static final Rotation2d INTAKE_DEPLOYED_ANGLE = Rotation2d.fromDegrees(30);        
+        public static final Rotation2d INTAKE_RAISED_ANGLE = Rotation2d.fromDegrees(90.0);
+        public static final Rotation2d INTAKE_DEPLOYED_ANGLE = Rotation2d.fromDegrees(0.0);        
 
         public static final Rotation2d INTAKE_TOLERANCE_ANGLE = Rotation2d.fromDegrees(5);
     }

@@ -14,7 +14,7 @@ import frc.robot.commands.swerve.CompositeDriveCommand;
 import frc.robot.commands.swerve.DriveToSequenceCommand;
 import frc.robot.commands.swerve.ManualRotationVelocityDirective;
 import frc.robot.commands.swerve.ManualTranslationVelocityDirective;
-import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.*;
 import frc.robot.util.field.Alliance;
 import frc.robot.util.field.FieldUtil;
 import frc.robot.util.swerve.requests.RotationDirective;
@@ -26,9 +26,11 @@ public class RobotContainer {
   XboxController controller = new XboxController(0);
 
   DriveSubsystem driveSubsystem;
+  IntakePivotSubsystem intakePivot;
 
   public RobotContainer() {
     driveSubsystem = new DriveSubsystem();
+    intakePivot = new IntakePivotSubsystem();
   }
 
   public void setupSmartDashboard() {

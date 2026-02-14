@@ -90,11 +90,12 @@ public class Configs {
 
                 INTAKE_PIVOT_CONFIGURATION
                     .MotorOutput
-                        .NeutralMode = NeutralModeValue.Brake;
+                        .NeutralMode = NeutralModeValue.Coast;
 
                 INTAKE_PIVOT_CONFIGURATION
                     .MotorOutput
                         .Inverted = Constants.IntakePivot.MOTOR_INVERTED;
+
             }
         }
 }

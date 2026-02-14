@@ -5,19 +5,21 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.controls.PositionVoltage;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Configs;
 import frc.robot.Constants;
 
-public class IntakePivotSystem extends SubsystemBase {
-    public TalonFX Intake;
+public class IntakePivotSubsystem extends SubsystemBase {
+    public TalonFX intake;
 
     //Configuration
-    public IntakePivotSystem() {
-        Intake = new TalonFX(Constants.IntakePivot.INTAKE_ID);
-        Intake.getConfigurator().apply(Configs.IntakePivot.INTAKE_PIVOT_CONFIGURATION);
+    public IntakePivotSubsystem() {
+        intake = new TalonFX(Constants.IntakePivot.INTAKE_ID);
+        intake.getConfigurator().apply(Configs.IntakePivot.INTAKE_PIVOT_CONFIGURATION);
+        intake.setPosition(Constants.IntakePivot.INTAKE_START_POS.getRotations());
     }
 
     //Sets the angle for the intake subsystem
@@ -38,12 +40,17 @@ public class IntakePivotSystem extends SubsystemBase {
         angleRequest = new PositionVoltage(angle.getRadians());
 
         
-        Intake.setControl(angleRequest);
+        intake.setControl(angleRequest);
+    }
+
+    @Override
+    public void periodic() {
+        SmartDashboard.putNumber("IntakePivotPosition",getAngle().getDegrees());;
     }
 
     //Returns the angle as a double
     public Rotation2d getAngle(){
-        return Rotation2d.fromRadians(Intake.getPosition().getValueAsDouble());
+        return Rotation2d.fromRotations(intake.getPosition().getValueAsDouble());
     }
 
     

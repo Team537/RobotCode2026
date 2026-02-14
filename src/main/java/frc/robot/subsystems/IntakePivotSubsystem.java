@@ -25,19 +25,19 @@ public class IntakePivotSubsystem extends SubsystemBase {
     //Sets the angle for the intake subsystem
     public void setIntakeAngle(Rotation2d angle) {
 
-        //Prevents the intake from suprassing the maximum angle (going past its start pos)        
+        //Prevents the intake from surpassing the maximum angle (going past its start pos)        
         if (angle.getRadians() > Constants.IntakePivot.INTAKE_MAX_ANGLE.getRadians()) {
             angle = Constants.IntakePivot.INTAKE_MAX_ANGLE;
         }
                 
         //Prevents the intake from surpassing its minimum angle (going too far down)
-        if (angle.getRadians() > Constants.IntakePivot.INTAKE_MIN_ANGLE.getRadians()) {
+        if (angle.getRadians() < Constants.IntakePivot.INTAKE_MIN_ANGLE.getRadians()) {
             angle = Constants.IntakePivot.INTAKE_MIN_ANGLE;
         }
 
         PositionVoltage angleRequest;
 
-        angleRequest = new PositionVoltage(angle.getRadians());
+        angleRequest = new PositionVoltage(angle.getRotations());
 
         
         intake.setControl(angleRequest);

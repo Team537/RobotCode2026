@@ -65,8 +65,10 @@ public class TurretSubystem extends SubsystemBase {
     /**
      * True if the turret is currently within tolerance of its commanded angle.
      * This value is only valid while an angle command is running.
+     * same applies to the hood
      */
     private boolean atTarget = false;
+    private boolean atHoodTarget = false;
 
     // --------------------------------------------------------------------
     // Construction / Configuration
@@ -211,7 +213,7 @@ public class TurretSubystem extends SubsystemBase {
                             .getRadians()
                     ) < Constants.Turret.TURRET_TOLERANCE.getRadians();
 
-                atTarget = 
+                atHoodTarget = 
                     Math.abs(
                         getHoodAngle()
                             .minus(targetHoodAngle)
@@ -220,6 +222,27 @@ public class TurretSubystem extends SubsystemBase {
             },
 
             interrupted -> atTarget = false,
+            () -> false,
+            this
+        );
+    }
+
+    public Command setStowCommand() {
+        return new FunctionalCommand(
+            () -> {},
+
+            () -> {
+                setHoodAngle(Constants.Turret.HOOD_STOW_POSITION);
+
+                atHoodTarget = 
+                    Math.abs(
+                        getHoodAngle()
+                            .minus(Constants.Turret.HOOD_STOW_POSITION)
+                            .getRadians()
+                    ) < Constants.Turret.HOOD_TOLERANCE.getRadians();
+            },
+
+            interrupted -> atHoodTarget = false,
             () -> false,
             this
         );
@@ -261,5 +284,9 @@ public class TurretSubystem extends SubsystemBase {
      */
     public boolean atTarget() {
         return atTarget;
+    }
+
+    public boolean atHoodTarget() {
+        return atHoodTarget;
     }
 }

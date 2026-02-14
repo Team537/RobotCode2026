@@ -289,6 +289,8 @@ public class Constants {
         public static final Rotation2d ENCODER_MAX_PITCH = Rotation2d.fromDegrees(360.0);
         public static final Rotation2d ENCODER_MIN_PITCH = Rotation2d.fromDegrees(0.0);
 
+        public static final Rotation2d HOOD_STOW_POSITION = Rotation2d.fromDegrees(90);
+
         public static final double OUTPUT_RANGE_MAX = 1;
         public static final double OUTPUT_RANGE_MIN = -1;
 

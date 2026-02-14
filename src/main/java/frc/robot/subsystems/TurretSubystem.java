@@ -158,6 +158,11 @@ public class TurretSubystem extends SubsystemBase {
         turretMotor.setPosition(rotation.getRadians());
     }
 
+    public void stopHoodServo() {
+        hoodClosedLoopActive = false;
+        pitchServo.setSpeed(0);
+    }
+
 
     public void periodic() {
         if (!hoodClosedLoopActive) {
@@ -167,12 +172,7 @@ public class TurretSubystem extends SubsystemBase {
         double current = getHoodAngle().getRadians();
         double output = hoodController.calculate(current);
 
-        double limited = Math.max(-0.4, Math.min(0.4, output));
-        pitchServo.setSpeed(limited);
-
-        if (hoodController.atSetpoint()) {
-            hoodClosedLoopActive = false;
-        }
+        pitchServo.setSpeed(output);
     }
 
     // --------------------------------------------------------------------
@@ -191,7 +191,8 @@ public class TurretSubystem extends SubsystemBase {
      * @return a continuously running turret-aiming command
      */
     public Command getAngleCommand(
-        Supplier<Rotation2d> angleSupplier
+        Supplier<Rotation2d> angleSupplier,
+        Supplier<Rotation2d> hoodAngleSupplier
     ) {
         return new FunctionalCommand(
             () -> {},
@@ -200,12 +201,22 @@ public class TurretSubystem extends SubsystemBase {
                 Rotation2d targetAngle = angleSupplier.get();
                 setTurretAngle(targetAngle);
 
+                Rotation2d targetHoodAngle = hoodAngleSupplier.get();
+                setHoodAngle(targetHoodAngle);
+
                 atTarget =
                     Math.abs(
                         getAngle()
                             .minus(targetAngle)
                             .getRadians()
                     ) < Constants.Turret.TURRET_TOLERANCE.getRadians();
+
+                atTarget = 
+                    Math.abs(
+                        getHoodAngle()
+                            .minus(targetHoodAngle)
+                            .getRadians()
+                    ) < Constants.Turret.HOOD_TOLERANCE.getRadians();
             },
 
             interrupted -> atTarget = false,
@@ -239,27 +250,6 @@ public class TurretSubystem extends SubsystemBase {
 
             return solution.getYaw();
         });
-    }
-
-    public Command setHoodAngleCommand(Supplier<Rotation2d> angleSupplier) {
-        return new FunctionalCommand(
-            () -> {},
-
-            () -> setHoodAngle(angleSupplier.get()),
-
-            interrupted -> {},
-            () -> false
-        );
-    }
-
-    public Command resetHoodAngleCommand(Rotation2d angle) {
-        return new FunctionalCommand(
-            () -> {},
-
-            () -> setHoodAngle(angle),
-            interrupted -> {},
-            () -> false
-        );
     }
 
     // --------------------------------------------------------------------

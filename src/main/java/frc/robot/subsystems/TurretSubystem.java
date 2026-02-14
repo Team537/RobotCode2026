@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
@@ -12,10 +13,12 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.FeedForwardConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.PWM;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
@@ -47,6 +50,13 @@ public class TurretSubystem extends SubsystemBase {
 
     /** Brushless motor driving the turret rotation. */
     private final TalonFX turretMotor;
+    private final PWM pitchServo = new PWM(Constants.Turret.PITCH_SERVO_ID);
+    private final CANcoder pitchEncoder = new CANcoder(Constants.Turret.PITCH_CANCODER_ID);
+
+    private volatile double hoodSetpointRad = Constants.Turret.MIN_PITCH.getRadians();
+    private volatile boolean hoodClosedLoopActive = false;
+
+    PIDController hoodController = new PIDController(Constants.Turret.PITCH_KP, Constants.Turret.PITCH_KI, Constants.Turret.PITCH_KD);
 
     // --------------------------------------------------------------------
     // Internal State
@@ -97,6 +107,18 @@ public class TurretSubystem extends SubsystemBase {
 
     }
 
+    public void setHoodAngle(Rotation2d angle) {
+        double minR = Constants.Turret.ENCODER_MIN_PITCH.getRadians();
+        double maxR = Constants.Turret.ENCODER_MAX_PITCH.getRadians();
+
+        double clamped = Math.max(minR, Math.min(maxR, angle.getRadians()));
+
+        hoodSetpointRad = clamped;
+        hoodController.reset();
+        hoodController.setSetpoint(hoodSetpointRad);
+        hoodClosedLoopActive = true;
+    }
+
     /**
      * Commands the turret to rotate to a field-relative yaw.
      *
@@ -116,6 +138,11 @@ public class TurretSubystem extends SubsystemBase {
         return Rotation2d.fromRadians(turretMotor.getPosition().getValueAsDouble());
     }
 
+
+    public Rotation2d getHoodAngle() {
+        return Rotation2d.fromRadians(pitchEncoder.getPosition().getValueAsDouble() * Constants.Turret.PITCH_ENCODER_FACTOR);
+    }
+
     /**
      * @return the current turret yaw in the field frame
      */
@@ -131,6 +158,22 @@ public class TurretSubystem extends SubsystemBase {
         turretMotor.setPosition(rotation.getRadians());
     }
 
+
+    public void periodic() {
+        if (!hoodClosedLoopActive) {
+            return;
+        }
+
+        double current = getHoodAngle().getRadians();
+        double output = hoodController.calculate(current);
+
+        double limited = Math.max(-0.4, Math.min(0.4, output));
+        pitchServo.setSpeed(limited);
+
+        if (hoodController.atSetpoint()) {
+            hoodClosedLoopActive = false;
+        }
+    }
 
     // --------------------------------------------------------------------
     // Commands
@@ -196,6 +239,27 @@ public class TurretSubystem extends SubsystemBase {
 
             return solution.getYaw();
         });
+    }
+
+    public Command setHoodAngleCommand(Supplier<Rotation2d> angleSupplier) {
+        return new FunctionalCommand(
+            () -> {},
+
+            () -> setHoodAngle(angleSupplier.get()),
+
+            interrupted -> {},
+            () -> false
+        );
+    }
+
+    public Command resetHoodAngleCommand(Rotation2d angle) {
+        return new FunctionalCommand(
+            () -> {},
+
+            () -> setHoodAngle(angle),
+            interrupted -> {},
+            () -> false
+        );
     }
 
     // --------------------------------------------------------------------

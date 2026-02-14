@@ -1,5 +1,6 @@
 package frc.robot;
 
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -15,6 +16,7 @@ public class Configs {
     public static final String NT_PREFIX_PARSED = "DeployMetadata/";   // per-field entries
     
     public static final TalonFXConfiguration TURRET_CONFIG = new TalonFXConfiguration();
+    public static final CANcoderConfiguration PITCH_CANCODER_CONFIG = new CANcoderConfiguration();
 
     static {
 

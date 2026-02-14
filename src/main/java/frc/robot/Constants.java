@@ -262,6 +262,10 @@ public class Constants {
         public static final int TURRET_ID = 56;
         public static final int TURRET_MOTOR_CURRENT_LIMIT = 40;
 
+        public static final int PITCH_SERVO_ID = 1;
+       
+        public static final int PITCH_CANCODER_ID = 2;
+
         // PID
         public static final double KP = 2.5;
         public static final double KI = 0;
@@ -270,11 +274,20 @@ public class Constants {
         public static final double KV = 2.36;
         public static final double KA = 0.18;
 
+        public static final double PITCH_KP = 1;
+        public static final double PITCH_KI = 1;
+        public static final double PITCH_KD = 1;
+
         public static final boolean MOTOR_INVERTED = false;
 
         public static final double TURRET_GEAR_REDUCTION = 5.0;
         public static final double TURN_TABLE_RATIO = 24.0 / 200.0;
         public static final double ENCODER_FACTOR = 1.0 / (TURRET_GEAR_REDUCTION * TURN_TABLE_RATIO);
+
+        public static final double PITCH_ENCODER_FACTOR = 1.0;
+
+        public static final Rotation2d ENCODER_MAX_PITCH = Rotation2d.fromDegrees(360.0);
+        public static final Rotation2d ENCODER_MIN_PITCH = Rotation2d.fromDegrees(0.0);
 
         public static final double OUTPUT_RANGE_MAX = 1;
         public static final double OUTPUT_RANGE_MIN = -1;

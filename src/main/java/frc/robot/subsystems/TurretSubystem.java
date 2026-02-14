@@ -245,7 +245,8 @@ public class TurretSubystem extends SubsystemBase {
                     robotPoseSupplier.get(),
                     robotVelocitySupplier.get(),
                     targetTranslationSupplier.get(),
-                    Constants.Turret.SOLVER_CONFIG
+                    Constants.Turret.SOLVER_CONFIG,
+                    this
                 );
 
             return solution.getYaw();

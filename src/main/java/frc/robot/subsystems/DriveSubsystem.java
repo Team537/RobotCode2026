@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.subsystems.vision.PhotonVisionOdometry;
+import frc.robot.subsystems.vision.Raycast;
 import frc.robot.util.swerve.Obstacle;
 import frc.robot.util.swerve.requests.RotationRequest;
 import frc.robot.util.swerve.requests.TranslationRequest;
@@ -40,6 +41,7 @@ public class DriveSubsystem extends SubsystemBase {
 
     private SwerveDrive swerveDrive;
     private PhotonVisionOdometry visionOdometry;
+    private Raycast raycast;
 
     PIDController xController;
     PIDController yController;
@@ -116,7 +118,8 @@ public class DriveSubsystem extends SubsystemBase {
             );
         }
 
-
+        // Grab a reference to the Raycast singleton.
+        raycast = Raycast.getInstance();
     }
 
     // ------------------------------
@@ -151,11 +154,14 @@ public class DriveSubsystem extends SubsystemBase {
             visionOdometry.updatePoseEstimation(swerveDrive);
           }
 
+        // Update Raycast's pose.
         Pose2d pose = getPose();
+        raycast.publishRobotPose(pose);
+
+        // Publish data to the dashboard for visualization.
         SmartDashboard.putNumber("X Position", pose.getX());
         SmartDashboard.putNumber("Y Position", pose.getY());
         SmartDashboard.putNumber("Theta Position", pose.getRotation().getDegrees());
-
 
     }
 
@@ -185,7 +191,8 @@ public class DriveSubsystem extends SubsystemBase {
 
     /**
      * Returns the current estimated robot pose on the field.
-     *
+     * Synchronized to ensure thread safety.
+     * 
      * @return The robot's pose as a {@link Pose2d}.
      */
     public Pose2d getPose() {

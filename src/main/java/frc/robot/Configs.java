@@ -89,8 +89,20 @@ public class Configs {
                         .kD = Constants.IntakePivot.KD;
 
                 INTAKE_PIVOT_CONFIGURATION
+                    .Slot0
+                        .kS = Constants.IntakePivot.KS;
+
+                INTAKE_PIVOT_CONFIGURATION
+                    .Slot0
+                        .kV = Constants.IntakePivot.KV;
+
+                INTAKE_PIVOT_CONFIGURATION
+                    .Slot0
+                        .kA = Constants.IntakePivot.KA;
+
+                INTAKE_PIVOT_CONFIGURATION
                     .MotorOutput
-                        .NeutralMode = NeutralModeValue.Coast;
+                        .NeutralMode = NeutralModeValue.Brake;
 
                 INTAKE_PIVOT_CONFIGURATION
                     .MotorOutput

@@ -353,6 +353,10 @@ public class RobotContainer {
         manualRotationVelocityDirective, null, null);
     driveSubsystem.setDefaultCommand(manualDriveCommand);
 
+    Trigger intakeTrigger = new Trigger(() -> driverController.getRightBumperButton());
+    intakeTrigger.onTrue(intakePivot.deployIntakeCommand());
+    intakeTrigger.onFalse(intakePivot.raiseIntakeCommand());
+
   }
 
   public void scheduleAutonomous() {

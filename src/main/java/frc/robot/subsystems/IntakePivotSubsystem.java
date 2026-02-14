@@ -68,7 +68,7 @@ public class IntakePivotSubsystem extends SubsystemBase {
 
     //Raises the intake to the start position
     public Command raiseIntakeCommand() {
-        return setIntakeAngleCommand(Constants.IntakePivot.INTAKE_START_POS);
+        return setIntakeAngleCommand(Constants.IntakePivot.INTAKE_RAISED_ANGLE);
     }
 
     //Deploys intake 

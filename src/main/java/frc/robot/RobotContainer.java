@@ -323,35 +323,37 @@ public class RobotContainer {
 
   public void scheduleTeleOp() {
 
-    // Setup the translational directive for drive subsystem
-    TranslationDirective manualTranslationVelocityDirective = new ManualTranslationVelocityDirective(
-        driveSubsystem,
-        () -> -driverController.getLeftY(), // X (On controllers, -Y corresponds to "forwards", or +X)
-        () -> -driverController.getLeftX(), // X (On controllers, -X corresponds to "left", or +Y)
-        () -> driverController.getRightTriggerAxis(),
-        () -> driverController.getLeftTriggerAxis(),
-        () -> !driverController.getLeftBumperButton(),
-        Constants.Operator.Drive.TRANSLATION_INPUT_CURVE_POWER,
-        Constants.Operator.Drive.NORMAL_TRANSLATION_MAX_SPEED,
-        Constants.Operator.Drive.THROTTLE_TRANSLATION_MAX_SPEED,
-        Constants.Operator.Drive.SLOW_TRANSLATION_MAX_SPEED,
-        FieldUtil.getAlliance().orElse(Alliance.BLUE).driverRotation);
+    // DISABLED because of errors during drive
 
-    // Setup the rotational directive for drive subsystem
-    RotationDirective manualRotationVelocityDirective = new ManualRotationVelocityDirective(
-        driveSubsystem,
-        () -> -driverController.getRightX(), // X (On controllers, -X corresponds to "counter-clockwise", or +Theta)
-        () -> driverController.getRightTriggerAxis(),
-        () -> driverController.getLeftTriggerAxis(),
-        Constants.Operator.Drive.ROTATION_INPUT_CURVE_POWER,
-        Constants.Operator.Drive.NORMAL_ROTATION_MAX_SPEED,
-        Constants.Operator.Drive.THROTTLE_ROTATION_MAX_SPEED,
-        Constants.Operator.Drive.SLOW_ROTATION_MAX_SPEED);
+    // // Setup the translational directive for drive subsystem
+    // TranslationDirective manualTranslationVelocityDirective = new ManualTranslationVelocityDirective(
+    //     driveSubsystem,
+    //     () -> -driverController.getLeftY(), // X (On controllers, -Y corresponds to "forwards", or +X)
+    //     () -> -driverController.getLeftX(), // X (On controllers, -X corresponds to "left", or +Y)
+    //     () -> driverController.getRightTriggerAxis(),
+    //     () -> driverController.getLeftTriggerAxis(),
+    //     () -> !driverController.getLeftBumperButton(),
+    //     Constants.Operator.Drive.TRANSLATION_INPUT_CURVE_POWER,
+    //     Constants.Operator.Drive.NORMAL_TRANSLATION_MAX_SPEED,
+    //     Constants.Operator.Drive.THROTTLE_TRANSLATION_MAX_SPEED,
+    //     Constants.Operator.Drive.SLOW_TRANSLATION_MAX_SPEED,
+    //     FieldUtil.getAlliance().orElse(Alliance.BLUE).driverRotation);
 
-    // Scheduling Subsystems
-    Command manualDriveCommand = new CompositeDriveCommand(driveSubsystem, manualTranslationVelocityDirective,
-        manualRotationVelocityDirective, null, null);
-    driveSubsystem.setDefaultCommand(manualDriveCommand);
+    // // Setup the rotational directive for drive subsystem
+    // RotationDirective manualRotationVelocityDirective = new ManualRotationVelocityDirective(
+    //     driveSubsystem,
+    //     () -> -driverController.getRightX(), // X (On controllers, -X corresponds to "counter-clockwise", or +Theta)
+    //     () -> driverController.getRightTriggerAxis(),
+    //     () -> driverController.getLeftTriggerAxis(),
+    //     Constants.Operator.Drive.ROTATION_INPUT_CURVE_POWER,
+    //     Constants.Operator.Drive.NORMAL_ROTATION_MAX_SPEED,
+    //     Constants.Operator.Drive.THROTTLE_ROTATION_MAX_SPEED,
+    //     Constants.Operator.Drive.SLOW_ROTATION_MAX_SPEED);
+
+    // // Scheduling Subsystems
+    // Command manualDriveCommand = new CompositeDriveCommand(driveSubsystem, manualTranslationVelocityDirective,
+    //     manualRotationVelocityDirective, null, null);
+    // driveSubsystem.setDefaultCommand(manualDriveCommand);
 
     Trigger intakeTrigger = new Trigger(() -> driverController.getRightBumperButton());
     intakeTrigger.onTrue(intakePivot.deployIntakeCommand());

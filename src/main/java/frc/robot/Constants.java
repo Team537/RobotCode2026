@@ -319,7 +319,7 @@ public class Constants {
         public static final int CURRENT_LOWER_LIMIT = 25;
         public static final double CURRENT_LOWER_TIME = .5;
 
-        public static final double KP = 1.0;
+        public static final double KP = 60.0;
         public static final double KI = 0.0;
         public static final double KD = 0.0;
         public static final double KS = 0.0;
@@ -332,10 +332,10 @@ public class Constants {
         public static final InvertedValue MOTOR_INVERTED = InvertedValue.CounterClockwise_Positive;
 
         public static final Rotation2d INTAKE_START_POS = Rotation2d.fromDegrees(118); //Prevents the intake from going beyond its start positon
-        public static final Rotation2d INTAKE_MIN_ANGLE = Rotation2d.fromDegrees(0);
+        public static final Rotation2d INTAKE_MIN_ANGLE = Rotation2d.fromDegrees(1);
         public static final Rotation2d INTAKE_MAX_ANGLE = INTAKE_START_POS; //Prevents the robot from going beyond its maxiumum angle
         public static final Rotation2d INTAKE_RAISED_ANGLE = Rotation2d.fromDegrees(90.0);
-        public static final Rotation2d INTAKE_DEPLOYED_ANGLE = Rotation2d.fromDegrees(0.0);        
+        public static final Rotation2d INTAKE_DEPLOYED_ANGLE = INTAKE_MIN_ANGLE;        
 
         public static final Rotation2d INTAKE_TOLERANCE_ANGLE = Rotation2d.fromDegrees(5);
     }

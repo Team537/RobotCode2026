@@ -1,6 +1,8 @@
 package frc.robot;
 
+import com.ctre.phoenix6.configs.ExternalFeedbackConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 public class Configs {
@@ -62,7 +64,11 @@ public class Configs {
 
             static {
                 INTAKE_PIVOT_CONFIGURATION
-                    .Feedback.SensorToMechanismRatio = Constants.IntakePivot.ENCODER_FACTOR;
+                    .Feedback.RotorToSensorRatio = Constants.IntakePivot.ROTOR_TO_SENSOR_RATIO;
+                INTAKE_PIVOT_CONFIGURATION
+                    .Feedback.SensorToMechanismRatio = Constants.IntakePivot.SENSOR_TO_MECHANISM_RATIO;
+                INTAKE_PIVOT_CONFIGURATION
+                    .Feedback.FeedbackRemoteSensorID = Constants.IntakePivot.CANCODER_ID;
                 
                 INTAKE_PIVOT_CONFIGURATION
                     .CurrentLimits

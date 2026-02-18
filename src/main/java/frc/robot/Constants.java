@@ -281,7 +281,7 @@ public class Constants {
 
         public static final double TURRET_GEAR_REDUCTION = 5.0;
         public static final double TURN_TABLE_RATIO = 24.0 / 200.0;
-        public static final double ENCODER_FACTOR = 1.0 / (TURRET_GEAR_REDUCTION * TURN_TABLE_RATIO);
+        public static final double ENCODER_FACTOR = (TURRET_GEAR_REDUCTION * TURN_TABLE_RATIO) / (2.0 * Math.PI);
 
         public static final double PITCH_GEAR_RATIO = (447.2 / 26.0);
         public static final double PITCH_ENCODER_FACTOR = PITCH_GEAR_RATIO / (2.0 * Math.PI);
@@ -313,7 +313,7 @@ public class Constants {
         public static final TurretSolver.Config SOLVER_CONFIG = new TurretSolver.Config(
             Field.GRAVITY,
             0.02,
-            15.0, //TODO: replace with actual maximum launch speed once turret constants are added       
+            Shooter.MAX_BALL_SPEED, 
             TURRET_TRANSLATION,
             MIN_PITCH,
             MAX_PITCH
@@ -337,7 +337,7 @@ public class Constants {
 
         public static final double GEAR_RATIO = 1.0;
         public static final double WHEEL_RADIUS = 1.985; 
-        public static final double ENCOER_FACTOR = 2.0 * Math.PI * WHEEL_RADIUS / GEAR_RATIO;
+        public static final double ENCOER_FACTOR = GEAR_RATIO / (2.0 * Math.PI * WHEEL_RADIUS) ;
 
         public static final double TOLERANCE = 0.1; // Meters per second
 
@@ -347,6 +347,8 @@ public class Constants {
             {3.0, 3.0},
             {4.0, 4.0}
         }; // Meters per second to meters per second
+
+        public static final double MAX_BALL_SPEED = 15.0; // Meters per second
 
     }
     public static class Transfer {
@@ -365,7 +367,7 @@ public class Constants {
 
         public static final double TRANSFER_GEAR_REDUCTION = 1.0;
         public static final double TRANSFER_WHEEL_RADIUS = 1.0;
-        public static final double ENCODER_FACTOR = 2.0 * Math.PI * TRANSFER_WHEEL_RADIUS / TRANSFER_GEAR_REDUCTION;
+        public static final double ENCODER_FACTOR = TRANSFER_GEAR_REDUCTION / (2.0 * Math.PI * TRANSFER_WHEEL_RADIUS);
 
         public static final boolean MOTOR_INVERTED = false;
 

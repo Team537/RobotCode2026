@@ -283,8 +283,8 @@ public class Constants {
         public static final double CURRENT_LOWER_TIME = 0.5;
 
         public static final Rotation2d START_POSITION = Rotation2d.kPi;
-        public static final Rotation2d MIN_ROTATION = Rotation2d.fromRadians(0.5 * Math.PI);
-        public static final Rotation2d MAX_ROTATION = Rotation2d.fromRadians(2.5 * Math.PI);
+        public static final Rotation2d MIN_ROTATION = Rotation2d.fromRadians(0.75 * Math.PI);
+        public static final Rotation2d MAX_ROTATION = Rotation2d.fromRadians(2.75 * Math.PI);
 
         public static final Rotation2d TURRET_TOLERANCE = Rotation2d.fromRadians(3.0);
 

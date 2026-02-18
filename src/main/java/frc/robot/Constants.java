@@ -1,6 +1,7 @@
 package frc.robot;
 
 import java.io.File;
+import org.apache.commons.text.similarity.LevenshteinDistance;
 import java.util.List;
 
 import edu.wpi.first.math.VecBuilder;
@@ -41,6 +42,16 @@ public class Constants {
 
         }
 
+        public static class ErrorSettings {
+
+            public static final double SETTINGS_DELAY_TIME = 0.5;
+            public static final double TURRET_OFFSET_INCREASE = 0.1; // Degrees to increase per tick
+            public static final int TURRET_OFFSET_DECIMAL_PLACE = 1;
+            public static final double SHOOTER_PERCENT_INCREASE = 0.2; // Percent to increase per tick
+            public static final int SHOOTER_PERCENT_DECIMAL_PLACE = 1;
+
+        }
+
     }
 
     public static class Field {
@@ -53,168 +64,164 @@ public class Constants {
         // Shifts
 
         public static final double AUTO_START = 0.0;
-        public static final double AUTO_END   = 20.0;
+        public static final double AUTO_END = 20.0;
 
-        // Match period boundaries (elapsed seconds since match start, including autonomous)
+        // Match period boundaries (elapsed seconds since match start, including
+        // autonomous)
 
         public static final double TRANSITION_START = 20.0;
-        public static final double TRANSITION_END   = 30.0;
+        public static final double TRANSITION_END = 30.0;
 
         public static final double SHIFT_1_START = 30.0;
-        public static final double SHIFT_1_END   = 55.0;
+        public static final double SHIFT_1_END = 55.0;
 
         public static final double SHIFT_2_START = 55.0;
-        public static final double SHIFT_2_END   = 80.0;
+        public static final double SHIFT_2_END = 80.0;
 
         public static final double SHIFT_3_START = 80.0;
-        public static final double SHIFT_3_END   = 105.0;
+        public static final double SHIFT_3_END = 105.0;
 
         public static final double SHIFT_4_START = 105.0;
-        public static final double SHIFT_4_END   = 130.0;
+        public static final double SHIFT_4_END = 130.0;
 
         public static final double ENDGAME_START = 130.0;
-        public static final double ENDGAME_END    = 160.0;
+        public static final double ENDGAME_END = 160.0;
 
         public static final double FIELD_LENGTH = 16.54;
         public static final double FIELD_WIDTH = 8.07;
+        public static final Translation2d FIELD_CENTER = new Translation2d(0.5 * FIELD_LENGTH, 0.5 * FIELD_WIDTH);
 
         /** Mirror across field center (180° rotation) */
-        private static Translation2d flipTranslation(Translation2d t) {
+        public static Translation2d flipTranslation(Translation2d t) {
             return new Translation2d(
-                FIELD_LENGTH - t.getX(),
-                FIELD_WIDTH  - t.getY()
-            );
+                    FIELD_LENGTH - t.getX(),
+                    FIELD_WIDTH - t.getY());
         }
 
         /** Mirror Y */
-        private static double flipY(double y) {
+        public static double flipY(double y) {
             return FIELD_WIDTH - y;
         }
 
         /* --------------------------------------------------------------------- */
-        /*  Blue / Red Alliance Zone Corners                                      */
+        /* Blue / Red Alliance Zone Corners */
         /* --------------------------------------------------------------------- */
 
         public static final Translation2d BLUE_ALLIANCE_ZONE_C1 = new Translation2d(
-            0.000,
-            0.000
-        );
+                0.000,
+                0.000);
 
         public static final Translation2d BLUE_ALLIANCE_ZONE_C2 = new Translation2d(
-            4.028,
-            flipY(BLUE_ALLIANCE_ZONE_C1.getY())
-        );
+                4.028,
+                flipY(BLUE_ALLIANCE_ZONE_C1.getY()));
 
-        public static final Translation2d RED_ALLIANCE_ZONE_C1 =
-            flipTranslation(BLUE_ALLIANCE_ZONE_C1);
+        public static final Translation2d RED_ALLIANCE_ZONE_C1 = flipTranslation(BLUE_ALLIANCE_ZONE_C1);
 
-        public static final Translation2d RED_ALLIANCE_ZONE_C2 =
-            flipTranslation(BLUE_ALLIANCE_ZONE_C2);
+        public static final Translation2d RED_ALLIANCE_ZONE_C2 = flipTranslation(BLUE_ALLIANCE_ZONE_C2);
 
         /* --------------------------------------------------------------------- */
-        /*  Tower Zone Corners (Forbidden in Alliance Regions)                    */
+        /* Tower Zone Corners (Forbidden in Alliance Regions) */
         /* --------------------------------------------------------------------- */
 
         public static final Translation2d BLUE_TOWER_C1 = new Translation2d(
-            BLUE_ALLIANCE_ZONE_C1.getX(),
-            3.253
-        );
+                BLUE_ALLIANCE_ZONE_C1.getX(),
+                3.253);
 
         public static final Translation2d BLUE_TOWER_C2 = new Translation2d(
-            1.144,
-            4.239
-        );
+                1.144,
+                4.239);
 
-        public static final Translation2d RED_TOWER_C1 =
-            flipTranslation(BLUE_TOWER_C1);
+        public static final Translation2d RED_TOWER_C1 = flipTranslation(BLUE_TOWER_C1);
 
-        public static final Translation2d RED_TOWER_C2 =
-            flipTranslation(BLUE_TOWER_C2);
+        public static final Translation2d RED_TOWER_C2 = flipTranslation(BLUE_TOWER_C2);
 
         /* --------------------------------------------------------------------- */
-        /*  Neutral Zone Corners                                                  */
+        /* Neutral Zone Corners */
         /* --------------------------------------------------------------------- */
 
         public static final Translation2d NEUTRAL_ZONE_C1 = new Translation2d(
-            5.222,
-            BLUE_ALLIANCE_ZONE_C1.getY()
-        );
+                5.222,
+                BLUE_ALLIANCE_ZONE_C1.getY());
 
-        public static final Translation2d NEUTRAL_ZONE_C2 =
-            flipTranslation(NEUTRAL_ZONE_C1);
+        public static final Translation2d NEUTRAL_ZONE_C2 = flipTranslation(NEUTRAL_ZONE_C1);
 
         /* --------------------------------------------------------------------- */
-        /*  Hub Output Zones (Forbidden in Neutral Region)                        */
+        /* Hub Output Zones (Forbidden in Neutral Region) */
         /* --------------------------------------------------------------------- */
 
         public static final Translation2d BLUE_HUB_OUTPUT_C1 = new Translation2d(
-            NEUTRAL_ZONE_C1.getX(),
-            3.441
-        );
+                NEUTRAL_ZONE_C1.getX(),
+                3.441);
 
         public static final Translation2d BLUE_HUB_OUTPUT_C2 = new Translation2d(
-            5.600,
-            flipY(BLUE_HUB_OUTPUT_C1.getY())
-        );
+                5.600,
+                flipY(BLUE_HUB_OUTPUT_C1.getY()));
 
-        public static final Translation2d RED_HUB_OUTPUT_C1 =
-            flipTranslation(BLUE_HUB_OUTPUT_C1);
+        public static final Translation2d RED_HUB_OUTPUT_C1 = flipTranslation(BLUE_HUB_OUTPUT_C1);
 
-        public static final Translation2d RED_HUB_OUTPUT_C2 =
-            flipTranslation(BLUE_HUB_OUTPUT_C2);
+        public static final Translation2d RED_HUB_OUTPUT_C2 = flipTranslation(BLUE_HUB_OUTPUT_C2);
 
         /* --------------------------------------------------------------------- */
-        /*  RectangularRegion3d Definitions (2D → Infinite Z)                    */
+        /* RectangularRegion3d Definitions (2D → Infinite Z) */
         /* --------------------------------------------------------------------- */
 
-        public static final RectangularRegion3d BLUE_ALLIANCE_ZONE =
-            new RectangularRegion3d(BLUE_ALLIANCE_ZONE_C1, BLUE_ALLIANCE_ZONE_C2);
+        public static final RectangularRegion3d BLUE_ALLIANCE_ZONE = new RectangularRegion3d(BLUE_ALLIANCE_ZONE_C1,
+                BLUE_ALLIANCE_ZONE_C2);
 
-        public static final RectangularRegion3d RED_ALLIANCE_ZONE =
-            new RectangularRegion3d(RED_ALLIANCE_ZONE_C1, RED_ALLIANCE_ZONE_C2);
+        public static final RectangularRegion3d RED_ALLIANCE_ZONE = new RectangularRegion3d(RED_ALLIANCE_ZONE_C1,
+                RED_ALLIANCE_ZONE_C2);
 
-        public static final RectangularRegion3d BLUE_TOWER_ZONE =
-            new RectangularRegion3d(BLUE_TOWER_C1, BLUE_TOWER_C2);
+        public static final RectangularRegion3d BLUE_TOWER_ZONE = new RectangularRegion3d(BLUE_TOWER_C1, BLUE_TOWER_C2);
 
-        public static final RectangularRegion3d RED_TOWER_ZONE =
-            new RectangularRegion3d(RED_TOWER_C1, RED_TOWER_C2);
+        public static final RectangularRegion3d RED_TOWER_ZONE = new RectangularRegion3d(RED_TOWER_C1, RED_TOWER_C2);
 
-        public static final RectangularRegion3d NEUTRAL_ZONE =
-            new RectangularRegion3d(NEUTRAL_ZONE_C1, NEUTRAL_ZONE_C2);
+        public static final RectangularRegion3d NEUTRAL_ZONE = new RectangularRegion3d(NEUTRAL_ZONE_C1,
+                NEUTRAL_ZONE_C2);
 
-        public static final RectangularRegion3d BLUE_HUB_OUTPUT_ZONE =
-            new RectangularRegion3d(BLUE_HUB_OUTPUT_C1, BLUE_HUB_OUTPUT_C2);
+        public static final RectangularRegion3d BLUE_HUB_OUTPUT_ZONE = new RectangularRegion3d(BLUE_HUB_OUTPUT_C1,
+                BLUE_HUB_OUTPUT_C2);
 
-        public static final RectangularRegion3d RED_HUB_OUTPUT_ZONE =
-            new RectangularRegion3d(RED_HUB_OUTPUT_C1, RED_HUB_OUTPUT_C2);
+        public static final RectangularRegion3d RED_HUB_OUTPUT_ZONE = new RectangularRegion3d(RED_HUB_OUTPUT_C1,
+                RED_HUB_OUTPUT_C2);
 
         /* --------------------------------------------------------------------- */
-        /*  FieldRegion3d Definitions                                             */
+        /* FieldRegion3d Definitions */
         /* --------------------------------------------------------------------- */
 
         /** Blue alliance playable region (tower excluded) */
-        public static final CompositeRegion3d BLUE_ALLIANCE_REGION =
-            new CompositeRegion3d(
+        public static final CompositeRegion3d BLUE_ALLIANCE_REGION = new CompositeRegion3d(
                 List.of(BLUE_ALLIANCE_ZONE),
-                List.of(BLUE_TOWER_ZONE)
-            );
+                List.of(BLUE_TOWER_ZONE));
 
         /** Red alliance playable region (tower excluded) */
-        public static final CompositeRegion3d RED_ALLIANCE_REGION =
-            new CompositeRegion3d(
+        public static final CompositeRegion3d RED_ALLIANCE_REGION = new CompositeRegion3d(
                 List.of(RED_ALLIANCE_ZONE),
-                List.of(RED_TOWER_ZONE)
-            );
+                List.of(RED_TOWER_ZONE));
 
         /** Neutral playable region (hub outputs excluded) */
-        public static final CompositeRegion3d NEUTRAL_REGION =
-            new CompositeRegion3d(
+        public static final CompositeRegion3d NEUTRAL_REGION = new CompositeRegion3d(
                 List.of(NEUTRAL_ZONE),
                 List.of(
-                    BLUE_HUB_OUTPUT_ZONE,
-                    RED_HUB_OUTPUT_ZONE
-                )
-            );
+                        BLUE_HUB_OUTPUT_ZONE,
+                        RED_HUB_OUTPUT_ZONE));
+
+        public static final Translation3d BLUE_HUB_TRANSLATION = new Translation3d(
+            4.619,
+            4.035,
+            1.829
+        );
+
+        public static final Translation3d BLUE_DEPO_TRANSLATION = new Translation3d(
+            0.390,
+            5.956,
+            0.0
+        );
+
+        public static final Translation3d BLUE_OUTPOST_TRANSLATION = new Translation3d(
+            0.390,
+            0.626,
+            0.0
+        );
 
     }
 
@@ -363,12 +370,28 @@ public class Constants {
         public static final String CENTER_CAMERA_NAME = "back";
         public static final Rotation3d CENTER_CAMERA_ROTATION = new Rotation3d(0, 0, Units.degreesToRadians(0));
         public static final Translation3d CENTER_CAMERA_TRANSLATION = new Translation3d(
-                Units.inchesToMeters(10), 
-                Units.inchesToMeters(0), 
+                Units.inchesToMeters(10),
+                Units.inchesToMeters(0),
                 Units.inchesToMeters(0));
 
         public static final Vector<N3> CENTER_SINGLE_TAG_STANDARD_DEVIATION = VecBuilder.fill(4, 4, 8);
         public static final Vector<N3> CENTER_MULTI_TAG_STANDARD_DEVIATION = VecBuilder.fill(0.5, 0.5, 1);
     }
 
+    public static class RaycastConstants {
+
+        // IPs
+        public static final String JETSON_IP = "10.5.37.42";
+
+        // Ports 
+        // NOTE: THESE MUST ALL BE DIFFERENT AND BE BETWEEN 5800 and 5810!!!!
+        public static final int UDP_SENDER_PORT = 5004;
+        public static final int IMU_RESET_PORT = 5805;
+        public static final int ROBOT_DETECTION_PORT = 5806;
+        public static final int TIME_SYNC_PORT = 5807;
+
+
+        // Visualization.
+        public static final String RAYCAST_FIELD_NAME = "raycast-field";
+    }
 }

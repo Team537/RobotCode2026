@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import java.util.function.Supplier;
 
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -167,14 +168,12 @@ public class TurretSubystem extends SubsystemBase {
 
 
     public void periodic() {
-        if (!hoodClosedLoopActive) {
-            return;
+        if (hoodClosedLoopActive) {
+            double current = getHoodAngle().getRadians();
+            double output = hoodController.calculate(current);
+
+            pitchServo.setSpeed(output);
         }
-
-        double current = getHoodAngle().getRadians();
-        double output = hoodController.calculate(current);
-
-        pitchServo.setSpeed(output);
     }
 
     // --------------------------------------------------------------------

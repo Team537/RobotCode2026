@@ -10,7 +10,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Filesystem;
@@ -264,7 +263,7 @@ public class Constants {
 
         public static final int PITCH_SERVO_ID = 1;
        
-        public static final int PITCH_CANCODER_ID = 2;
+        public static final int PITCH_CANCODER_ID = 44;
 
         // PID
         public static final double KP = 2.5;
@@ -274,9 +273,9 @@ public class Constants {
         public static final double KV = 2.36;
         public static final double KA = 0.18;
 
-        public static final double PITCH_KP = 1;
-        public static final double PITCH_KI = 1;
-        public static final double PITCH_KD = 1;
+        public static final double PITCH_KP = 1.0;
+        public static final double PITCH_KI = 0.0;
+        public static final double PITCH_KD = 0.0;
 
         public static final boolean MOTOR_INVERTED = false;
 
@@ -284,10 +283,11 @@ public class Constants {
         public static final double TURN_TABLE_RATIO = 24.0 / 200.0;
         public static final double ENCODER_FACTOR = 1.0 / (TURRET_GEAR_REDUCTION * TURN_TABLE_RATIO);
 
-        public static final double PITCH_ENCODER_FACTOR = 1.0;
+        public static final double PITCH_GEAR_RATIO = (447.2 / 26.0);
+        public static final double PITCH_ENCODER_FACTOR = PITCH_GEAR_RATIO / (2.0 * Math.PI);
 
-        public static final Rotation2d ENCODER_MAX_PITCH = Rotation2d.fromDegrees(360.0);
-        public static final Rotation2d ENCODER_MIN_PITCH = Rotation2d.fromDegrees(0.0);
+        public static final Rotation2d ENCODER_MAX_PITCH = Rotation2d.fromDegrees(48.50);
+        public static final Rotation2d ENCODER_MIN_PITCH = Rotation2d.fromDegrees(7.50);
 
         public static final Rotation2d HOOD_STOW_POSITION = Rotation2d.fromDegrees(90);
 

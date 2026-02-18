@@ -4,7 +4,8 @@ import java.util.function.Supplier;
 
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
-
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
+import com.ctre.phoenix6.controls.Follower;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -15,6 +16,7 @@ import frc.robot.Configs;
 import frc.robot.Constants;
 import frc.robot.util.turret.TurretSolver;
 import frc.robot.util.turret.TurretUtil;
+
 
 /**
  * Subsystem responsible for controlling the shooter flywheel(s).
@@ -37,6 +39,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
     /** TalonFX driving the shooter wheel(s). */
     private final TalonFX shooterMotor;
+    private final TalonFX followerShooterMotor;
 
     // --------------------------------------------------------------------
     // Internal State
@@ -60,6 +63,11 @@ public class ShooterSubsystem extends SubsystemBase {
         shooterMotor
             .getConfigurator()
             .apply(Configs.Shooter.SHOOTER_CONFIGURATION);
+
+        followerShooterMotor = new TalonFX(Constants.Shooter.FOLLOWER_SHOOTER_ID);
+        followerShooterMotor
+            .getConfigurator()
+            .apply(Configs.Shooter.SHOOTER_CONFIGURATION);
     }
 
     // --------------------------------------------------------------------
@@ -71,10 +79,11 @@ public class ShooterSubsystem extends SubsystemBase {
      *
      * @param velocity desired wheel velocity in meters per second
      */
+
     public void setWheelVelocity(double velocity) {
         shooterMotor.setControl(new VelocityVoltage(velocity));
+        followerShooterMotor.setControl(new Follower(Constants.Shooter.SHOOTER_ID,MotorAlignmentValue.Opposed));
     }
-
     /**
      * Commands the shooter flywheel so the ball with shoot out at the specified velocity
      *

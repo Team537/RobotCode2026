@@ -326,6 +326,8 @@ public class Constants {
     public static final class Shooter {
 
         public static final int SHOOTER_ID = 53;
+        public static final int FOLLOWER_SHOOTER_ID = 1;
+
         public static final int CURRENT_LIMIT = 75;
         public static final int CURRENT_LOWER_LIMIT = 25; 
         public static final double CURRENT_LOWER_TIME = .5;

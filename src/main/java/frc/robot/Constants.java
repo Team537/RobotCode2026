@@ -274,7 +274,7 @@ public class Constants {
 
         public static final double TURRET_GEAR_REDUCTION = 5.0;
         public static final double TURN_TABLE_RATIO = 24.0 / 200.0;
-        public static final double ENCODER_FACTOR = 1.0 / (TURRET_GEAR_REDUCTION * TURN_TABLE_RATIO);
+        public static final double ENCODER_FACTOR = (TURRET_GEAR_REDUCTION * TURN_TABLE_RATIO) / (2.0 * Math.PI);
 
         public static final double OUTPUT_RANGE_MAX = 1;
         public static final double OUTPUT_RANGE_MIN = -1;
@@ -320,7 +320,7 @@ public class Constants {
 
         public static final double GEAR_RATIO = 1.0;
         public static final double WHEEL_RADIUS = 1.985; 
-        public static final double ENCOER_FACTOR = 2.0 * Math.PI * WHEEL_RADIUS / GEAR_RATIO;
+        public static final double ENCOER_FACTOR = GEAR_RATIO / (2.0 * Math.PI * WHEEL_RADIUS) ;
 
         public static final double TOLERANCE = 0.1; // Meters per second
 
@@ -350,7 +350,7 @@ public class Constants {
 
         public static final double TRANSFER_GEAR_REDUCTION = 1.0;
         public static final double TRANSFER_WHEEL_RADIUS = 1.0;
-        public static final double ENCODER_FACTOR = 2.0 * Math.PI * TRANSFER_WHEEL_RADIUS / TRANSFER_GEAR_REDUCTION;
+        public static final double ENCODER_FACTOR = TRANSFER_GEAR_REDUCTION / (2.0 * Math.PI * TRANSFER_WHEEL_RADIUS);
 
         public static final boolean MOTOR_INVERTED = false;
 

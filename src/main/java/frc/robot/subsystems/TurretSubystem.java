@@ -262,17 +262,28 @@ public class TurretSubystem extends SubsystemBase {
         Supplier<Pose2d> robotPoseSupplier,
         Supplier<ChassisSpeeds> robotVelocitySupplier
     ) {
-        return getAngleCommand(() -> {
-            TurretSolver.State solution =
-                TurretSolver.solve(
-                    robotPoseSupplier.get(),
-                    robotVelocitySupplier.get(),
-                    targetTranslationSupplier.get(),
-                    Constants.Turret.SOLVER_CONFIG
-                );
-
-            return solution.getYaw();
-        });
+        return getAngleCommand(
+            () -> {
+                TurretSolver.State solution =
+                    TurretSolver.solve(
+                        robotPoseSupplier.get(),
+                        robotVelocitySupplier.get(),
+                        targetTranslationSupplier.get(),
+                        Constants.Turret.SOLVER_CONFIG
+                    );
+                return solution.getYaw();
+            },
+            () -> {
+               TurretSolver.State solution =
+                    TurretSolver.solve(
+                        robotPoseSupplier.get(),
+                        robotVelocitySupplier.get(),
+                        targetTranslationSupplier.get(),
+                        Constants.Turret.SOLVER_CONFIG
+                    );
+                return solution.getPitch(); 
+            }
+        );
     }
 
     // --------------------------------------------------------------------

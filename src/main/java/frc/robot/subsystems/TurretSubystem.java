@@ -51,8 +51,8 @@ public class TurretSubystem extends SubsystemBase {
 
     /** Brushless motor driving the turret rotation. */
     private final TalonFX turretMotor;
-    private final PWM pitchServo = new PWM(Constants.Turret.PITCH_SERVO_ID);
-    private final CANcoder pitchEncoder = new CANcoder(Constants.Turret.PITCH_CANCODER_ID);
+    private final PWM pitchServo;
+    private final CANcoder pitchEncoder;
 
     private volatile double hoodSetpointRad = Constants.Turret.MIN_PITCH.getRadians();
     private volatile boolean hoodClosedLoopActive = false;
@@ -71,6 +71,9 @@ public class TurretSubystem extends SubsystemBase {
     private boolean atTarget = false;
     private boolean atHoodTarget = false;
 
+    private int accumulatedRotations;
+    private double lastRawPitch;
+
     // --------------------------------------------------------------------
     // Construction / Configuration
     // --------------------------------------------------------------------
@@ -81,6 +84,15 @@ public class TurretSubystem extends SubsystemBase {
     public TurretSubystem() {
         turretMotor = new TalonFX(Constants.Turret.TURRET_ID);
         turretMotor.getConfigurator().apply(Configs.TURRET_CONFIG);
+        pitchServo = new PWM(Constants.Turret.PITCH_SERVO_ID);
+        pitchEncoder = new CANcoder(Constants.Turret.PITCH_CANCODER_ID);
+
+        lastRawPitch = pitchEncoder.getPosition().getValueAsDouble();
+        if (lastRawPitch < 0.5) {
+            accumulatedRotations = 0;
+        } else {
+            accumulatedRotations = -1;
+        }
     }
 
     // --------------------------------------------------------------------
@@ -111,8 +123,8 @@ public class TurretSubystem extends SubsystemBase {
     }
 
     public void setHoodAngle(Rotation2d angle) {
-        double minR = Constants.Turret.ENCODER_MIN_PITCH.getRadians();
-        double maxR = Constants.Turret.ENCODER_MAX_PITCH.getRadians();
+        double minR = Constants.Turret.MIN_PITCH.getRadians();
+        double maxR = Constants.Turret.MAX_PITCH.getRadians();
 
         double clamped = Math.max(minR, Math.min(maxR, angle.getRadians()));
 
@@ -143,7 +155,9 @@ public class TurretSubystem extends SubsystemBase {
 
 
     public Rotation2d getHoodAngle() {
-        return Rotation2d.fromRadians(pitchEncoder.getPosition().getValueAsDouble() * Constants.Turret.PITCH_ENCODER_FACTOR);
+        double continuousRotations = accumulatedRotations + pitchEncoder.getPosition().getValueAsDouble();
+        return Rotation2d.fromRadians(continuousRotations * Constants.Turret.PITCH_ENCODER_FACTOR)
+            .plus(Constants.Turret.MIN_PITCH);
     }
 
     /**
@@ -174,6 +188,15 @@ public class TurretSubystem extends SubsystemBase {
 
             pitchServo.setSpeed(output);
         }
+
+        double rawPitch = pitchEncoder.getPosition().getValueAsDouble();
+        if (rawPitch - lastRawPitch > 0.5) {
+            accumulatedRotations--;
+        } else if (lastRawPitch - rawPitch > 0.5) {
+            accumulatedRotations++;
+        }
+        lastRawPitch = rawPitch;
+
     }
 
     // --------------------------------------------------------------------

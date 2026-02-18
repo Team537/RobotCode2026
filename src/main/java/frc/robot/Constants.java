@@ -286,10 +286,10 @@ public class Constants {
         public static final double PITCH_GEAR_RATIO = (447.2 / 26.0);
         public static final double PITCH_ENCODER_FACTOR = PITCH_GEAR_RATIO / (2.0 * Math.PI);
 
-        public static final Rotation2d ENCODER_MAX_PITCH = Rotation2d.fromDegrees(48.50);
-        public static final Rotation2d ENCODER_MIN_PITCH = Rotation2d.fromDegrees(7.50);
+        public static final Rotation2d MAX_PITCH = Rotation2d.fromDegrees(48.50);
+        public static final Rotation2d MIN_PITCH = Rotation2d.fromDegrees(7.50);
 
-        public static final Rotation2d HOOD_STOW_POSITION = Rotation2d.fromDegrees(90);
+        public static final Rotation2d HOOD_STOW_POSITION = MIN_PITCH;
 
         public static final double OUTPUT_RANGE_MAX = 1;
         public static final double OUTPUT_RANGE_MIN = -1;
@@ -310,8 +310,6 @@ public class Constants {
             0.0,
             0.537 //537!!!
         );
-        public static final Rotation2d MIN_PITCH = Rotation2d.fromDegrees(70.0);
-        public static final Rotation2d MAX_PITCH = Rotation2d.fromDegrees(70.0);
         public static final TurretSolver.Config SOLVER_CONFIG = new TurretSolver.Config(
             Field.GRAVITY,
             0.02,

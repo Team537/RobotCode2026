@@ -304,8 +304,9 @@ public class Constants {
         public static final double KI = 0;
         public static final double KD = 0.2;
 
-        public static final double GEAR_RATIO = 20;
-        public static final double ENCODER_FACTOR = Math.PI * 2 / GEAR_RATIO;
+        public static final double GEAR_RATIO = 4.0;
+        public static final double ROLLER_RADIUS = 0.8125; 
+        public static final double ENCODER_FACTOR = GEAR_RATIO / (2.0 * Math.PI * ROLLER_RADIUS);
 
         public static final InvertedValue MOTOR_INVERTED = InvertedValue.CounterClockwise_Positive;
         public static final boolean MOTOR_INVERTED_NEO = false;

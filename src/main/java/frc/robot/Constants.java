@@ -283,7 +283,7 @@ public class Constants {
         public static final double KA = 0.0;
 
         public static final double PITCH_KP = 3.0;
-        public static final double PITCH_KI = 2.0;
+        public static final double PITCH_KI = 0.0;
         public static final double PITCH_KD = 0.0;
 
         public static final boolean MOTOR_INVERTED = true;

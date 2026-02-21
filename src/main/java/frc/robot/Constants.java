@@ -1,8 +1,10 @@
 package frc.robot;
 
 import java.io.File;
-import org.apache.commons.text.similarity.LevenshteinDistance;
 import java.util.List;
+
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
@@ -439,4 +441,54 @@ public class Constants {
         // Visualization.
         public static final String RAYCAST_FIELD_NAME = "raycast-field";
     }
+
+    public static class Intake {
+
+        public static final int INTAKE_ID = 54;
+        
+        public static final int CURRENT_LIMIT = 75;
+        public static final int CURRENT_LOWER_LIMIT = 40;
+        public static final double CURRENT_LOWER_TIME = 0.5;
+
+
+        public static final double GEAR_RATIO = 4.0;
+        public static final double ENCODER_FACTOR = GEAR_RATIO / (2.0 * Math.PI);
+
+        public static final InvertedValue MOTOR_INVERTED = InvertedValue.CounterClockwise_Positive;
+
+        public static final double INTAKE_POWER = 1.0; //percent of max speed
+    }
+
+    public static class IntakePivot {
+
+        public static final int INTAKE_ID = 55;
+        public static final int CANCODER_ID = 43;
+
+        public static final int CURRENT_LIMIT = 75;
+        public static final int CURRENT_LOWER_LIMIT = 40;
+        public static final double CURRENT_LOWER_TIME = .5;
+
+        public static final double KP = 3.0; // Volts per radian
+        public static final double KI = 0.0;
+        public static final double KD = 0.0;
+        public static final double KS = 0.0;
+        public static final double KV = 0.0;
+        public static final double KA = 0.0;
+
+        public static final double GEAR_RATIO = 54.0;
+        public static final double ROTOR_TO_SENSOR_RATIO = GEAR_RATIO;
+        public static final double SENSOR_TO_MECHANISM_RATIO = 1.0 / (2.0 * Math.PI);
+
+        public static final InvertedValue MOTOR_INVERTED = InvertedValue.CounterClockwise_Positive;
+
+        public static final Rotation2d INTAKE_START_POS = Rotation2d.fromDegrees(125.0); //Prevents the intake from going beyond its start positon
+        public static final Rotation2d INTAKE_MIN_ANGLE = Rotation2d.fromDegrees(0);
+        public static final Rotation2d INTAKE_MAX_ANGLE = INTAKE_START_POS; //Prevents the robot from going beyond its maxiumum angle
+        public static final Rotation2d INTAKE_RAISED_ANGLE = Rotation2d.fromDegrees(110.0);
+        public static final Rotation2d INTAKE_DEPLOYED_ANGLE = INTAKE_MIN_ANGLE;        
+
+        public static final Rotation2d INTAKE_TOLERANCE_ANGLE = Rotation2d.fromDegrees(3);
+        
+    }
+
 }

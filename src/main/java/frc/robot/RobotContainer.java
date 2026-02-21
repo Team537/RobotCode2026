@@ -23,6 +23,7 @@ import frc.robot.commands.swerve.CompositeDriveCommand;
 import frc.robot.commands.swerve.DriveToSequenceCommand;
 import frc.robot.commands.swerve.ManualRotationVelocityDirective;
 import frc.robot.commands.swerve.ManualTranslationVelocityDirective;
+import frc.robot.subsystems.*;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.TurretSubsystem;
@@ -44,6 +45,8 @@ public class RobotContainer {
   TurretSubsystem turretSubsystem;
   ShooterSubsystem shooterSubsystem;
   TransferSubsystem transferSubsystem;
+  IntakePivotSubsystem intakePivot;
+  IntakeRollerSubsystem intakeRoller;
   Raycast raycast;
 
   private final Field2d targetingField = new Field2d();
@@ -67,6 +70,8 @@ public class RobotContainer {
 
   public RobotContainer() {
     driveSubsystem = new DriveSubsystem();
+    intakePivot = new IntakePivotSubsystem();
+    intakeRoller = new IntakeRollerSubsystem();
     setupSmartDashboard();
     configureBindings();
     turretSubsystem = new TurretSubsystem();
@@ -344,6 +349,8 @@ public class RobotContainer {
 
   public void scheduleTeleOp() {
 
+    // DISABLED because of errors during drive
+
     // Setup the translational directive for drive subsystem
     TranslationDirective manualTranslationVelocityDirective = new ManualTranslationVelocityDirective(
         driveSubsystem,
@@ -388,10 +395,18 @@ public class RobotContainer {
       transferSubsystem.getLoadCommand()
     ).onTrue(
       shooterSubsystem.getWheelVelocityCommand(() -> SmartDashboard.getNumber("Shooter Speed",0.0))
+    ).onTrue(
+      intakePivot.deployIntakeCommand()
+    ).onTrue(
+      intakeRoller.getIntakeCommand()
     ).onFalse(
       transferSubsystem.getStopCommand()
     ).onFalse(
       shooterSubsystem.getStopCommand()
+    ).onFalse(
+      intakePivot.raiseIntakeCommand()
+    ).onFalse(
+      intakeRoller.getStopCommand()
     );
 
   }

@@ -11,6 +11,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -261,9 +262,16 @@ public class RobotContainer {
           teamNumber = -1;
         }
 
-        Optional<RobotDetection> detectedTranslation = raycast.getRobot(teamNumber, 1);
+        // Get the robot using the alliance if possible. We will never want to target a robot of the opposing alliance.
+        Optional<RobotDetection> detectedRobot;
+        if (alliance.isPresent()) {
+          detectedRobot = raycast.getRobot(teamNumber, alliance.get(), 1);
+        } else {
+          detectedRobot = raycast.getRobot(teamNumber, 1);
+        }
+
         if (teamNumber > 0) {
-          detectedTranslation = Optional.empty();
+          detectedRobot = Optional.empty();
         }
 
         // Fallback info
@@ -272,8 +280,8 @@ public class RobotContainer {
         double fallbackY = SmartDashboard.getNumber(basePath + "FallbackY", 0.0);
         double targetHeight = SmartDashboard.getNumber(basePath + "TargetHeight", 0.25);
 
-        if (detectedTranslation.isPresent()) {
-          return detectedTranslation.get().getPoseTranslation3d();
+        if (detectedRobot.isPresent()) {
+          return detectedRobot.get().getPoseTranslation3d();
         } else if (useFallback) {
           Translation3d fallbackTarget = new Translation3d(fallbackX, fallbackY, targetHeight);
           return FieldUtil.flipIfRed(fallbackTarget);

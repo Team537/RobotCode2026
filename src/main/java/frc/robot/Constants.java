@@ -271,6 +271,28 @@ public class Constants {
 
         public static final Vector<N3> CENTER_SINGLE_TAG_STANDARD_DEVIATION = VecBuilder.fill(4, 4, 8);
         public static final Vector<N3> CENTER_MULTI_TAG_STANDARD_DEVIATION = VecBuilder.fill(0.5, 0.5, 1);
+        
+        // Left Camera Constants
+        public static final String LEFT_CAMERA_NAME = "left";
+        public static final Rotation3d LEFT_CAMERA_ROTATION = new Rotation3d(0, 0, Units.degreesToRadians(-90));
+        public static final Translation3d LEFT_CAMERA_TRANSLATION = new Translation3d(
+                Units.inchesToMeters(10),
+                Units.inchesToMeters(0),
+                Units.inchesToMeters(0));
+
+        public static final Vector<N3> LEFT_SINGLE_TAG_STANDARD_DEVIATION = VecBuilder.fill(4, 4, 8);
+        public static final Vector<N3> LEFT_MULTI_TAG_STANDARD_DEVIATION = VecBuilder.fill(0.5, 0.5, 1);
+
+        // Right Camera Constants (OLD / EXAMPLE)
+        public static final String RIGHT_CAMERA_NAME = "right";
+        public static final Rotation3d RIGHT_CAMERA_ROTATION = new Rotation3d(0, 0, Units.degreesToRadians(90));
+        public static final Translation3d RIGHT_CAMERA_TRANSLATION = new Translation3d(
+                Units.inchesToMeters(10),
+                Units.inchesToMeters(0),
+                Units.inchesToMeters(0));
+
+        public static final Vector<N3> RIGHT_SINGLE_TAG_STANDARD_DEVIATION = VecBuilder.fill(4, 4, 8);
+        public static final Vector<N3> RIGHT_MULTI_TAG_STANDARD_DEVIATION = VecBuilder.fill(0.5, 0.5, 1);
     }
 
     public static class RaycastConstants {

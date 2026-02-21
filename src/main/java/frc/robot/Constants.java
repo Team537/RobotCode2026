@@ -323,7 +323,7 @@ public class Constants {
         public static final int CURRENT_LOWER_LIMIT = 25;
         public static final double CURRENT_LOWER_TIME = .5;
 
-        public static final double KP = 60.0; // 60 works
+        public static final double KP = 10.0; // 60 works
         public static final double KI = 0.0;
         public static final double KD = 0.0;
         public static final double KS = 0.0;

@@ -43,7 +43,7 @@ import frc.robot.util.turret.TurretUtil;
  * <p>All angles are represented using {@link Rotation2d}. Internally, the turret
  * is controlled in robot-relative coordinates.
  */
-public class TurretSubystem extends SubsystemBase {
+public class TurretSubsystem extends SubsystemBase {
 
     // --------------------------------------------------------------------
     // Hardware
@@ -71,9 +71,6 @@ public class TurretSubystem extends SubsystemBase {
     private boolean atTarget = false;
     private boolean atHoodTarget = false;
 
-    private int accumulatedRotations;
-    private double lastRawPitch;
-
     // --------------------------------------------------------------------
     // Construction / Configuration
     // --------------------------------------------------------------------
@@ -81,19 +78,12 @@ public class TurretSubystem extends SubsystemBase {
     /**
      * Creates the turret subsystem and configures the motor controller.
      */
-    public TurretSubystem() {
+    public TurretSubsystem() {
         turretMotor = new TalonFX(Constants.Turret.TURRET_ID);
         turretMotor.getConfigurator().apply(Configs.TURRET_CONFIG);
         resetTurretAngle(Constants.Turret.START_POSITION);
         pitchServo = new PWM(Constants.Turret.PITCH_SERVO_ID);
         pitchEncoder = new CANcoder(Constants.Turret.PITCH_CANCODER_ID);
-
-        lastRawPitch = pitchEncoder.getPosition().getValueAsDouble();
-        if (lastRawPitch < 0.5) {
-            accumulatedRotations = 0;
-        } else {
-            accumulatedRotations = -1;
-        }
     }
 
     // --------------------------------------------------------------------
@@ -156,8 +146,7 @@ public class TurretSubystem extends SubsystemBase {
 
 
     public Rotation2d getHoodAngle() {
-        double continuousRotations = accumulatedRotations + pitchEncoder.getPosition().getValueAsDouble();
-        return Rotation2d.fromRadians(continuousRotations * Constants.Turret.PITCH_ENCODER_FACTOR)
+        return Rotation2d.fromRadians(pitchEncoder.getPosition().getValueAsDouble() * Constants.Turret.PITCH_ENCODER_FACTOR)
             .plus(Constants.Turret.MIN_PITCH);
     }
 
@@ -191,14 +180,6 @@ public class TurretSubystem extends SubsystemBase {
 
             pitchServo.setSpeed(output);
         }
-
-        double rawPitch = pitchEncoder.getPosition().getValueAsDouble();
-        if (rawPitch - lastRawPitch > 0.5) {
-            accumulatedRotations--;
-        } else if (lastRawPitch - rawPitch > 0.5) {
-            accumulatedRotations++;
-        }
-        lastRawPitch = rawPitch;
 
     }
 

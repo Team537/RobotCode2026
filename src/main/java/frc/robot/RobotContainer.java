@@ -24,7 +24,7 @@ import frc.robot.commands.swerve.ManualRotationVelocityDirective;
 import frc.robot.commands.swerve.ManualTranslationVelocityDirective;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
-import frc.robot.subsystems.TurretSubystem;
+import frc.robot.subsystems.TurretSubsystem;
 import frc.robot.subsystems.TransferSubsystem;
 import frc.robot.subsystems.vision.Raycast;
 import frc.robot.util.dashboard.AdjustableDouble;
@@ -39,7 +39,7 @@ public class RobotContainer {
   XboxController operatorController = new XboxController(1);
 
   DriveSubsystem driveSubsystem;
-  TurretSubystem turretSubsystem;
+  TurretSubsystem turretSubsystem;
   ShooterSubsystem shooterSubsystem;
   TransferSubsystem transferSubsystem;
   Raycast raycast;
@@ -67,7 +67,7 @@ public class RobotContainer {
     driveSubsystem = new DriveSubsystem();
     setupSmartDashboard();
     configureBindings();
-    turretSubsystem = new TurretSubystem();
+    turretSubsystem = new TurretSubsystem();
     shooterSubsystem = new ShooterSubsystem();
     transferSubsystem = new TransferSubsystem();
 

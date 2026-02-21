@@ -293,7 +293,8 @@ public class Constants {
     }
 
     public static class Intake {
-        public static final int INTAKE_LEAD_ID = 54;
+
+        public static final int INTAKE_ID = 54;
         
         public static final int CURRENT_LIMIT = 75;
         public static final int CURRENT_LOWER_LIMIT = 25;
@@ -303,8 +304,9 @@ public class Constants {
         public static final double KI = 0;
         public static final double KD = 0.2;
 
-        public static final double GEAR_RATIO = 20;
-        public static final double ENCODER_FACTOR = Math.PI * 2 / GEAR_RATIO;
+        public static final double GEAR_RATIO = 4.0;
+        public static final double ROLLER_RADIUS = 0.8125; 
+        public static final double ENCODER_FACTOR = GEAR_RATIO / (2.0 * Math.PI * ROLLER_RADIUS);
 
         public static final InvertedValue MOTOR_INVERTED = InvertedValue.CounterClockwise_Positive;
         public static final boolean MOTOR_INVERTED_NEO = false;
@@ -313,7 +315,9 @@ public class Constants {
     }
 
     public static class IntakePivot {
+
         public static final int INTAKE_ID = 55;
+        public static final int CANCODER_ID = 43;
 
         public static final int CURRENT_LIMIT = 75;
         public static final int CURRENT_LOWER_LIMIT = 25;
@@ -326,13 +330,14 @@ public class Constants {
         public static final double KV = 0.0;
         public static final double KA = 0.0;
 
-        public static final double GEAR_RATIO = 75.0;
-        public static final double ENCODER_FACTOR = GEAR_RATIO;
+        public static final double GEAR_RATIO = 90.0;
+        public static final double ROTOR_TO_SENSOR_RATIO = GEAR_RATIO;
+        public static final double SENSOR_TO_MECHANISM_RATIO = 1.0 / (2.0 * Math.PI);
 
         public static final InvertedValue MOTOR_INVERTED = InvertedValue.CounterClockwise_Positive;
 
-        public static final Rotation2d INTAKE_START_POS = Rotation2d.fromDegrees(118); //Prevents the intake from going beyond its start positon
-        public static final Rotation2d INTAKE_MIN_ANGLE = Rotation2d.fromDegrees(1);
+        public static final Rotation2d INTAKE_START_POS = Rotation2d.fromDegrees(117); //Prevents the intake from going beyond its start positon
+        public static final Rotation2d INTAKE_MIN_ANGLE = Rotation2d.fromDegrees(0);
         public static final Rotation2d INTAKE_MAX_ANGLE = INTAKE_START_POS; //Prevents the robot from going beyond its maxiumum angle
         public static final Rotation2d INTAKE_RAISED_ANGLE = Rotation2d.fromDegrees(90.0);
         public static final Rotation2d INTAKE_DEPLOYED_ANGLE = INTAKE_MIN_ANGLE;        

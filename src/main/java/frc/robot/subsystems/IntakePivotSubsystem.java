@@ -35,7 +35,7 @@ public class IntakePivotSubsystem extends SubsystemBase {
             System.out.println("IntakePivotSubsystem: TalonFX configured successfully");
         }
         
-        intake.setPosition(Constants.IntakePivot.INTAKE_START_POS.getRotations());
+        intake.setPosition(Constants.IntakePivot.INTAKE_START_POS.getRadians());
         System.out.println("IntakePivotSubsystem: Initial position set to " + Constants.IntakePivot.INTAKE_START_POS.getDegrees() + " degrees");
     }
 
@@ -55,7 +55,7 @@ public class IntakePivotSubsystem extends SubsystemBase {
             System.out.println("IntakePivot: Clamped to MIN angle: " + angle.getDegrees());
         }
 
-        angleRequest.Position = angle.getRotations();
+        angleRequest.Position = angle.getRadians();
         intake.setControl(angleRequest);
     }
 
@@ -71,9 +71,8 @@ public class IntakePivotSubsystem extends SubsystemBase {
 
     //Returns the angle as a double
     public Rotation2d getAngle(){
-        return Rotation2d.fromRotations(intake.getPosition().getValueAsDouble());
+        return Rotation2d.fromRadians(intake.getPosition().getValueAsDouble());
     }
-
     
     //Command for setting hte intake angle
     public Command setIntakeAngleCommand(Rotation2d angle){

@@ -19,6 +19,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PWM;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -165,6 +166,11 @@ public class TurretSubsystem extends SubsystemBase {
         turretMotor.setPosition(rotation.getRadians());
     }
 
+    public void stopTurretMotor() {
+        turretMotor.stopMotor();
+    }
+
+
     public void stopHoodServo() {
         hoodClosedLoopActive = false;
         pitchServo.setSpeed(0);
@@ -174,11 +180,13 @@ public class TurretSubsystem extends SubsystemBase {
     public void periodic() {
 
         SmartDashboard.putNumber("Current Turret Angle", getAngle().getDegrees());
-        if (hoodClosedLoopActive) {
+        SmartDashboard.putNumber("Current Hood Angle", getHoodAngle().getDegrees());
+        SmartDashboard.putNumber("Current Hood Speed", pitchServo.getSpeed());
+        if (hoodClosedLoopActive && DriverStation.isEnabled()) {
             double current = getHoodAngle().getRadians();
             double output = hoodController.calculate(current);
 
-            pitchServo.setSpeed(output);
+            pitchServo.setSpeed((Constants.Turret.PITCH_INVERTED ? -1.0 : 1.0) * output);
         }
 
     }
@@ -227,7 +235,10 @@ public class TurretSubsystem extends SubsystemBase {
                     ) < Constants.Turret.HOOD_TOLERANCE.getRadians();
             },
 
-            interrupted -> atTarget = false,
+            interrupted -> {
+                atTarget = false;
+                stopHoodServo();
+            },
             () -> false,
             this
         );

@@ -65,11 +65,13 @@ public class ShooterSubsystem extends SubsystemBase {
         leadShooterMotor
             .getConfigurator()
             .apply(Configs.Shooter.SHOOTER_CONFIGURATION);
+        leadShooterMotor.setPosition(0.0);
 
         followerShooterMotor = new TalonFX(Constants.Shooter.FOLLOWER_SHOOTER_ID);
         followerShooterMotor
             .getConfigurator()
             .apply(Configs.Shooter.SHOOTER_CONFIGURATION);
+        followerShooterMotor.setPosition(0.0);
     }
 
     // --------------------------------------------------------------------
@@ -84,7 +86,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
     public void setWheelVelocity(double velocity) {
         leadShooterMotor.setControl(new VelocityVoltage(velocity));
-        followerShooterMotor.setControl(new Follower(Constants.Shooter.FOLLOWER_SHOOTER_ID,MotorAlignmentValue.Opposed));
+        followerShooterMotor.setControl(new Follower(Constants.Shooter.LEAD_SHOOTER_ID,MotorAlignmentValue.Opposed));
     }
     /**
      * Commands the shooter flywheel so the ball with shoot out at the specified velocity
@@ -157,7 +159,7 @@ public class ShooterSubsystem extends SubsystemBase {
      * @param velocitySupplier supplies the desired shooter velocity
      * @return a continuously running shooter velocity command
      */
-    public Command getVelocityCommand(
+    public Command getBallVelocityCommand(
         Supplier<Double> velocitySupplier
     ) {
         return new FunctionalCommand(
@@ -216,7 +218,7 @@ public class ShooterSubsystem extends SubsystemBase {
         Supplier<Pose2d> robotPoseSupplier,
         Supplier<ChassisSpeeds> robotVelocitySupplier
     ) {
-        return getVelocityCommand(() -> {
+        return getBallVelocityCommand(() -> {
             TurretSolver.State solution =
                 TurretSolver.solve(
                     robotPoseSupplier.get(),
@@ -245,6 +247,7 @@ public class ShooterSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         SmartDashboard.putNumber("Current Wheel Velocity",getWheelVelocity());
+        SmartDashboard.putNumber("Current Wheel Position",leadShooterMotor.getPosition().getValueAsDouble());
     }
 
 }

@@ -77,7 +77,7 @@ public class Raycast {
         try {
             this.robotReceiver = new UDPReceiver<>(RaycastConstants.ROBOT_DETECTION_PORT, RobotDetection[].class);
             this.udpSender = new UDPSender(RaycastConstants.JETSON_IP, RaycastConstants.UDP_SENDER_PORT);
-            this.tcpImuResetSender = new TCPImuResetSender(RaycastConstants.JETSON_IP, RaycastConstants.IMU_RESET_PORT);
+            //this.tcpImuResetSender = new TCPImuResetSender(RaycastConstants.JETSON_IP, RaycastConstants.IMU_RESET_PORT);
         } catch (Exception e) {
             System.err.println("!!WARNING!! RIO COULDN'T CONNECT TO THE JETSON! ROBOT DETECTION FUNCTIONALITY WON'T WORK!!");
             this.setupFailed = true;

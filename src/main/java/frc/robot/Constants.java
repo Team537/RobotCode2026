@@ -280,8 +280,8 @@ public class Constants {
         public static final double KV = 0.0;
         public static final double KA = 0.0;
 
-        public static final double PITCH_KP = 1.0;
-        public static final double PITCH_KI = 0.0;
+        public static final double PITCH_KP = 3.0;
+        public static final double PITCH_KI = 2.0;
         public static final double PITCH_KD = 0.0;
 
         public static final boolean MOTOR_INVERTED = true;
@@ -290,11 +290,13 @@ public class Constants {
         public static final double TURN_TABLE_RATIO = 24.0 / 200.0;
         public static final double ENCODER_FACTOR = (TURRET_GEAR_REDUCTION) / (2.0 * Math.PI * TURN_TABLE_RATIO);
 
-        public static final double PITCH_GEAR_RATIO = (447.2 / 26.0);
-        public static final double PITCH_ENCODER_FACTOR = PITCH_GEAR_RATIO / (2.0 * Math.PI);
+        public static final double PITCH_GEAR_RATIO = (26.0 / 447.2);
+        public static final double PITCH_ENCODER_FACTOR = PITCH_GEAR_RATIO * (2.0 * Math.PI);
 
-        public static final Rotation2d MAX_PITCH = Rotation2d.fromDegrees(48.50);
-        public static final Rotation2d MIN_PITCH = Rotation2d.fromDegrees(7.50);
+        public static final boolean PITCH_INVERTED = true;
+
+        public static final Rotation2d MAX_PITCH = Rotation2d.fromDegrees(45.0);
+        public static final Rotation2d MIN_PITCH = Rotation2d.fromDegrees(5.00);;
 
         public static final Rotation2d HOOD_STOW_POSITION = MIN_PITCH;
 
@@ -337,12 +339,12 @@ public class Constants {
         public static final int CURRENT_LOWER_LIMIT = 25; 
         public static final double CURRENT_LOWER_TIME = .5;
 
-        public static final double KP = 0;
+        public static final double KP = 1.5;
         public static final double KI = 0;
         public static final double KD = 0;
-        public static final double KS = 0.0;
-        public static final double KV = 2.3;
-        public static final double KA = 0.3;
+        public static final double KS = 0.13;
+        public static final double KV = 0.25;
+        public static final double KA = 0.46;
 
         public static final double GEAR_RATIO = 20.0 / 24.0;
         public static final double WHEEL_RADIUS = 0.050419; 
@@ -369,12 +371,12 @@ public class Constants {
         public static final int CURRENT_LOWER_LIMIT = 25;
         public static final double CURRENT_LOWER_TIME = 0.5;
 
-        public static final double KP = 0.7;
+        public static final double KP = 0.0;
         public static final double KI = 0.0;
         public static final double KD = 0.0;
         public static final double KS = 0.0;
-        public static final double KV = 2.36;
-        public static final double KA = 0.18;
+        public static final double KV = 2.3;
+        public static final double KA = 0.3;
 
         public static final double TRANSFER_GEAR_REDUCTION = 1.0;
         public static final double TRANSFER_WHEEL_RADIUS = 0.0254;

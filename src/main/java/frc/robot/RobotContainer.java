@@ -28,6 +28,7 @@ import frc.robot.util.field.Alliance;
 import frc.robot.util.field.FieldUtil;
 import frc.robot.util.swerve.requests.RotationDirective;
 import frc.robot.util.swerve.requests.TranslationDirective;
+import frc.robot.util.vision.detections.RobotDetection;
 
 public class RobotContainer {
 
@@ -260,9 +261,9 @@ public class RobotContainer {
           teamNumber = -1;
         }
 
-        Optional<Translation3d> detectedTranslation = Optional.empty();
+        Optional<RobotDetection> detectedTranslation = raycast.getRobot(teamNumber, 1);
         if (teamNumber > 0) {
-          detectedTranslation = Optional.empty(); // getRobotTranslation3d(teamNumber); TODO: make this work
+          detectedTranslation = Optional.empty();
         }
 
         // Fallback info
@@ -272,7 +273,7 @@ public class RobotContainer {
         double targetHeight = SmartDashboard.getNumber(basePath + "TargetHeight", 0.25);
 
         if (detectedTranslation.isPresent()) {
-          return detectedTranslation.get();
+          return detectedTranslation.get().getPoseTranslation3d();
         } else if (useFallback) {
           Translation3d fallbackTarget = new Translation3d(fallbackX, fallbackY, targetHeight);
           return FieldUtil.flipIfRed(fallbackTarget);

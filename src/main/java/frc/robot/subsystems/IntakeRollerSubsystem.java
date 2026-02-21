@@ -1,7 +1,5 @@
 package frc.robot.subsystems;
 
-import java.util.function.Supplier;
-
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
@@ -14,25 +12,46 @@ import frc.robot.Configs;
 import frc.robot.Constants;
 
 public class IntakeRollerSubsystem extends SubsystemBase {
-    private TalonFX intakeRoller;
-    
-    //Configuration (Talon)
+
+    // --------------------------------------------------------------------
+    // Hardware
+    // --------------------------------------------------------------------
+
+    private final TalonFX intakeRoller;
+
+    // --------------------------------------------------------------------
+    // Construction / Configuration
+    // --------------------------------------------------------------------
+
     public IntakeRollerSubsystem() {
         intakeRoller = new TalonFX(Constants.Intake.INTAKE_ID);
         intakeRoller.getConfigurator().apply(Configs.Intake.INTAKE_CONFIGURATION);
     }
 
+    @Override
+    public void periodic() {
+        SmartDashboard.putNumber(
+            "Intake Roller Velocity",
+            getVelocity()
+        );
+    }
+
+    // --------------------------------------------------------------------
+    // Control
+    // --------------------------------------------------------------------
+
+    public double getVelocity() {
+        return intakeRoller.getVelocity().getValueAsDouble();
+    }
+
+    // --------------------------------------------------------------------
+    // Commands
+    // --------------------------------------------------------------------
     public Command getIntakeCommand() {
-        return new RunCommand(() -> intakeRoller.set(1.0),this);
+        return new RunCommand(() -> intakeRoller.set(Constants.Intake.INTAKE_POWER),this);
     }
 
     public Command getStopCommand() {
         return new RunCommand(() -> intakeRoller.stopMotor(),this);
     }
-
-    @Override
-    public void periodic() {
-        SmartDashboard.putNumber("Intake Roller Speed (Radians / Second)",intakeRoller.getVelocity().getValueAsDouble());
-    }
-
 }

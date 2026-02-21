@@ -35,30 +35,6 @@ public class Configs {
                     .SupplyCurrentLowerTime = Constants.Intake.CURRENT_LOWER_TIME;
 
             INTAKE_CONFIGURATION
-                .Slot0
-                    .kP = Constants.Intake.KP;
-
-            INTAKE_CONFIGURATION
-                .Slot0
-                    .kI = Constants.Intake.KI;
-            
-            INTAKE_CONFIGURATION
-                .Slot0
-                    .kD = Constants.Intake.KD;
-
-            INTAKE_CONFIGURATION
-                .Slot0
-                    .kS = Constants.Intake.KS;
-
-            INTAKE_CONFIGURATION
-                .Slot0
-                    .kV = Constants.Intake.KV;
-            
-            INTAKE_CONFIGURATION
-                .Slot0
-                    .kA = Constants.Intake.KA;
-
-            INTAKE_CONFIGURATION
                 .MotorOutput
                     .NeutralMode = NeutralModeValue.Coast;
 

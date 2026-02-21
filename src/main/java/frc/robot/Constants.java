@@ -300,19 +300,13 @@ public class Constants {
         public static final int CURRENT_LOWER_LIMIT = 40;
         public static final double CURRENT_LOWER_TIME = 0.5;
 
-        public static final double KP = 1.0;
-        public static final double KI = 0.0;
-        public static final double KD = 0.0;
-        public static final double KS = 0.0;
-        public static final double KV = 2.3;
-        public static final double KA = 0.3;
 
         public static final double GEAR_RATIO = 4.0;
         public static final double ENCODER_FACTOR = GEAR_RATIO / (2.0 * Math.PI);
 
         public static final InvertedValue MOTOR_INVERTED = InvertedValue.CounterClockwise_Positive;
 
-        public static final double INTAKE_POWER = 1.0; // Percent of max power
+        public static final double INTAKE_POWER = 1.0; //percent of max speed
     }
 
     public static class IntakePivot {

@@ -97,6 +97,7 @@ public class IntakePivotSubsystem extends SubsystemBase {
         })
         .finallyDo(() -> {
             commandActive = false;
+            intake.stopMotor();
             System.out.println("IntakePivot: Command finished");
         });
     }

@@ -324,9 +324,9 @@ public class Constants {
         public static final int CURRENT_LOWER_LIMIT = 40;
         public static final double CURRENT_LOWER_TIME = .5;
 
-        public static final double KP = 5.0; // Volts per radian
+        public static final double KP = 3.0; // Volts per radian
         public static final double KI = 0.0;
-        public static final double KD = 0.5;
+        public static final double KD = 0.0;
         public static final double KS = 0.0;
         public static final double KV = 0.0;
         public static final double KA = 0.0;
@@ -343,7 +343,7 @@ public class Constants {
         public static final Rotation2d INTAKE_RAISED_ANGLE = Rotation2d.fromDegrees(110.0);
         public static final Rotation2d INTAKE_DEPLOYED_ANGLE = INTAKE_MIN_ANGLE;        
 
-        public static final Rotation2d INTAKE_TOLERANCE_ANGLE = Rotation2d.fromDegrees(5);
+        public static final Rotation2d INTAKE_TOLERANCE_ANGLE = Rotation2d.fromDegrees(3);
         
     }
 

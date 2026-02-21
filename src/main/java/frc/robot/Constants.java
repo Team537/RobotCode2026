@@ -344,7 +344,7 @@ public class Constants {
         public static final double KV = 2.3;
         public static final double KA = 0.3;
 
-        public static final double GEAR_RATIO = 1.0;
+        public static final double GEAR_RATIO = 20.0 / 24.0;
         public static final double WHEEL_RADIUS = 0.050419; 
         public static final double ENCOER_FACTOR = GEAR_RATIO / (2.0 * Math.PI * WHEEL_RADIUS) ;
 
@@ -358,6 +358,8 @@ public class Constants {
         }; // Meters per second to meters per second
 
         public static final double MAX_BALL_SPEED = 15.0; // Meters per second
+
+        public static final boolean MOTOR_INVERTED = false;
 
     }
     public static class Transfer {

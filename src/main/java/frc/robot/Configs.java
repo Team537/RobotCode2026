@@ -115,6 +115,10 @@ public class Configs {
 
             SHOOTER_CONFIGURATION
                 .MotorOutput
+                    .Inverted = Constants.Shooter.MOTOR_INVERTED ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
+
+            SHOOTER_CONFIGURATION
+                .MotorOutput
                     .NeutralMode = NeutralModeValue.Coast;
         }
     }

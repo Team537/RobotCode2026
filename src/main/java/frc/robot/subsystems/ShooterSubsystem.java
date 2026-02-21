@@ -38,7 +38,7 @@ public class ShooterSubsystem extends SubsystemBase {
     // --------------------------------------------------------------------
 
     /** TalonFX driving the shooter wheel(s). */
-    private final TalonFX shooterMotor;
+    private final TalonFX leadShooterMotor;
     private final TalonFX followerShooterMotor;
 
     // --------------------------------------------------------------------
@@ -59,8 +59,8 @@ public class ShooterSubsystem extends SubsystemBase {
      * Creates the shooter subsystem and applies motor configuration.
      */
     public ShooterSubsystem() {
-        shooterMotor = new TalonFX(Constants.Shooter.SHOOTER_ID);
-        shooterMotor
+        leadShooterMotor = new TalonFX(Constants.Shooter.LEAD_SHOOTER_ID);
+        leadShooterMotor
             .getConfigurator()
             .apply(Configs.Shooter.SHOOTER_CONFIGURATION);
 
@@ -81,8 +81,8 @@ public class ShooterSubsystem extends SubsystemBase {
      */
 
     public void setWheelVelocity(double velocity) {
-        shooterMotor.setControl(new VelocityVoltage(velocity));
-        followerShooterMotor.setControl(new Follower(Constants.Shooter.SHOOTER_ID,MotorAlignmentValue.Opposed));
+        leadShooterMotor.setControl(new VelocityVoltage(velocity));
+        followerShooterMotor.setControl(new Follower(Constants.Shooter.FOLLOWER_SHOOTER_ID,MotorAlignmentValue.Opposed));
     }
     /**
      * Commands the shooter flywheel so the ball with shoot out at the specified velocity
@@ -97,7 +97,7 @@ public class ShooterSubsystem extends SubsystemBase {
      * @return the current shooter flywheel velocity in meters per second
      */
     public double getWheelVelocity() {
-        return shooterMotor.getVelocity().getValueAsDouble();
+        return leadShooterMotor.getVelocity().getValueAsDouble();
     }
 
     /**

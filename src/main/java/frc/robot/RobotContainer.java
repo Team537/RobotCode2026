@@ -356,8 +356,8 @@ public class RobotContainer {
     // driveSubsystem.setDefaultCommand(manualDriveCommand);
 
     Trigger intakeTrigger = new Trigger(() -> driverController.getRightBumperButton());
-    intakeTrigger.onTrue(intakePivot.deployIntakeCommand());
-    intakeTrigger.onFalse(intakePivot.raiseIntakeCommand());
+    intakeTrigger.onTrue(intakePivot.deployIntakeCommand().withInterruptBehavior(Command.InterruptionBehavior.kCancelSelf));
+    intakeTrigger.onFalse(intakePivot.raiseIntakeCommand().withInterruptBehavior(Command.InterruptionBehavior.kCancelSelf));
 
   }
 

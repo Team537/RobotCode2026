@@ -18,6 +18,7 @@ import frc.robot.Constants.RaycastConstants;
 import frc.robot.network.TCPImuResetSender;
 import frc.robot.network.UDPReceiver;
 import frc.robot.network.UDPSender;
+import frc.robot.util.field.Alliance;
 import frc.robot.util.network.UDPPacket;
 import frc.robot.util.vision.detections.RobotDetection;
 
@@ -275,6 +276,44 @@ public class Raycast {
 
         for (RobotDetection robotDetection : this.getRobotDetections()) {
             int robotScore = distanceMetric.apply(targetNumAsString, Integer.toString(robotDetection.teamNumber));
+
+            // If there is a tie, we use the more confident detection.
+            if (robotScore < lowestScore || (robotScore == lowestScore && highestConfidence < robotDetection.teamNumberConfidence)) {
+                closesDetection = robotDetection;
+                lowestScore = robotScore;
+                highestConfidence = robotDetection.teamNumberConfidence;
+            }
+        }
+
+        return Optional.ofNullable(closesDetection);
+    }
+
+    /**
+     * Returns the `RobotDetection` instance that is closest to the given team number. 
+     * NOTE!! This will still return an instance by default even if there is no robot that would reasonably fit the given team number.
+     * Make sure to tune {@code maxAcceptedScore} to prevent this from happening. (Try 1-2 to start).
+     * 
+     * @param teamNumber The team # of the robot that will be returned.
+     * @param robotAlliance The alliance of the robot that will be targeted.
+     * @param maxAcceptedScore The maximum Levenshtein Distance score that will be accepted as a valid robot.
+     * 
+     * @return An optional that may or may not contain the robot with the specified team number.
+     */
+    public Optional<RobotDetection> getRobot(int teamNumber, Alliance robotAlliance, int maxAcceptedScore) {
+
+        // Setup relevant parameters.
+        String targetNumAsString = Integer.toString(teamNumber);
+        RobotDetection closesDetection = null;
+        int lowestScore = maxAcceptedScore;
+        double highestConfidence = 0;
+
+        for (RobotDetection robotDetection : this.getRobotDetections()) {
+            int robotScore = distanceMetric.apply(targetNumAsString, Integer.toString(robotDetection.teamNumber));
+
+            // Verify the alliances match.
+            if (robotDetection.getRobotAlliance() != robotAlliance) {
+                continue;
+            }
 
             // If there is a tie, we use the more confident detection.
             if (robotScore < lowestScore || (robotScore == lowestScore && highestConfidence < robotDetection.teamNumberConfidence)) {

@@ -29,11 +29,11 @@ public class Configs {
 
         TURRET_CONFIG
             .CurrentLimits
-                .SupplyCurrentLimit = Constants.Turret.CURRENT_LOWER_LIMIT;
+                .SupplyCurrentLowerLimit = Constants.Turret.CURRENT_LOWER_LIMIT;
 
         TURRET_CONFIG
             .CurrentLimits
-                .SupplyCurrentLimit = Constants.Turret.CURRENT_LOWER_TIME;
+                .SupplyCurrentLowerTime = Constants.Turret.CURRENT_LOWER_TIME;
 
         TURRET_CONFIG
             .MotorOutput.Inverted = Constants.Turret.MOTOR_INVERTED ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
@@ -83,11 +83,11 @@ public class Configs {
             
             SHOOTER_CONFIGURATION
                 .CurrentLimits
-                    .SupplyCurrentLimit = Constants.Shooter.CURRENT_LOWER_TIME;
+                    .SupplyCurrentLowerTime = Constants.Shooter.CURRENT_LOWER_TIME;
 
             SHOOTER_CONFIGURATION
                 .CurrentLimits
-                    .SupplyCurrentLimit = Constants.Shooter.CURRENT_LOWER_LIMIT;
+                    .SupplyCurrentLowerLimit = Constants.Shooter.CURRENT_LOWER_LIMIT;
 
             SHOOTER_CONFIGURATION
                 .Slot0
@@ -155,11 +155,11 @@ public class Configs {
         
         TRANSFER_CONFIG
             .CurrentLimits
-                .SupplyCurrentLimit = Constants.Transfer.CURRENT_LOWER_LIMIT;
+                .SupplyCurrentLowerLimit = Constants.Transfer.CURRENT_LOWER_LIMIT;
 
         TRANSFER_CONFIG
             .CurrentLimits
-                .SupplyCurrentLimit = Constants.Transfer.CURRENT_LOWER_TIME;
+                .SupplyCurrentLowerTime = Constants.Transfer.CURRENT_LOWER_TIME;
 
         TRANSFER_CONFIG
             .MotorOutput

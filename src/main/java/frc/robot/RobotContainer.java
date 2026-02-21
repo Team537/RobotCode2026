@@ -37,6 +37,7 @@ public class RobotContainer {
 
   DriveSubsystem driveSubsystem;
   IntakePivotSubsystem intakePivot;
+  IntakeRollerSubsystem intakeRoller;
   Raycast raycast;
 
   private final Field2d targetingField = new Field2d();
@@ -61,6 +62,7 @@ public class RobotContainer {
   public RobotContainer() {
     driveSubsystem = new DriveSubsystem();
     intakePivot = new IntakePivotSubsystem();
+    intakeRoller = new IntakeRollerSubsystem();
     setupSmartDashboard();
     configureBindings();
 
@@ -356,8 +358,10 @@ public class RobotContainer {
     driveSubsystem.setDefaultCommand(manualDriveCommand);
 
     Trigger intakeTrigger = new Trigger(() -> driverController.getRightBumperButton());
-    intakeTrigger.onTrue(intakePivot.deployIntakeCommand().withInterruptBehavior(Command.InterruptionBehavior.kCancelSelf));
-    intakeTrigger.onFalse(intakePivot.raiseIntakeCommand().withInterruptBehavior(Command.InterruptionBehavior.kCancelSelf));
+    intakeTrigger.onTrue(intakePivot.deployIntakeCommand());
+    intakeTrigger.onFalse(intakePivot.raiseIntakeCommand());
+    intakeTrigger.onTrue(intakeRoller.getIntakeCommand());
+    intakeTrigger.onFalse(intakeRoller.getStopCommand());
 
   }
 

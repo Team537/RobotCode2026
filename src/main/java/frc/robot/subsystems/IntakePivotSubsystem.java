@@ -104,14 +104,12 @@ public class IntakePivotSubsystem extends SubsystemBase {
     //Raises the intake to the start position
     public Command raiseIntakeCommand() {
         return setIntakeAngleCommand(Constants.IntakePivot.INTAKE_RAISED_ANGLE)
-            .withTimeout(Constants.IntakePivot.INTAKE_PIVOT_TIMEOUT)
             .withName("RaiseIntake");
     }
 
     //Deploys intake 
     public Command deployIntakeCommand() {
         return setIntakeAngleCommand(Constants.IntakePivot.INTAKE_DEPLOYED_ANGLE)
-            .withTimeout(Constants.IntakePivot.INTAKE_PIVOT_TIMEOUT)
             .withName("DeployIntake");
     }
 }

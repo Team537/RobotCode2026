@@ -5,8 +5,10 @@ import java.util.function.Supplier;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Configs;
 import frc.robot.Constants;
@@ -20,19 +22,17 @@ public class IntakeRollerSubsystem extends SubsystemBase {
         intakeRoller.getConfigurator().apply(Configs.Intake.INTAKE_CONFIGURATION);
     }
 
-    //Sets the velocity of the intake roller
-    public void setVelocity(double velocity) {
-        VelocityVoltage velocityRequest = new VelocityVoltage(velocity);
-        intakeRoller.setControl(velocityRequest);
+    public Command getIntakeCommand() {
+        return new RunCommand(() -> intakeRoller.set(1.0),this);
     }
 
-    //Runs the command for the intake roller at a given velocity
-    public Command getVelocityCommand(Supplier<Double> velocitySupplier) {
-        return new InstantCommand(
-            () -> {
-                setVelocity(velocitySupplier.get());
-            },
-            this
-        );
+    public Command getStopCommand() {
+        return new RunCommand(() -> intakeRoller.stopMotor(),this);
     }
+
+    @Override
+    public void periodic() {
+        SmartDashboard.putNumber("Intake Roller Speed (Radians / Second)",intakeRoller.getVelocity().getValueAsDouble());
+    }
+
 }

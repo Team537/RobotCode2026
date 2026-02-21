@@ -28,11 +28,11 @@ public class Configs {
 
             INTAKE_CONFIGURATION
                 .CurrentLimits
-                    .SupplyCurrentLimit = Constants.Intake.CURRENT_LOWER_LIMIT;
+                    .SupplyCurrentLowerLimit = Constants.Intake.CURRENT_LOWER_LIMIT;
 
             INTAKE_CONFIGURATION
                 .CurrentLimits 
-                    .SupplyCurrentLimit = Constants.Intake.CURRENT_LOWER_TIME;
+                    .SupplyCurrentLowerTime = Constants.Intake.CURRENT_LOWER_TIME;
 
             INTAKE_CONFIGURATION
                 .Slot0
@@ -47,8 +47,20 @@ public class Configs {
                     .kD = Constants.Intake.KD;
 
             INTAKE_CONFIGURATION
+                .Slot0
+                    .kS = Constants.Intake.KS;
+
+            INTAKE_CONFIGURATION
+                .Slot0
+                    .kV = Constants.Intake.KV;
+            
+            INTAKE_CONFIGURATION
+                .Slot0
+                    .kA = Constants.Intake.KA;
+
+            INTAKE_CONFIGURATION
                 .MotorOutput
-                    .NeutralMode = NeutralModeValue.Brake;
+                    .NeutralMode = NeutralModeValue.Coast;
 
             INTAKE_CONFIGURATION
                 .MotorOutput
@@ -69,6 +81,8 @@ public class Configs {
                     .Feedback.SensorToMechanismRatio = Constants.IntakePivot.SENSOR_TO_MECHANISM_RATIO;
                 INTAKE_PIVOT_CONFIGURATION
                     .Feedback.FeedbackRemoteSensorID = Constants.IntakePivot.CANCODER_ID;
+                INTAKE_PIVOT_CONFIGURATION
+                    .Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
                 
                 INTAKE_PIVOT_CONFIGURATION
                     .CurrentLimits
@@ -76,11 +90,11 @@ public class Configs {
 
                 INTAKE_PIVOT_CONFIGURATION
                     .CurrentLimits
-                        .SupplyCurrentLimit = Constants.IntakePivot.CURRENT_LOWER_LIMIT;
+                        .SupplyCurrentLowerLimit = Constants.IntakePivot.CURRENT_LOWER_LIMIT;
 
                 INTAKE_PIVOT_CONFIGURATION
                     .CurrentLimits
-                        .SupplyCurrentLimit = Constants.IntakePivot.CURRENT_LOWER_TIME;
+                        .SupplyCurrentLowerTime = Constants.IntakePivot.CURRENT_LOWER_TIME;
 
                 INTAKE_PIVOT_CONFIGURATION
                     .Slot0

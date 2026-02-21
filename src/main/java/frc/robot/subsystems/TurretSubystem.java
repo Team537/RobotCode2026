@@ -84,6 +84,7 @@ public class TurretSubystem extends SubsystemBase {
     public TurretSubystem() {
         turretMotor = new TalonFX(Constants.Turret.TURRET_ID);
         turretMotor.getConfigurator().apply(Configs.TURRET_CONFIG);
+        resetTurretAngle(Constants.Turret.START_POSITION);
         pitchServo = new PWM(Constants.Turret.PITCH_SERVO_ID);
         pitchEncoder = new CANcoder(Constants.Turret.PITCH_CANCODER_ID);
 
@@ -182,6 +183,8 @@ public class TurretSubystem extends SubsystemBase {
 
 
     public void periodic() {
+
+        SmartDashboard.putNumber("Current Turret Angle", getAngle().getDegrees());
         if (hoodClosedLoopActive) {
             double current = getHoodAngle().getRadians();
             double output = hoodController.calculate(current);

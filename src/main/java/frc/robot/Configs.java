@@ -115,7 +115,7 @@ public class Configs {
 
             SHOOTER_CONFIGURATION
                 .MotorOutput
-                    .NeutralMode = NeutralModeValue.Brake;
+                    .NeutralMode = NeutralModeValue.Coast;
         }
     }
 

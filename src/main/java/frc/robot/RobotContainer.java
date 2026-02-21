@@ -365,10 +365,10 @@ public class RobotContainer {
         manualRotationVelocityDirective, null, null);
     driveSubsystem.setDefaultCommand(manualDriveCommand);
 
-    SmartDashboard.putNumber("Turret Angle", 180.0);
+    SmartDashboard.putNumber("Turret Angle", 270.0);
     SmartDashboard.putNumber("Hood Angle", 5.0);
     SmartDashboard.putData("Set Turret Angle", turretSubsystem.getAngleCommand(
-      () -> Rotation2d.fromDegrees(SmartDashboard.getNumber("Turret Angle", 180.0)),
+      () -> Rotation2d.fromDegrees(SmartDashboard.getNumber("Turret Angle", 270.0)),
       () -> Rotation2d.fromDegrees(SmartDashboard.getNumber("Hood Angle", 5.0))
     ));
 

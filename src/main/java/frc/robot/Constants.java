@@ -273,22 +273,22 @@ public class Constants {
         public static final int PITCH_CANCODER_ID = 44;
 
         // PID
-        public static final double KP = 2.5;
-        public static final double KI = 0;
-        public static final double KD = 0.4;
+        public static final double KP = 3.0;
+        public static final double KI = 0.8;
+        public static final double KD = 0.0;
         public static final double KS = 0.0;
-        public static final double KV = 2.36;
-        public static final double KA = 0.18;
+        public static final double KV = 0.0;
+        public static final double KA = 0.0;
 
         public static final double PITCH_KP = 1.0;
         public static final double PITCH_KI = 0.0;
         public static final double PITCH_KD = 0.0;
 
-        public static final boolean MOTOR_INVERTED = false;
+        public static final boolean MOTOR_INVERTED = true;
 
         public static final double TURRET_GEAR_REDUCTION = 5.0;
         public static final double TURN_TABLE_RATIO = 24.0 / 200.0;
-        public static final double ENCODER_FACTOR = (TURRET_GEAR_REDUCTION * TURN_TABLE_RATIO) / (2.0 * Math.PI);
+        public static final double ENCODER_FACTOR = (TURRET_GEAR_REDUCTION) / (2.0 * Math.PI * TURN_TABLE_RATIO);
 
         public static final double PITCH_GEAR_RATIO = (447.2 / 26.0);
         public static final double PITCH_ENCODER_FACTOR = PITCH_GEAR_RATIO / (2.0 * Math.PI);
@@ -304,9 +304,9 @@ public class Constants {
         public static final int CURRENT_LOWER_LIMIT = 25;
         public static final double CURRENT_LOWER_TIME = 0.5;
 
-        public static final Rotation2d START_POSITION = Rotation2d.kPi;
-        public static final Rotation2d MIN_ROTATION = Rotation2d.fromRadians(0.75 * Math.PI);
-        public static final Rotation2d MAX_ROTATION = Rotation2d.fromRadians(2.75 * Math.PI);
+        public static final Rotation2d START_POSITION = Rotation2d.fromRadians(1.5 * Math.PI);
+        public static final Rotation2d MIN_ROTATION = Rotation2d.fromRadians(1.0 * Math.PI);
+        public static final Rotation2d MAX_ROTATION = Rotation2d.fromRadians(2.0 * Math.PI);
 
         public static final Rotation2d TURRET_TOLERANCE = Rotation2d.fromRadians(3.0);
 
@@ -337,15 +337,15 @@ public class Constants {
         public static final int CURRENT_LOWER_LIMIT = 25; 
         public static final double CURRENT_LOWER_TIME = .5;
 
-        public static final double KP = .7;
+        public static final double KP = 0;
         public static final double KI = 0;
-        public static final double KD = .2;
+        public static final double KD = 0;
         public static final double KS = 0.0;
-        public static final double KV = 2.36;
-        public static final double KA = 0.18;
+        public static final double KV = 2.3;
+        public static final double KA = 0.3;
 
         public static final double GEAR_RATIO = 1.0;
-        public static final double WHEEL_RADIUS = 1.985; 
+        public static final double WHEEL_RADIUS = 0.050419; 
         public static final double ENCOER_FACTOR = GEAR_RATIO / (2.0 * Math.PI * WHEEL_RADIUS) ;
 
         public static final double TOLERANCE = 0.1; // Meters per second
@@ -369,18 +369,18 @@ public class Constants {
 
         public static final double KP = 0.7;
         public static final double KI = 0.0;
-        public static final double KD = 0.2;
+        public static final double KD = 0.0;
         public static final double KS = 0.0;
         public static final double KV = 2.36;
         public static final double KA = 0.18;
 
         public static final double TRANSFER_GEAR_REDUCTION = 1.0;
-        public static final double TRANSFER_WHEEL_RADIUS = 1.0;
+        public static final double TRANSFER_WHEEL_RADIUS = 0.0254;
         public static final double ENCODER_FACTOR = TRANSFER_GEAR_REDUCTION / (2.0 * Math.PI * TRANSFER_WHEEL_RADIUS);
 
-        public static final boolean MOTOR_INVERTED = false;
+        public static final boolean MOTOR_INVERTED = true;
 
-        public static final double LOAD_SPEED = 1.0;
+        public static final double LOAD_SPEED = 16.0;
     }
 
     public static class VisionOdometryConstants {

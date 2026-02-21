@@ -9,8 +9,10 @@ import com.ctre.phoenix6.controls.Follower;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Configs;
 import frc.robot.Constants;
@@ -182,7 +184,10 @@ public class ShooterSubsystem extends SubsystemBase {
      * @return A command to stop the shooter.
      */
     public Command getStopCommand() {
-        return getVelocityCommand(() -> 0.0).until(() -> atTarget);
+        return new RunCommand(() -> {
+            leadShooterMotor.stopMotor();
+            followerShooterMotor.stopMotor();
+        },this);
     }
 
     /**
@@ -236,4 +241,10 @@ public class ShooterSubsystem extends SubsystemBase {
     public boolean atTarget() {
         return atTarget;
     }
+
+    @Override
+    public void periodic() {
+        SmartDashboard.putNumber("Current Wheel Velocity",getWheelVelocity());
+    }
+
 }

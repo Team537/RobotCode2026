@@ -55,7 +55,7 @@ public class DriveSubsystem extends SubsystemBase {
     private List<Supplier<List<Obstacle>>> obstaclesSuppliers;
     
     // Feature Flags 
-    private boolean useVisionOdometry = false;
+    private boolean useVisionOdometry = true;
 
     public DriveSubsystem() {
 

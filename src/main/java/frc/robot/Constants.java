@@ -326,8 +326,8 @@ public class Constants {
             0.02,
             Shooter.MAX_BALL_SPEED, 
             TURRET_TRANSLATION,
-            Rotation2d.fromDegrees(84),
-            Rotation2d.fromDegrees(85),
+            Rotation2d.fromDegrees(44),
+            Rotation2d.fromDegrees(45),
             25.0
         );
 
@@ -483,7 +483,7 @@ public class Constants {
         public static final Rotation2d INTAKE_START_POS = Rotation2d.fromDegrees(125.0); //Prevents the intake from going beyond its start positon
         public static final Rotation2d INTAKE_MIN_ANGLE = Rotation2d.fromDegrees(0);
         public static final Rotation2d INTAKE_MAX_ANGLE = INTAKE_START_POS; //Prevents the robot from going beyond its maxiumum angle
-        public static final Rotation2d INTAKE_RAISED_ANGLE = Rotation2d.fromDegrees(110.0);
+        public static final Rotation2d INTAKE_RAISED_ANGLE = Rotation2d.fromDegrees(120.0);
         public static final Rotation2d INTAKE_DEPLOYED_ANGLE = INTAKE_MIN_ANGLE;        
 
         public static final Rotation2d INTAKE_TOLERANCE_ANGLE = Rotation2d.fromDegrees(3);

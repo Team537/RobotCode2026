@@ -112,6 +112,7 @@ public class TurretSubsystem extends SubsystemBase {
 
         PositionVoltage positionRequest = new PositionVoltage(clampedAngle.getRadians());
         turretMotor.setControl(positionRequest);
+        SmartDashboard.putNumber("Turret Target",clampedAngle.getDegrees());
 
     }
 
@@ -125,6 +126,8 @@ public class TurretSubsystem extends SubsystemBase {
         hoodController.reset();
         hoodController.setSetpoint(hoodSetpointRad);
         hoodClosedLoopActive = true;
+
+        SmartDashboard.putNumber("Hood Target",Rotation2d.fromRadians(clamped).getDegrees());
     }
 
     /**

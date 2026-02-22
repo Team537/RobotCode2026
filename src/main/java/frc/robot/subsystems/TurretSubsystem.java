@@ -85,6 +85,7 @@ public class TurretSubsystem extends SubsystemBase {
         resetTurretAngle(Constants.Turret.START_POSITION);
         pitchServo = new PWM(Constants.Turret.PITCH_SERVO_ID);
         pitchEncoder = new CANcoder(Constants.Turret.PITCH_CANCODER_ID);
+        resetHoodAngle(Constants.Turret.MIN_PITCH);
     }
 
     // --------------------------------------------------------------------
@@ -147,8 +148,7 @@ public class TurretSubsystem extends SubsystemBase {
 
 
     public Rotation2d getHoodAngle() {
-        return Rotation2d.fromRadians(pitchEncoder.getPosition().getValueAsDouble() * Constants.Turret.PITCH_ENCODER_FACTOR)
-            .plus(Constants.Turret.MIN_PITCH);
+        return Rotation2d.fromRadians(pitchEncoder.getPosition().getValueAsDouble() * Constants.Turret.PITCH_ENCODER_FACTOR);
     }
 
     /**
@@ -164,6 +164,14 @@ public class TurretSubsystem extends SubsystemBase {
      */
     public void resetTurretAngle(Rotation2d rotation) {
         turretMotor.setPosition(rotation.getRadians());
+    }
+
+     /**
+     * Sets the position of the hood
+     * @param rotation The position to set to
+     */
+    public void resetHoodAngle(Rotation2d rotation) {
+        pitchEncoder.setPosition(rotation.getRadians() / Constants.Turret.PITCH_ENCODER_FACTOR);
     }
 
     public void stopTurretMotor() {
@@ -244,7 +252,7 @@ public class TurretSubsystem extends SubsystemBase {
         );
     }
 
-    public Command setStowCommand() {
+    public Command getStowCommand() {
         return new FunctionalCommand(
             () -> {},
 

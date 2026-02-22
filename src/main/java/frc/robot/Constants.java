@@ -232,7 +232,7 @@ public class Constants {
         public static final Pose2d BLUE_STARTING_POSE = new Pose2d(
             7.013,
             6.085,
-            Rotation2d.fromDegrees(-152.5)
+            Rotation2d.kZero
         );
         public static final Pose2d RED_STARTING_POSE = new Pose2d(
                 2.0,

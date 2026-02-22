@@ -385,7 +385,7 @@ public class Constants {
 
         // Ports 
         // NOTE: THESE MUST ALL BE DIFFERENT AND BE BETWEEN 5800 and 5810!!!!
-        public static final int UDP_SENDER_PORT = 5004;
+        public static final int UDP_SENDER_PORT = 5804;
         public static final int IMU_RESET_PORT = 5805;
         public static final int ROBOT_DETECTION_PORT = 5806;
         public static final int TIME_SYNC_PORT = 5807;

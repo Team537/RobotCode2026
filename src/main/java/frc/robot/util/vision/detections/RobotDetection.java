@@ -2,7 +2,7 @@ package frc.robot.util.vision.detections;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import frc.robot.util.field.Alliance;
 
 /**
  * A generic dataclass used to represent robot detection data sent from the NVIDIA Jetson Orion Nano Super.
@@ -63,6 +63,14 @@ public class RobotDetection {
         return new Translation3d(this.x, this.y, this.z);
     }
 
+    /**
+     * Returns this {@code RobotDetection}'s alliance.
+     * 
+     * @return This {@code RobotDetection}'s alliance.
+     */
+    public Alliance getRobotAlliance() {
+        return this.allianceColor;
+    }
     /**
      * Returns the placeholder radius representing a robot.
      * 

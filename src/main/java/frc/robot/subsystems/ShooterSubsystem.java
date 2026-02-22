@@ -43,7 +43,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
     /** TalonFX driving the shooter wheel(s). */
     private final TalonFX leadShooterMotor;
-    private final TalonFX followerShooterMotor;
+    //private final TalonFX followerShooterMotor;
 
     // --------------------------------------------------------------------
     // Internal State
@@ -69,11 +69,11 @@ public class ShooterSubsystem extends SubsystemBase {
             .apply(Configs.Shooter.SHOOTER_CONFIGURATION);
         leadShooterMotor.setPosition(0.0);
 
-        followerShooterMotor = new TalonFX(Constants.Shooter.FOLLOWER_SHOOTER_ID);
+        /*followerShooterMotor = new TalonFX(Constants.Shooter.FOLLOWER_SHOOTER_ID);
         followerShooterMotor
             .getConfigurator()
             .apply(Configs.Shooter.SHOOTER_CONFIGURATION);
-        followerShooterMotor.setPosition(0.0);
+        followerShooterMotor.setPosition(0.0);*/
     }
 
     // --------------------------------------------------------------------
@@ -88,7 +88,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
     public void setWheelVelocity(double velocity) {
         leadShooterMotor.setControl(new VelocityVoltage(velocity));
-        followerShooterMotor.setControl(new Follower(Constants.Shooter.LEAD_SHOOTER_ID,MotorAlignmentValue.Opposed));
+        //followerShooterMotor.setControl(new Follower(Constants.Shooter.LEAD_SHOOTER_ID,MotorAlignmentValue.Opposed));
         SmartDashboard.putNumber("Target Shooter Velocity (Wheel)", velocity);
     }
     /**
@@ -191,7 +191,7 @@ public class ShooterSubsystem extends SubsystemBase {
     public Command getStopCommand() {
         return new RunCommand(() -> {
             leadShooterMotor.stopMotor();
-            followerShooterMotor.stopMotor();
+            //followerShooterMotor.stopMotor();
         },this);
     }
 
@@ -252,7 +252,7 @@ public class ShooterSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         SmartDashboard.putNumber("Current Wheel Velocity",getWheelVelocity());
-        SmartDashboard.putNumber("Current Wheel Velocity Follower",followerShooterMotor.getVelocity().getValueAsDouble());
+        //SmartDashboard.putNumber("Current Wheel Velocity Follower",followerShooterMotor.getVelocity().getValueAsDouble());
     }
 
 }

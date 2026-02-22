@@ -53,7 +53,7 @@ public class TurretSubsystem extends SubsystemBase {
     /** Brushless motor driving the turret rotation. */
     private final TalonFX turretMotor;
     private final PWM pitchServo;
-    private final CANcoder pitchEncoder;
+    //private final CANcoder pitchEncoder;
 
     private volatile double hoodSetpointRad = Constants.Turret.MIN_PITCH.getRadians();
     private volatile boolean hoodClosedLoopActive = false;
@@ -84,7 +84,7 @@ public class TurretSubsystem extends SubsystemBase {
         turretMotor.getConfigurator().apply(Configs.TURRET_CONFIG);
         resetTurretAngle(Constants.Turret.START_POSITION);
         pitchServo = new PWM(Constants.Turret.PITCH_SERVO_ID);
-        pitchEncoder = new CANcoder(Constants.Turret.PITCH_CANCODER_ID);
+        //pitchEncoder = new CANcoder(Constants.Turret.PITCH_CANCODER_ID);
         resetHoodAngle(Constants.Turret.MIN_PITCH);
     }
 
@@ -151,7 +151,8 @@ public class TurretSubsystem extends SubsystemBase {
 
 
     public Rotation2d getHoodAngle() {
-        return Rotation2d.fromRadians(pitchEncoder.getPosition().getValueAsDouble() * Constants.Turret.PITCH_ENCODER_FACTOR);
+        //return Rotation2d.fromRadians(pitchEncoder.getPosition().getValueAsDouble() * Constants.Turret.PITCH_ENCODER_FACTOR);
+        return Rotation2d.kZero;
     }
 
     /**
@@ -174,7 +175,7 @@ public class TurretSubsystem extends SubsystemBase {
      * @param rotation The position to set to
      */
     public void resetHoodAngle(Rotation2d rotation) {
-        pitchEncoder.setPosition(rotation.getRadians() / Constants.Turret.PITCH_ENCODER_FACTOR);
+        //pitchEncoder.setPosition(rotation.getRadians() / Constants.Turret.PITCH_ENCODER_FACTOR);
     }
 
     public void stopTurretMotor() {

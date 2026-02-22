@@ -326,9 +326,9 @@ public class Constants {
             0.02,
             Shooter.MAX_BALL_SPEED, 
             TURRET_TRANSLATION,
-            Rotation2d.fromDegrees(45),
+            Rotation2d.fromDegrees(84),
             Rotation2d.fromDegrees(85),
-            5.0
+            25.0
         );
 
     }

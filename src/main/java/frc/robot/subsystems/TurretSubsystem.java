@@ -309,7 +309,7 @@ public class TurretSubsystem extends SubsystemBase {
                         targetTranslationSupplier.get(),
                         Constants.Turret.SOLVER_CONFIG
                     );
-                return solution.getPitch(); 
+                return Rotation2d.fromRadians(0.5 * Math.PI).minus(solution.getPitch()); 
             }
         );
     }

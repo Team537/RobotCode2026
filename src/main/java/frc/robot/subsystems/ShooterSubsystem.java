@@ -6,6 +6,8 @@ import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.SolidColor;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -228,6 +230,8 @@ public class ShooterSubsystem extends SubsystemBase {
                     Constants.Turret.SOLVER_CONFIG
                 );
 
+            SmartDashboard.putNumber("Target Max Height", solution.getMaxHeight());
+            SmartDashboard.putNumber("Target Impact Velocity", solution.getImpactVelocity());
             return solution.getLaunchVelocity();
         });
     }

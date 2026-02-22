@@ -20,19 +20,25 @@ public final class TurretSolver {
         private final double launchVelocity;
         private final Rotation2d yaw;
         private final Rotation2d pitch;
+        private final double maxHeight;
+        private final double impactVelocity;
         private final boolean valid;
 
-        public State(double v, Rotation2d yaw, Rotation2d pitch, boolean valid) {
+        public State(double v, Rotation2d yaw, Rotation2d pitch, boolean valid, double h, double impactV) {
             this.launchVelocity = v;
             this.yaw = yaw;
             this.pitch = pitch;
             this.valid = valid;
+            this.maxHeight = h;
+            this.impactVelocity = impactV;
         }
 
         public double getLaunchVelocity() { return launchVelocity; }
         public Rotation2d getYaw() { return yaw; }
         public Rotation2d getPitch() { return pitch; }
         public boolean isValid() { return valid; }
+        public double getMaxHeight() { return maxHeight; }
+        public double getImpactVelocity() { return impactVelocity; }
     }
 
     // ============================ CONFIG ============================
@@ -100,6 +106,8 @@ public final class TurretSolver {
         double bestV = 0.0;
         Rotation2d bestYaw = new Rotation2d();
         Rotation2d bestPitch = new Rotation2d();
+        double bestH = 0.0;
+        double bestImpactV = 0.0;
         boolean found = false;
 
         for (double phi = config.minPitch.getRadians(); phi <= config.maxPitch.getRadians(); phi += PITCH_STEP) {
@@ -117,23 +125,25 @@ public final class TurretSolver {
             double thetaField = Math.atan2((ry / t) - vry, (rx / t) - vrx);
             Rotation2d yaw = Rotation2d.fromRadians(thetaField).minus(correctedPose.getRotation());
 
-            double impactVz = v * Math.sin(phi) - config.gravity * t;
+            double impactV = v * Math.sin(phi) - config.gravity * t;
 
-            if (impactVz >= 0) continue; // must be falling
+            if (impactV >= 0) continue; // must be falling
 
-            double cost = v / Math.abs(impactVz);
+            double cost = v / Math.abs(impactV);
 
             if (cost < bestCost) {
                 bestCost = cost;
                 bestV = v;
                 bestYaw = yaw;
                 bestPitch = Rotation2d.fromRadians(phi);
+                bestH = apexHeight;
+                bestImpactV = impactV;
                 found = true;
             }
         }
 
-        if (!found) return new State(0, new Rotation2d(), new Rotation2d(), false);
-        return new State(bestV, bestYaw, bestPitch, true);
+        if (!found) return new State(0, new Rotation2d(), new Rotation2d(), false, 0, 0);
+        return new State(bestV, bestYaw, bestPitch, true, bestH, bestImpactV);
     }
 
     // ============================ TIME SOLVER ============================

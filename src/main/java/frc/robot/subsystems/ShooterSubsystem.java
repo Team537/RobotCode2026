@@ -248,7 +248,7 @@ public class ShooterSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         SmartDashboard.putNumber("Current Wheel Velocity",getWheelVelocity());
-        SmartDashboard.putNumber("Current Wheel Position",leadShooterMotor.getPosition().getValueAsDouble());
+        SmartDashboard.putNumber("Current Wheel Velocity Follower",followerShooterMotor.getVelocity().getValueAsDouble());
     }
 
 }

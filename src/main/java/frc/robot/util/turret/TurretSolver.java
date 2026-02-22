@@ -1,11 +1,14 @@
 package frc.robot.util.turret;
 
-import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 public final class TurretSolver {
 
-    private static final double PITCH_STEP = 0.1;
+    private static final double PITCH_STEP = 0.02;
     private static final double TIME_EPS = 1e-4;
     private static final int MAX_ITER = 20;
 
@@ -42,6 +45,7 @@ public final class TurretSolver {
 
         public final Rotation2d minPitch;  // can be same as maxPitch if fixed
         public final Rotation2d maxPitch;
+        public final double maxHeight;
 
         public Config(
                 double gravity,
@@ -49,7 +53,8 @@ public final class TurretSolver {
                 double maxLaunchSpeed,
                 Translation3d turretOffset,
                 Rotation2d minPitch,
-                Rotation2d maxPitch
+                Rotation2d maxPitch,
+                double maxHeight
         ) {
             this.gravity = gravity;
             this.poseLatency = poseLatency;
@@ -57,6 +62,7 @@ public final class TurretSolver {
             this.turretOffset = turretOffset;
             this.minPitch = minPitch;
             this.maxPitch = maxPitch;
+            this.maxHeight = maxHeight;
         }
     }
 
@@ -90,7 +96,8 @@ public final class TurretSolver {
         double vrx = robotVelocity.vxMetersPerSecond;
         double vry = robotVelocity.vyMetersPerSecond;
 
-        double bestV = Double.POSITIVE_INFINITY;
+        double bestCost = Double.POSITIVE_INFINITY;
+        double bestV = 0.0;
         Rotation2d bestYaw = new Rotation2d();
         Rotation2d bestPitch = new Rotation2d();
         boolean found = false;
@@ -103,10 +110,21 @@ public final class TurretSolver {
             double v = (rz + 0.5 * config.gravity * t * t) / (t * Math.sin(phi));
             if (v <= 0 || v > config.maxLaunchSpeed) continue;
 
+            double apexHeight = config.turretOffset.getZ() + (v * v * Math.sin(phi) * Math.sin(phi)) 
+                / (2.0 * config.gravity);
+            if (apexHeight > config.maxHeight) continue;
+
             double thetaField = Math.atan2((ry / t) - vry, (rx / t) - vrx);
             Rotation2d yaw = Rotation2d.fromRadians(thetaField).minus(correctedPose.getRotation());
 
-            if (v < bestV) {
+            double impactVz = v * Math.sin(phi) - config.gravity * t;
+
+            if (impactVz >= 0) continue; // must be falling
+
+            double cost = v / Math.abs(impactVz);
+
+            if (cost < bestCost) {
+                bestCost = cost;
                 bestV = v;
                 bestYaw = yaw;
                 bestPitch = Rotation2d.fromRadians(phi);

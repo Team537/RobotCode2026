@@ -80,7 +80,7 @@ public class Raycast {
             this.udpSender = new UDPSender(RaycastConstants.JETSON_IP, RaycastConstants.UDP_SENDER_PORT);
             //this.tcpImuResetSender = new TCPImuResetSender(RaycastConstants.JETSON_IP, RaycastConstants.IMU_RESET_PORT);
         } catch (Exception e) {
-            System.err.println("!!WARNING!! RIO COULDN'T CONNECT TO THE JETSON! ROBOT DETECTION FUNCTIONALITY WON'T WORK!!");
+            //System.err.println("!!WARNING!! RIO COULDN'T CONNECT TO THE JETSON! ROBOT DETECTION FUNCTIONALITY WON'T WORK!!");
             this.setupFailed = true;
         }
 
@@ -154,7 +154,7 @@ public class Raycast {
         try {
             this.tcpImuResetSender.sendZeroImu(cmdId);
         } catch (Exception e) {
-            System.err.println("!!WARNING!! IMU RESET FAILED ON COPROCESSOR!");
+            //System.err.println("!!WARNING!! IMU RESET FAILED ON COPROCESSOR!");
         }
     }
 
@@ -185,7 +185,7 @@ public class Raycast {
          try {
             hostIP = InetAddress.getLocalHost().getHostAddress();
         } catch (Exception e) {
-            System.out.println("Could not get IP Address: " + e.getMessage());
+            //System.out.println("Could not get IP Address: " + e.getMessage());
         }   
 
         return hostIP;
@@ -210,7 +210,7 @@ public class Raycast {
         try {
             this.udpSender.send(robotPosePacket);
         } catch (Exception e) {
-            System.err.println("!!WARNING!! FAILED TO SEND UDP ROBOT POSE UPDATE!!");
+            //System.err.println("!!WARNING!! FAILED TO SEND UDP ROBOT POSE UPDATE!!");
         }
     }
 

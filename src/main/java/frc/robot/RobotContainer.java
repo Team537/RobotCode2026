@@ -397,7 +397,11 @@ public class RobotContainer {
     shootTrigger.onTrue(
       transferSubsystem.getLoadCommand()
     ).onTrue(
-      shooterSubsystem.getWheelVelocityCommand(() -> 20.0)
+      shooterSubsystem.getTargetCommand(
+        targetingSupplier,
+        driveSubsystem::getPose,
+        driveSubsystem::getVelocity
+      )
     ).onTrue(
       intakePivot.deployIntakeCommand()
     ).onTrue(

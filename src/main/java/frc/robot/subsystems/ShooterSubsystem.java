@@ -87,6 +87,7 @@ public class ShooterSubsystem extends SubsystemBase {
     public void setWheelVelocity(double velocity) {
         leadShooterMotor.setControl(new VelocityVoltage(velocity));
         followerShooterMotor.setControl(new Follower(Constants.Shooter.LEAD_SHOOTER_ID,MotorAlignmentValue.Opposed));
+        SmartDashboard.putNumber("Target Shooter Velocity (Wheel)", velocity);
     }
     /**
      * Commands the shooter flywheel so the ball with shoot out at the specified velocity

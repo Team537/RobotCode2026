@@ -355,13 +355,11 @@ public class Constants {
         public static final double TOLERANCE = 0.1; // Meters per second
 
         public static final double[][] WHEEL_SPEED_TO_BALL_SPEED_POINTS = {
-            {1.0, 1.0},
-            {2.0, 2.0},
-            {3.0, 3.0},
-            {4.0, 4.0}
+            {0.0,0.0},
+            {40.0,40.0}
         }; // Meters per second to meters per second
 
-        public static final double MAX_BALL_SPEED = 15.0; // Meters per second
+        public static final double MAX_BALL_SPEED = 40.0; // Meters per second
 
         public static final boolean MOTOR_INVERTED = false;
 

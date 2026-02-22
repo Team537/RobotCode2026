@@ -48,10 +48,10 @@ public class IntakeRollerSubsystem extends SubsystemBase {
     // Commands
     // --------------------------------------------------------------------
     public Command getIntakeCommand() {
-        return new RunCommand(() -> intakeRoller.set(Constants.Intake.INTAKE_POWER),this);
+        return new RunCommand(() -> intakeRoller.set(Constants.Intake.INTAKE_POWER),this).withName("RunIntake");
     }
 
     public Command getStopCommand() {
-        return new RunCommand(() -> intakeRoller.stopMotor(),this);
+        return new RunCommand(() -> intakeRoller.stopMotor(),this).withName("StopIntake");
     }
 }

@@ -298,9 +298,9 @@ public class Constants {
         public static final boolean PITCH_INVERTED = true;
 
         public static final Rotation2d MAX_PITCH = Rotation2d.fromDegrees(45.0);
-        public static final Rotation2d MIN_PITCH = Rotation2d.fromDegrees(5.00);;
-
-        public static final Rotation2d HOOD_STOW_POSITION = Rotation2d.fromDegrees(3.00);;
+        public static final Rotation2d MIN_PITCH = Rotation2d.fromDegrees(3.00);
+        public static final Rotation2d HOOD_START_POSITION =Rotation2d.fromDegrees(5.00);
+        public static final Rotation2d HOOD_STOW_POSITION = Rotation2d.fromDegrees(3.00);
 
         public static final double OUTPUT_RANGE_MAX = 1;
         public static final double OUTPUT_RANGE_MIN = -1;
@@ -351,7 +351,7 @@ public class Constants {
 
         public static final double GEAR_RATIO = 20.0 / 24.0;
         public static final double WHEEL_RADIUS = 0.050419; 
-        public static final double ENCOER_FACTOR = GEAR_RATIO / (2.0 * Math.PI * WHEEL_RADIUS) ;
+        public static final double ENCODER_FACTOR = GEAR_RATIO / (2.0 * Math.PI * WHEEL_RADIUS) ;
 
         public static final double TOLERANCE = 0.1; // Meters per second
 

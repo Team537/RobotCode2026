@@ -78,7 +78,7 @@ public class Configs {
         static {
 
             SHOOTER_CONFIGURATION
-                .Feedback.SensorToMechanismRatio = Constants.Shooter.ENCOER_FACTOR;
+                .Feedback.SensorToMechanismRatio = Constants.Shooter.ENCODER_FACTOR;
 
             SHOOTER_CONFIGURATION
                 .CurrentLimits

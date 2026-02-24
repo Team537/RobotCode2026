@@ -85,7 +85,7 @@ public class TurretSubsystem extends SubsystemBase {
         resetTurretAngle(Constants.Turret.START_POSITION);
         pitchServo = new PWM(Constants.Turret.PITCH_SERVO_ID);
         pitchEncoder = new CANcoder(Constants.Turret.PITCH_CANCODER_ID);
-        resetHoodAngle(Constants.Turret.MIN_PITCH);
+        resetHoodAngle(Constants.Turret.HOOD_START_POSITION);
     }
 
     // --------------------------------------------------------------------

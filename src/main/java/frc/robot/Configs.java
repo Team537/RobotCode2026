@@ -182,19 +182,19 @@ public class Configs {
 
         static {
             INTAKE_CONFIGURATION
-                .Feedback.SensorToMechanismRatio = Constants.Intake.ENCODER_FACTOR;
+                .Feedback.SensorToMechanismRatio = Constants.IntakeRoller.ENCODER_FACTOR;
             
             INTAKE_CONFIGURATION
                 .CurrentLimits
-                    .SupplyCurrentLimit = Constants.Intake.CURRENT_LIMIT;
+                    .SupplyCurrentLimit = Constants.IntakeRoller.CURRENT_LIMIT;
 
             INTAKE_CONFIGURATION
                 .CurrentLimits
-                    .SupplyCurrentLowerLimit = Constants.Intake.CURRENT_LOWER_LIMIT;
+                    .SupplyCurrentLowerLimit = Constants.IntakeRoller.CURRENT_LOWER_LIMIT;
 
             INTAKE_CONFIGURATION
                 .CurrentLimits 
-                    .SupplyCurrentLowerTime = Constants.Intake.CURRENT_LOWER_TIME;
+                    .SupplyCurrentLowerTime = Constants.IntakeRoller.CURRENT_LOWER_TIME;
 
             INTAKE_CONFIGURATION
                 .MotorOutput
@@ -202,7 +202,7 @@ public class Configs {
 
             INTAKE_CONFIGURATION
                 .MotorOutput
-                    .Inverted = Constants.Intake.MOTOR_INVERTED;
+                    .Inverted = Constants.IntakeRoller.MOTOR_INVERTED;
         }
 
 

@@ -24,7 +24,7 @@ public class IntakeRollerSubsystem extends SubsystemBase {
     // --------------------------------------------------------------------
 
     public IntakeRollerSubsystem() {
-        intakeRoller = new TalonFX(Constants.Intake.INTAKE_ID);
+        intakeRoller = new TalonFX(Constants.IntakeRoller.INTAKE_ID);
         intakeRoller.getConfigurator().apply(Configs.Intake.INTAKE_CONFIGURATION);
     }
 
@@ -48,7 +48,7 @@ public class IntakeRollerSubsystem extends SubsystemBase {
     // Commands
     // --------------------------------------------------------------------
     public Command getIntakeCommand() {
-        return new RunCommand(() -> intakeRoller.set(Constants.Intake.INTAKE_POWER),this).withName("RunIntake");
+        return new RunCommand(() -> intakeRoller.set(Constants.IntakeRoller.INTAKE_POWER),this).withName("RunIntake");
     }
 
     public Command getStopCommand() {

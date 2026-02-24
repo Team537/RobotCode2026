@@ -441,7 +441,7 @@ public class Constants {
         public static final String RAYCAST_FIELD_NAME = "raycast-field";
     }
 
-    public static class Intake {
+    public static class IntakeRoller {
 
         public static final int INTAKE_ID = 54;
         

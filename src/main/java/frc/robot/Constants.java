@@ -1,8 +1,10 @@
 package frc.robot;
 
 import java.io.File;
-import org.apache.commons.text.similarity.LevenshteinDistance;
 import java.util.List;
+
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
@@ -16,6 +18,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Filesystem;
 import frc.robot.util.field.regions.CompositeRegion3d;
 import frc.robot.util.field.regions.RectangularRegion3d;
+import frc.robot.util.turret.TurretSolver;
 
 public class Constants {
 
@@ -53,6 +56,8 @@ public class Constants {
     }
 
     public static class Field {
+
+        public static final double GRAVITY = 9.81; // N/kg
 
         public static final double AUTONOMOUS_PERIOD = 20.0;
         public static final double TELEOP_PERIOD = 140.0;
@@ -225,9 +230,10 @@ public class Constants {
 
         // Starting Poses
         public static final Pose2d BLUE_STARTING_POSE = new Pose2d(
-                7.013,
-                6.085,
-                Rotation2d.fromDegrees(-152.5));
+            7.013,
+            6.085,
+            Rotation2d.kZero
+        );
         public static final Pose2d RED_STARTING_POSE = new Pose2d(
                 2.0,
                 6.0,
@@ -257,6 +263,129 @@ public class Constants {
         public static final double TRANSLATIONAL_TOLERANCE = 0.025; // Meters
         public static final Rotation2d ROTATIONAL_TOLERANCE = Rotation2d.fromDegrees(3.5);
 
+    }
+
+    public static class Turret {
+
+        public static final int TURRET_ID = 56;
+        public static final int TURRET_MOTOR_CURRENT_LIMIT = 40;
+
+        public static final int PITCH_SERVO_ID = 1;
+       
+        public static final int PITCH_CANCODER_ID = 44;
+
+        // PID
+        public static final double KP = 3.0;
+        public static final double KI = 0.8;
+        public static final double KD = 0.0;
+        public static final double KS = 0.0;
+        public static final double KV = 0.0;
+        public static final double KA = 0.0;
+
+        public static final double PITCH_KP = 3.0;
+        public static final double PITCH_KI = 0.0;
+        public static final double PITCH_KD = 0.0;
+
+        public static final boolean MOTOR_INVERTED = true;
+
+        public static final double TURRET_GEAR_REDUCTION = 5.0;
+        public static final double TURN_TABLE_RATIO = 24.0 / 200.0;
+        public static final double ENCODER_FACTOR = (TURRET_GEAR_REDUCTION) / (2.0 * Math.PI * TURN_TABLE_RATIO);
+
+        public static final double PITCH_GEAR_RATIO = (26.0 / 447.2);
+        public static final double PITCH_ENCODER_FACTOR = PITCH_GEAR_RATIO * (2.0 * Math.PI);
+
+        public static final boolean PITCH_INVERTED = true;
+
+        public static final Rotation2d MAX_PITCH = Rotation2d.fromDegrees(45.0);
+        public static final Rotation2d MIN_PITCH = Rotation2d.fromDegrees(3.00);
+        public static final Rotation2d HOOD_START_POSITION =Rotation2d.fromDegrees(5.00);
+        public static final Rotation2d HOOD_STOW_POSITION = Rotation2d.fromDegrees(3.00);
+
+        public static final double OUTPUT_RANGE_MAX = 1;
+        public static final double OUTPUT_RANGE_MIN = -1;
+
+        public static final int CURRENT_LOWER_LIMIT = 25;
+        public static final double CURRENT_LOWER_TIME = 0.5;
+
+        public static final Rotation2d START_POSITION = Rotation2d.fromRadians(1.5 * Math.PI);
+        public static final Rotation2d MIN_ROTATION = Rotation2d.fromRadians(1.0 * Math.PI);
+        public static final Rotation2d MAX_ROTATION = Rotation2d.fromRadians(2.0 * Math.PI);
+
+        public static final Rotation2d TURRET_TOLERANCE = Rotation2d.fromRadians(3.0);
+
+        public static final Rotation2d HOOD_TOLERANCE = Rotation2d.fromRadians(3.0);
+
+        public static final Translation3d TURRET_TRANSLATION = new Translation3d(
+            -0.089,
+            0.0,
+            0.537 //537!!!
+        );
+        public static final TurretSolver.Config SOLVER_CONFIG = new TurretSolver.Config(
+            Field.GRAVITY,
+            0.02,
+            Shooter.MAX_BALL_SPEED, 
+            TURRET_TRANSLATION,
+            Rotation2d.fromDegrees(45),
+            Rotation2d.fromDegrees(85),
+            5.0
+        );
+
+    }
+
+    public static final class Shooter {
+
+        public static final int LEAD_SHOOTER_ID = 53;
+        public static final int FOLLOWER_SHOOTER_ID = 52;
+
+        public static final int CURRENT_LIMIT = 75;
+        public static final int CURRENT_LOWER_LIMIT = 25; 
+        public static final double CURRENT_LOWER_TIME = .5;
+
+        public static final double KP = 1.5;
+        public static final double KI = 0;
+        public static final double KD = 0;
+        public static final double KS = 0.13;
+        public static final double KV = 0.25;
+        public static final double KA = 0.46;
+
+        public static final double GEAR_RATIO = 20.0 / 24.0;
+        public static final double WHEEL_RADIUS = 0.050419; 
+        public static final double ENCODER_FACTOR = GEAR_RATIO / (2.0 * Math.PI * WHEEL_RADIUS) ;
+
+        public static final double TOLERANCE = 0.1; // Meters per second
+
+        public static final double[][] WHEEL_SPEED_TO_BALL_SPEED_POINTS = {
+            {0.0,0.0},
+            {40.0,12.50}
+        }; // Meters per second to meters per second
+
+        public static final double MAX_BALL_SPEED = 12.5; // Meters per second
+
+        public static final boolean MOTOR_INVERTED = false;
+
+    }
+    public static class Transfer {
+        public static final int TRANSFER_MOTOR_ID = 58;
+
+        public static final int CURRENT_LIMIT = 75; //Amps
+        public static final int CURRENT_LOWER_LIMIT = 25;
+        public static final double CURRENT_LOWER_TIME = 0.5;
+
+        public static final double KP = 0.0;
+        public static final double KI = 0.0;
+        public static final double KD = 0.0;
+        public static final double KS = 0.0;
+        public static final double KV = 2.3;
+        public static final double KA = 0.3;
+
+        public static final double TRANSFER_GEAR_REDUCTION = 1.0;
+        public static final double TRANSFER_WHEEL_RADIUS = 0.0254;
+        public static final double ENCODER_FACTOR = TRANSFER_GEAR_REDUCTION / (2.0 * Math.PI * TRANSFER_WHEEL_RADIUS);
+
+        public static final boolean MOTOR_INVERTED = true;
+
+        public static final double LOAD_SPEED = 16.0;
     }
 
     public static class VisionOdometryConstants {
@@ -311,4 +440,54 @@ public class Constants {
         // Visualization.
         public static final String RAYCAST_FIELD_NAME = "raycast-field";
     }
+
+    public static class IntakeRoller {
+
+        public static final int INTAKE_ID = 54;
+        
+        public static final int CURRENT_LIMIT = 75;
+        public static final int CURRENT_LOWER_LIMIT = 40;
+        public static final double CURRENT_LOWER_TIME = 0.5;
+
+
+        public static final double GEAR_RATIO = 4.0;
+        public static final double ENCODER_FACTOR = GEAR_RATIO / (2.0 * Math.PI);
+
+        public static final InvertedValue MOTOR_INVERTED = InvertedValue.CounterClockwise_Positive;
+
+        public static final double INTAKE_POWER = 1.0; //percent of max speed
+    }
+
+    public static class IntakePivot {
+
+        public static final int INTAKE_ID = 55;
+        public static final int CANCODER_ID = 43;
+
+        public static final int CURRENT_LIMIT = 75;
+        public static final int CURRENT_LOWER_LIMIT = 40;
+        public static final double CURRENT_LOWER_TIME = .5;
+
+        public static final double KP = 3.0; // Volts per radian
+        public static final double KI = 0.0;
+        public static final double KD = 0.0;
+        public static final double KS = 0.0;
+        public static final double KV = 0.0;
+        public static final double KA = 0.0;
+
+        public static final double GEAR_RATIO = 54.0;
+        public static final double ROTOR_TO_SENSOR_RATIO = GEAR_RATIO;
+        public static final double SENSOR_TO_MECHANISM_RATIO = 1.0 / (2.0 * Math.PI);
+
+        public static final InvertedValue MOTOR_INVERTED = InvertedValue.CounterClockwise_Positive;
+
+        public static final Rotation2d INTAKE_START_POS = Rotation2d.fromDegrees(125.0); //Prevents the intake from going beyond its start positon
+        public static final Rotation2d INTAKE_MIN_ANGLE = Rotation2d.fromDegrees(0);
+        public static final Rotation2d INTAKE_MAX_ANGLE = INTAKE_START_POS; //Prevents the robot from going beyond its maxiumum angle
+        public static final Rotation2d INTAKE_RAISED_ANGLE = Rotation2d.fromDegrees(110.0);
+        public static final Rotation2d INTAKE_DEPLOYED_ANGLE = INTAKE_MIN_ANGLE;        
+
+        public static final Rotation2d INTAKE_TOLERANCE_ANGLE = Rotation2d.fromDegrees(3);
+        
+    }
+
 }

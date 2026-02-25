@@ -17,12 +17,17 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.swerve.CompositeDriveCommand;
 import frc.robot.commands.swerve.DriveToSequenceCommand;
 import frc.robot.commands.swerve.ManualRotationVelocityDirective;
 import frc.robot.commands.swerve.ManualTranslationVelocityDirective;
+import frc.robot.subsystems.*;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.ShooterSubsystem;
+import frc.robot.subsystems.TurretSubsystem;
+import frc.robot.subsystems.TransferSubsystem;
 import frc.robot.subsystems.vision.Raycast;
 import frc.robot.util.dashboard.AdjustableDouble;
 import frc.robot.util.field.Alliance;
@@ -37,6 +42,11 @@ public class RobotContainer {
   XboxController operatorController = new XboxController(1);
 
   DriveSubsystem driveSubsystem;
+  TurretSubsystem turretSubsystem;
+  ShooterSubsystem shooterSubsystem;
+  TransferSubsystem transferSubsystem;
+  IntakePivotSubsystem intakePivot;
+  IntakeRollerSubsystem intakeRoller;
   Raycast raycast;
 
   private final Field2d targetingField = new Field2d();
@@ -60,8 +70,13 @@ public class RobotContainer {
 
   public RobotContainer() {
     driveSubsystem = new DriveSubsystem();
+    intakePivot = new IntakePivotSubsystem();
+    intakeRoller = new IntakeRollerSubsystem();
     setupSmartDashboard();
     configureBindings();
+    turretSubsystem = new TurretSubsystem();
+    shooterSubsystem = new ShooterSubsystem();
+    transferSubsystem = new TransferSubsystem();
 
     // Setup Raycast.
     raycast = Raycast.getInstance();
@@ -85,6 +100,12 @@ public class RobotContainer {
 
     SmartDashboard.putData("Reset Pose", resetPoseCommand);
 
+    Command resetTurretCommand = new InstantCommand(() -> {
+      turretSubsystem.resetTurretAngle(Constants.Turret.START_POSITION);
+      turretSubsystem.resetHoodAngle(Constants.Turret.MIN_PITCH);
+    }).ignoringDisable(true);
+
+    SmartDashboard.putData("Reset Turret Angle", resetTurretCommand);
     // Targeting Data
 
     // Fixed field targets (static presets with forced defaults every boot)
@@ -329,6 +350,8 @@ public class RobotContainer {
 
   public void scheduleTeleOp() {
 
+    // DISABLED because of errors during drive
+
     // Setup the translational directive for drive subsystem
     TranslationDirective manualTranslationVelocityDirective = new ManualTranslationVelocityDirective(
         driveSubsystem,
@@ -359,26 +382,43 @@ public class RobotContainer {
         manualRotationVelocityDirective, null, null);
     driveSubsystem.setDefaultCommand(manualDriveCommand);
 
+    turretSubsystem.setDefaultCommand(turretSubsystem.getTargetCommand(
+      targetingSupplier,
+      driveSubsystem::getPose,
+      driveSubsystem::getVelocity
+    ));
+
+    Trigger stowTrigger = new Trigger(() -> driverController.getAButton());
+    stowTrigger.whileTrue(
+      turretSubsystem.getStowCommand()
+    );
+  
+    Trigger shootTrigger = new Trigger(() -> driverController.getRightBumperButton());
+    shootTrigger.onTrue(
+      transferSubsystem.getLoadCommand()
+    ).onTrue(
+      shooterSubsystem.getTargetCommand(
+        targetingSupplier,
+        driveSubsystem::getPose,
+        driveSubsystem::getVelocity
+      )
+    ).onTrue(
+      intakePivot.deployIntakeCommand()
+    ).onTrue(
+      intakeRoller.getIntakeCommand()
+    ).onFalse(
+      transferSubsystem.getStopCommand()
+    ).onFalse(
+      shooterSubsystem.getStopCommand()
+    ).onFalse(
+      intakePivot.raiseIntakeCommand()
+    ).onFalse(
+      intakeRoller.getStopCommand()
+    );
+
   }
 
   public void scheduleAutonomous() {
-
-    // Example: Drive to multiple coordinates in sequence
-    // The robot will drive to coordinate 1, then coordinate 2, then coordinate 3
-    // Far new Pose2d(1.46, 2.91, Rotation2d.fromDegrees(0))
-    // Close new Pose2d(2.63, 3.51, Rotation2d.fromDegrees(0))
-    new DriveToSequenceCommand(
-        driveSubsystem,
-        new Pose2d(1.977, 6.274, Rotation2d.kPi),
-        new Pose2d(7.013, 6.085, Rotation2d.fromDegrees(-152.5))).repeatedly().schedule();
-
-    // Alternative builder pattern syntax:
-    // new DriveToSequenceCommand.Builder(driveSubsystem)
-    // .addPose(2.0, 6.0, 0) // x, y, rotation in degrees
-    // .addPose(4.0, 6.0, 90)
-    // .addPose(4.0, 4.0, 180)
-    // .build()
-    // .schedule();
 
   }
 

@@ -22,6 +22,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
@@ -71,7 +72,6 @@ public class DriveSubsystem extends SubsystemBase {
         swerveDrive.setCosineCompensator(true);
         swerveDrive.setAngularVelocityCompensation(true, true, Constants.Drive.ANGULAR_VELOCITY_COMPENSATION_COEFFICIENT);
         swerveDrive.setModuleEncoderAutoSynchronize(true,Constants.Drive.ENCODER_AUTO_SYNCHRONIZE_DEADBAND.getDegrees());
-        swerveDrive.zeroGyro();
 
         RobotConfig pathPlannerConfig;
         try {
@@ -135,6 +135,9 @@ public class DriveSubsystem extends SubsystemBase {
      */
     @Override
     public void periodic() {
+
+        SmartDashboard.putNumber("Raw Gyro",swerveDrive.getGyro().getRawRotation3d().getZ());
+
         // Flatten all obstacle lists from suppliers
         List<Obstacle> obstacles = new ArrayList<>();
         obstaclesSuppliers.forEach(supplier -> supplier.get().forEach(obstacles::add));

@@ -32,6 +32,7 @@ import frc.robot.subsystems.vision.Raycast;
 import frc.robot.util.dashboard.AdjustableDouble;
 import frc.robot.util.field.Alliance;
 import frc.robot.util.field.FieldUtil;
+import frc.robot.util.swerve.SwerveUtil;
 import frc.robot.util.swerve.requests.RotationDirective;
 import frc.robot.util.swerve.requests.TranslationDirective;
 import frc.robot.util.vision.detections.RobotDetection;
@@ -72,11 +73,12 @@ public class RobotContainer {
     driveSubsystem = new DriveSubsystem();
     intakePivot = new IntakePivotSubsystem();
     intakeRoller = new IntakeRollerSubsystem();
-    setupSmartDashboard();
-    configureBindings();
     turretSubsystem = new TurretSubsystem();
     shooterSubsystem = new ShooterSubsystem();
     transferSubsystem = new TransferSubsystem();
+
+    setupSmartDashboard();
+    configureBindings();
 
     // Setup Raycast.
     raycast = Raycast.getInstance();
@@ -144,7 +146,7 @@ public class RobotContainer {
     }
 
     // Set the targetting field's robot pose far away so its off screen
-    targetingField.setRobotPose(new Pose2d(100.0,100.0,Rotation2d.kZero));
+    targetingField.setRobotPose(new Pose2d(100.0, 100.0, Rotation2d.kZero));
     SmartDashboard.putData("Targeting/Field", targetingField);
 
     // Operator Adjustments
@@ -156,6 +158,11 @@ public class RobotContainer {
     shooterPercent = new AdjustableDouble("ErrorSettings/ShooterPercent", 100.0, Double.NEGATIVE_INFINITY,
         Double.POSITIVE_INFINITY);
     shooterPercent.setDashboardRounding(Constants.Operator.ErrorSettings.SHOOTER_PERCENT_DECIMAL_PLACE);
+
+    turretSubsystem.setTurretOffsetSupplier(
+        () -> Rotation2d.fromDegrees(SmartDashboard.getNumber("ErrorSettings/TurretOffset", 0.0)));
+    shooterSubsystem
+        .setSpeedMultiplierSupplier(() -> SmartDashboard.getNumber("ErrorSettings/ShooterPercent", 100.0) / 100.0);
 
   }
 
@@ -194,6 +201,34 @@ public class RobotContainer {
   }
 
   public void configureBindings() {
+
+    // Driver controls
+
+    Trigger stowTrigger = new Trigger(
+        () -> driverController.getAButton() || SwerveUtil.willRobotEnterRegion(driveSubsystem.getPose(),
+            driveSubsystem.getVelocity(), Constants.Field.TRENCH_REGION, Constants.Drive.HOOD_STOW_LOOKAHEAD_TIME));
+    stowTrigger.whileTrue(
+        turretSubsystem.getStowCommand());
+
+    Trigger shootTrigger = new Trigger(() -> driverController.getRightBumperButton());
+    shootTrigger.onTrue(
+        transferSubsystem.getLoadCommand()).onTrue(
+            shooterSubsystem.getTargetCommand(
+                targetingSupplier,
+                driveSubsystem::getPose,
+                driveSubsystem::getVelocity))
+        .onTrue(
+            intakePivot.deployIntakeCommand())
+        .onTrue(
+            intakeRoller.getIntakeCommand())
+        .onFalse(
+            transferSubsystem.getStopCommand())
+        .onFalse(
+            shooterSubsystem.getStopCommand())
+        .onFalse(
+            intakePivot.raiseIntakeCommand())
+        .onFalse(
+            intakeRoller.getStopCommand());
 
     // ==============================
     // Turret Offset Adjustment (POV Left / Right)
@@ -283,7 +318,8 @@ public class RobotContainer {
           teamNumber = -1;
         }
 
-        // Get the robot using the alliance if possible. We will never want to target a robot of the opposing alliance.
+        // Get the robot using the alliance if possible. We will never want to target a
+        // robot of the opposing alliance.
         Optional<RobotDetection> detectedRobot;
         if (alliance.isPresent()) {
           detectedRobot = raycast.getRobot(teamNumber, alliance.get(), 1);
@@ -383,38 +419,9 @@ public class RobotContainer {
     driveSubsystem.setDefaultCommand(manualDriveCommand);
 
     turretSubsystem.setDefaultCommand(turretSubsystem.getTargetCommand(
-      targetingSupplier,
-      driveSubsystem::getPose,
-      driveSubsystem::getVelocity
-    ));
-
-    Trigger stowTrigger = new Trigger(() -> driverController.getAButton());
-    stowTrigger.whileTrue(
-      turretSubsystem.getStowCommand()
-    );
-  
-    Trigger shootTrigger = new Trigger(() -> driverController.getRightBumperButton());
-    shootTrigger.onTrue(
-      transferSubsystem.getLoadCommand()
-    ).onTrue(
-      shooterSubsystem.getTargetCommand(
         targetingSupplier,
         driveSubsystem::getPose,
-        driveSubsystem::getVelocity
-      )
-    ).onTrue(
-      intakePivot.deployIntakeCommand()
-    ).onTrue(
-      intakeRoller.getIntakeCommand()
-    ).onFalse(
-      transferSubsystem.getStopCommand()
-    ).onFalse(
-      shooterSubsystem.getStopCommand()
-    ).onFalse(
-      intakePivot.raiseIntakeCommand()
-    ).onFalse(
-      intakeRoller.getStopCommand()
-    );
+        driveSubsystem::getVelocity));
 
   }
 

@@ -16,8 +16,10 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Filesystem;
+import frc.robot.util.field.FieldUtil;
 import frc.robot.util.field.regions.CompositeRegion3d;
 import frc.robot.util.field.regions.RectangularRegion3d;
+import frc.robot.util.field.regions.Region3d;
 import frc.robot.util.turret.TurretSolver;
 
 public class Constants {
@@ -224,6 +226,23 @@ public class Constants {
             0.0
         );
 
+        public static final CompositeRegion3d BLUE_TRENCH_REGION = new CompositeRegion3d(
+            List.of(
+                new RectangularRegion3d(
+                    new Translation2d(3.996, 8.067),
+                    new Translation2d(5.222,6.811)
+                ),
+                new RectangularRegion3d(
+                    new Translation2d(3.996, 1.307),
+                    new Translation2d(5.222,0.000)
+                )
+            )
+        );
+
+        public static final Region3d RED_TRENCH_REGION = FieldUtil.flip(BLUE_TRENCH_REGION);
+
+        public static final Region3d TRENCH_REGION = new CompositeRegion3d(List.of(BLUE_TRENCH_REGION,RED_TRENCH_REGION));
+
     }
 
     public static class Drive {
@@ -262,6 +281,8 @@ public class Constants {
 
         public static final double TRANSLATIONAL_TOLERANCE = 0.025; // Meters
         public static final Rotation2d ROTATIONAL_TOLERANCE = Rotation2d.fromDegrees(3.5);
+
+        public static final double HOOD_STOW_LOOKAHEAD_TIME = 1.0;
 
     }
 
@@ -328,7 +349,9 @@ public class Constants {
             TURRET_TRANSLATION,
             Rotation2d.fromDegrees(45),
             Rotation2d.fromDegrees(85),
-            5.0
+            5.0,
+            MIN_ROTATION,
+            MAX_ROTATION
         );
 
     }

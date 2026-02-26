@@ -58,6 +58,8 @@ public class TurretSubsystem extends SubsystemBase {
     private volatile double hoodSetpointRad = Constants.Turret.MIN_PITCH.getRadians();
     private volatile boolean hoodClosedLoopActive = false;
 
+    private Supplier<Rotation2d> turretOffsetSupplier = () -> Rotation2d.kZero;
+
     PIDController hoodController = new PIDController(Constants.Turret.PITCH_KP, Constants.Turret.PITCH_KI, Constants.Turret.PITCH_KD);
 
     // --------------------------------------------------------------------
@@ -110,7 +112,7 @@ public class TurretSubsystem extends SubsystemBase {
                 Constants.Turret.MAX_ROTATION
             );
 
-        PositionVoltage positionRequest = new PositionVoltage(clampedAngle.getRadians());
+        PositionVoltage positionRequest = new PositionVoltage(clampedAngle.plus(turretOffsetSupplier.get()).getRadians());
         turretMotor.setControl(positionRequest);
         SmartDashboard.putNumber("Turret Target",clampedAngle.getDegrees());
 
@@ -146,7 +148,7 @@ public class TurretSubsystem extends SubsystemBase {
      * @return the current turret yaw (robot-relative)
      */
     public Rotation2d getAngle() {
-        return Rotation2d.fromRadians(turretMotor.getPosition().getValueAsDouble());
+        return Rotation2d.fromRadians(turretMotor.getPosition().getValueAsDouble()).minus(turretOffsetSupplier.get());
     }
 
 
@@ -166,7 +168,7 @@ public class TurretSubsystem extends SubsystemBase {
      * @param rotation The position to set to
      */
     public void resetTurretAngle(Rotation2d rotation) {
-        turretMotor.setPosition(rotation.getRadians());
+        turretMotor.setPosition(rotation.plus(turretOffsetSupplier.get()).getRadians());
     }
 
      /**
@@ -257,11 +259,12 @@ public class TurretSubsystem extends SubsystemBase {
 
     public Command getStowCommand() {
         return new FunctionalCommand(
-            () -> {},
+            () -> {
+                SmartDashboard.putBoolean("Turret/IsStowing",true);
+            },
 
             () -> {
                 setHoodAngle(Constants.Turret.HOOD_STOW_POSITION);
-
                 atHoodTarget = 
                     Math.abs(
                         getHoodAngle()
@@ -270,7 +273,10 @@ public class TurretSubsystem extends SubsystemBase {
                     ) < Constants.Turret.HOOD_TOLERANCE.getRadians();
             },
 
-            interrupted -> atHoodTarget = false,
+            interrupted -> {
+                atHoodTarget = false;
+                SmartDashboard.putBoolean("Turret/IsStowing",false);
+            },
             () -> false,
             this
         );
@@ -328,4 +334,13 @@ public class TurretSubsystem extends SubsystemBase {
     public boolean atHoodTarget() {
         return atHoodTarget;
     }
+
+    /**
+     * sets the supplier of the turret offset
+     * @param turretOffsetSupplier the supplier of the turret offset. 0 means no offset
+     */
+    public void setTurretOffsetSupplier(Supplier<Rotation2d> turretOffsetSupplier) {
+        this.turretOffsetSupplier = turretOffsetSupplier;
+    }
+
 }

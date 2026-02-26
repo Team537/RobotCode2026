@@ -55,6 +55,8 @@ public class ShooterSubsystem extends SubsystemBase {
      */
     private boolean atTarget = false;
 
+    private Supplier<Double> speedMultiplierSupplier = () -> 1.0;
+
     // --------------------------------------------------------------------
     // Construction / Configuration
     // --------------------------------------------------------------------
@@ -87,7 +89,7 @@ public class ShooterSubsystem extends SubsystemBase {
      */
 
     public void setWheelVelocity(double velocity) {
-        leadShooterMotor.setControl(new VelocityVoltage(velocity));
+        leadShooterMotor.setControl(new VelocityVoltage(velocity * speedMultiplierSupplier.get()));
         followerShooterMotor.setControl(new Follower(Constants.Shooter.LEAD_SHOOTER_ID,MotorAlignmentValue.Opposed));
         SmartDashboard.putNumber("Target Shooter Velocity (Wheel)", velocity);
     }
@@ -104,7 +106,7 @@ public class ShooterSubsystem extends SubsystemBase {
      * @return the current shooter flywheel velocity in meters per second
      */
     public double getWheelVelocity() {
-        return leadShooterMotor.getVelocity().getValueAsDouble();
+        return leadShooterMotor.getVelocity().getValueAsDouble() / speedMultiplierSupplier.get();
     }
 
     /**
@@ -253,6 +255,14 @@ public class ShooterSubsystem extends SubsystemBase {
     public void periodic() {
         SmartDashboard.putNumber("Current Wheel Velocity",getWheelVelocity());
         SmartDashboard.putNumber("Current Wheel Velocity Follower",followerShooterMotor.getVelocity().getValueAsDouble());
+    }
+
+    /**
+     * sets the supplier of the speed multiplier
+     * @param turretOffsetSupplier the supplier of the speed multiplier. 1 means no multiplication
+     */
+    public void setSpeedMultiplierSupplier(Supplier<Double> speedMultiplierSupplier) {
+        this.speedMultiplierSupplier = speedMultiplierSupplier;
     }
 
 }

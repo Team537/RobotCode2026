@@ -299,7 +299,7 @@ public class Constants {
 
         public static final Rotation2d MAX_PITCH = Rotation2d.fromDegrees(45.0);
         public static final Rotation2d MIN_PITCH = Rotation2d.fromDegrees(3.00);
-        public static final Rotation2d HOOD_START_POSITION =Rotation2d.fromDegrees(5.00);
+        public static final Rotation2d HOOD_START_POSITION = Rotation2d.fromDegrees(5.00);
         public static final Rotation2d HOOD_STOW_POSITION = Rotation2d.fromDegrees(3.00);
 
         public static final double OUTPUT_RANGE_MAX = 1;
@@ -312,9 +312,9 @@ public class Constants {
         public static final Rotation2d MIN_ROTATION = Rotation2d.fromRadians(1.0 * Math.PI);
         public static final Rotation2d MAX_ROTATION = Rotation2d.fromRadians(2.0 * Math.PI);
 
-        public static final Rotation2d TURRET_TOLERANCE = Rotation2d.fromRadians(3.0);
+        public static final Rotation2d TURRET_TOLERANCE = Rotation2d.fromDegrees(3.0);
 
-        public static final Rotation2d HOOD_TOLERANCE = Rotation2d.fromRadians(3.0);
+        public static final Rotation2d HOOD_TOLERANCE = Rotation2d.fromDegrees(3.0);
 
         public static final Translation3d TURRET_TRANSLATION = new Translation3d(
             -0.089,
@@ -482,7 +482,7 @@ public class Constants {
 
         public static final Rotation2d INTAKE_START_POS = Rotation2d.fromDegrees(125.0); //Prevents the intake from going beyond its start positon
         public static final Rotation2d INTAKE_MIN_ANGLE = Rotation2d.fromDegrees(0);
-        public static final Rotation2d INTAKE_MAX_ANGLE = INTAKE_START_POS; //Prevents the robot from going beyond its maxiumum angle
+        public static final Rotation2d INTAKE_MAX_ANGLE = INTAKE_START_POS; //Prevents the robot from going beyond its maximum angle
         public static final Rotation2d INTAKE_RAISED_ANGLE = Rotation2d.fromDegrees(110.0);
         public static final Rotation2d INTAKE_DEPLOYED_ANGLE = INTAKE_MIN_ANGLE;        
 

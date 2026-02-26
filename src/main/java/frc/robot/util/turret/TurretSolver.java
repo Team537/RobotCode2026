@@ -197,7 +197,15 @@ public final class TurretSolver {
         double dDy = -ry / (t * t);
 
         double horizontalRequired = Math.hypot(dx, dy);
-        double dHorizontalRequired = (dx * dDx + dy * dDy) / horizontalRequired;
+        double dHorizontalRequired;
+        if (horizontalRequired < 1e-9) {
+            // When the required horizontal velocity is effectively zero,
+            // treat its derivative as zero to avoid division by zero and
+            // keep the Newton iteration numerically stable.
+            dHorizontalRequired = 0.0;
+        } else {
+            dHorizontalRequired = (dx * dDx + dy * dDy) / horizontalRequired;
+        }
 
         double numerator = rz + 0.5 * g * t * t;
         double denominator = t * Math.tan(phi);

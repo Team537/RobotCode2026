@@ -95,8 +95,8 @@ public class TurretUtil {
 
     /**
      * Gets the ball speed that a given wheel speed would shoot it out from a regression model.
-     * @param ballSpeed The speed of the surface of the flywheel in meters per second.
-     * @return The speed the ball with shoot out in meters per second.
+     * @param wheelSurfaceSpeed The speed of the surface of the flywheel in meters per second.
+     * @return The speed the ball will shoot out in meters per second.
      */
     public static double ballSpeedFromWheelSurfaceSpeed(double wheelSurfaceSpeed) {
         return wheelToBall.get(wheelSurfaceSpeed);

@@ -10,13 +10,16 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.util.CommandTimeline;
 import frc.robot.util.field.FieldStatePublisher;
 import frc.robot.util.field.FieldUtil;
+import frc.robot.util.turret.TurretSolverDashboardTester;
 
 public class Robot extends TimedRobot {
 
   private final RobotContainer robotContainer;
+  private final TurretSolverDashboardTester turretTester;
 
   public Robot() {
     robotContainer = new RobotContainer();
+    turretTester = new TurretSolverDashboardTester(Constants.Turret.SOLVER_CONFIG);
   }
 
   @Override
@@ -32,6 +35,7 @@ public class Robot extends TimedRobot {
     robotContainer.updateTargetFieldObjects();
     FieldStatePublisher.update();
     CommandTimeline.run();
+    turretTester.periodic();
   }
 
   @Override

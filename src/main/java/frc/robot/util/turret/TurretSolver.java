@@ -129,7 +129,7 @@ public final class TurretSolver {
 
             if (impactV >= 0) continue; // must be falling
 
-            double cost = v / Math.abs(impactV);
+            double cost = (v * v) / Math.abs(impactV);
 
             if (cost < bestCost) {
                 bestCost = cost;

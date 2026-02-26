@@ -328,7 +328,7 @@ public class Constants {
             TURRET_TRANSLATION,
             Rotation2d.fromDegrees(45),
             Rotation2d.fromDegrees(85),
-            5.0
+            8.0
         );
 
     }
@@ -357,10 +357,10 @@ public class Constants {
 
         public static final double[][] WHEEL_SPEED_TO_BALL_SPEED_POINTS = {
             {0.0,0.0},
-            {40.0,12.50}
+            {40.0,20.0}
         }; // Meters per second to meters per second
 
-        public static final double MAX_BALL_SPEED = 12.5; // Meters per second
+        public static final double MAX_BALL_SPEED = 20.0; // Meters per second
 
         public static final boolean MOTOR_INVERTED = false;
 

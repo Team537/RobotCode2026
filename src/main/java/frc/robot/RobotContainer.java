@@ -11,23 +11,22 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.swerve.CompositeDriveCommand;
-import frc.robot.commands.swerve.DriveToSequenceCommand;
 import frc.robot.commands.swerve.ManualRotationVelocityDirective;
 import frc.robot.commands.swerve.ManualTranslationVelocityDirective;
-import frc.robot.subsystems.*;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.IntakePivotSubsystem;
+import frc.robot.subsystems.IntakeRollerSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
-import frc.robot.subsystems.TurretSubsystem;
 import frc.robot.subsystems.TransferSubsystem;
+import frc.robot.subsystems.TurretSubsystem;
 import frc.robot.subsystems.vision.Raycast;
 import frc.robot.util.dashboard.AdjustableDouble;
 import frc.robot.util.field.Alliance;
@@ -35,6 +34,7 @@ import frc.robot.util.field.FieldUtil;
 import frc.robot.util.swerve.SwerveUtil;
 import frc.robot.util.swerve.requests.RotationDirective;
 import frc.robot.util.swerve.requests.TranslationDirective;
+import frc.robot.util.turret.TurretSolver;
 import frc.robot.util.vision.detections.RobotDetection;
 
 public class RobotContainer {
@@ -210,25 +210,47 @@ public class RobotContainer {
     stowTrigger.whileTrue(
         turretSubsystem.getStowCommand());
 
-    Trigger shootTrigger = new Trigger(() -> driverController.getRightBumperButton());
-    shootTrigger.onTrue(
-        transferSubsystem.getLoadCommand()).onTrue(
-            shooterSubsystem.getTargetCommand(
-                targetingSupplier,
-                driveSubsystem::getPose,
-                driveSubsystem::getVelocity))
-        .onTrue(
-            intakePivot.deployIntakeCommand())
-        .onTrue(
-            intakeRoller.getIntakeCommand())
-        .onFalse(
-            transferSubsystem.getStopCommand())
-        .onFalse(
-            shooterSubsystem.getStopCommand())
-        .onFalse(
-            intakePivot.raiseIntakeCommand())
-        .onFalse(
-            intakeRoller.getStopCommand());
+    Trigger shootTrigger =
+        new Trigger(() -> driverController.getRightBumperButton());
+
+    Trigger solverValid =
+        new Trigger(() -> TurretSolver.solve(driveSubsystem.getPose(),driveSubsystem.getVelocity(),targetingSupplier.get(),Constants.Turret.SOLVER_CONFIG).isValid());
+
+    /* Shooter runs while button held */
+    shootTrigger.whileTrue(
+        shooterSubsystem.getTargetCommand(
+            targetingSupplier,
+            driveSubsystem::getPose,
+            driveSubsystem::getVelocity
+        )
+    );
+
+    /* Intake pivot runs while button held */
+    shootTrigger.whileTrue(
+        intakePivot.deployIntakeCommand()
+    );
+
+    /* Intake roller runs while button held */
+    shootTrigger.whileTrue(
+        intakeRoller.getIntakeCommand()
+    );
+
+    /* Transfer runs ONLY while button AND solver valid */
+    shootTrigger
+        .and(solverValid)
+        .whileTrue(
+            transferSubsystem.getLoadCommand()
+        );
+
+/* Stop everything on button release */
+shootTrigger.onFalse(
+    Commands.parallel(
+        transferSubsystem.getStopCommand(),
+        shooterSubsystem.getStopCommand(),
+        intakePivot.raiseIntakeCommand(),
+        intakeRoller.getStopCommand()
+    )
+);
 
     // ==============================
     // Turret Offset Adjustment (POV Left / Right)
@@ -345,7 +367,7 @@ public class RobotContainer {
         }
       }
 
-      // 3️ - Fixed target fallback (A/B)
+      // 3 - Fixed target fallback (A/B)
       switch (selectedFixedTarget) {
 
         case A: {

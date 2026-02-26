@@ -1,5 +1,6 @@
 package frc.robot.util.turret;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -49,10 +50,15 @@ public final class TurretSolver {
         public final double maxLaunchSpeed;
         public final Translation3d turretOffset;
 
-        public final Rotation2d minPitch;  // can be same as maxPitch if fixed
+        public final Rotation2d minPitch;
         public final Rotation2d maxPitch;
         public final double maxHeight;
 
+        // NEW
+        public final Rotation2d minYaw;
+        public final Rotation2d maxYaw;
+
+        // === Original Constructor (assume full yaw range) ===
         public Config(
                 double gravity,
                 double poseLatency,
@@ -62,6 +68,31 @@ public final class TurretSolver {
                 Rotation2d maxPitch,
                 double maxHeight
         ) {
+            this(
+                    gravity,
+                    poseLatency,
+                    maxLaunchSpeed,
+                    turretOffset,
+                    minPitch,
+                    maxPitch,
+                    maxHeight,
+                    Rotation2d.fromDegrees(-180),
+                    Rotation2d.fromDegrees(180)
+            );
+        }
+
+        // === New Constructor With Yaw Limits ===
+        public Config(
+                double gravity,
+                double poseLatency,
+                double maxLaunchSpeed,
+                Translation3d turretOffset,
+                Rotation2d minPitch,
+                Rotation2d maxPitch,
+                double maxHeight,
+                Rotation2d minYaw,
+                Rotation2d maxYaw
+        ) {
             this.gravity = gravity;
             this.poseLatency = poseLatency;
             this.maxLaunchSpeed = maxLaunchSpeed;
@@ -69,6 +100,9 @@ public final class TurretSolver {
             this.minPitch = minPitch;
             this.maxPitch = maxPitch;
             this.maxHeight = maxHeight;
+
+            this.minYaw = minYaw;
+            this.maxYaw = maxYaw;
         }
     }
 
@@ -124,6 +158,7 @@ public final class TurretSolver {
 
             double thetaField = Math.atan2((ry / t) - vry, (rx / t) - vrx);
             Rotation2d yaw = Rotation2d.fromRadians(thetaField).minus(correctedPose.getRotation());
+            if (!isYawInRange(yaw, config.minYaw, config.maxYaw)) continue;
 
             double impactV = v * Math.sin(phi) - config.gravity * t;
 
@@ -206,4 +241,21 @@ public final class TurretSolver {
 
         return dHorizontalRequired - dHorizontalAvailable;
     }
+
+    private static boolean isYawInRange(Rotation2d yaw,
+                                    Rotation2d min,
+                                    Rotation2d max) {
+
+        double y = MathUtil.angleModulus(yaw.getRadians());
+        double minR = MathUtil.angleModulus(min.getRadians());
+        double maxR = MathUtil.angleModulus(max.getRadians());
+
+        if (minR <= maxR) {
+            return y >= minR && y <= maxR;
+        } else {
+            // Wrapped range (ex: 270° → 90°)
+            return y >= minR || y <= maxR;
+        }
+    }
+
 }

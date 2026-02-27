@@ -24,14 +24,16 @@ public final class TurretSolver {
         private final double maxHeight;
         private final double impactVelocity;
         private final boolean valid;
+        private final double time;
 
-        public State(double v, Rotation2d yaw, Rotation2d pitch, boolean valid, double h, double impactV) {
+        public State(double v, Rotation2d yaw, Rotation2d pitch, boolean valid, double h, double impactV, double time) {
             this.launchVelocity = v;
             this.yaw = yaw;
             this.pitch = pitch;
             this.valid = valid;
             this.maxHeight = h;
             this.impactVelocity = impactV;
+            this.time = time;
         }
 
         public double getLaunchVelocity() { return launchVelocity; }
@@ -40,6 +42,7 @@ public final class TurretSolver {
         public boolean isValid() { return valid; }
         public double getMaxHeight() { return maxHeight; }
         public double getImpactVelocity() { return impactVelocity; }
+        public double getTime() {return time; }
     }
 
     // ============================ CONFIG ============================
@@ -177,8 +180,8 @@ public final class TurretSolver {
             }
         }
 
-        if (!found) return new State(0, new Rotation2d(), new Rotation2d(), false, 0, 0);
-        return new State(bestV, bestYaw, bestPitch, true, bestH, bestImpactV);
+        if (!found) return new State(0, new Rotation2d(), new Rotation2d(), false, 0, 0, 0);
+        return new State(bestV, bestYaw, bestPitch, true, bestH, bestImpactV, 0);
     }
 
     // ============================ TIME SOLVER ============================

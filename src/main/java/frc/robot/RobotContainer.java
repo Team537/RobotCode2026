@@ -51,6 +51,7 @@ public class RobotContainer {
   Raycast raycast;
 
   private final Field2d targetingField = new Field2d();
+  private final Field2d robotField = new Field2d();
 
   private static final String[] FIXED_TARGETS = { "A", "B" };
   private static final String[] ROBOT_TARGETS = { "X", "Y" };
@@ -149,6 +150,8 @@ public class RobotContainer {
     targetingField.setRobotPose(new Pose2d(100.0, 100.0, Rotation2d.kZero));
     SmartDashboard.putData("Targeting/Field", targetingField);
 
+    SmartDashboard.putData("Robot/Field", robotField);
+
     // Operator Adjustments
 
     turretOffsetDegrees = new AdjustableDouble("ErrorSettings/TurretOffset", 0.0, Double.NEGATIVE_INFINITY,
@@ -170,7 +173,7 @@ public class RobotContainer {
    * Updates all targeting objects on the Field2d display.
    * Automatically mirrors fixed targets if on Red alliance.
    */
-  public void updateTargetFieldObjects() {
+  public void updateFieldObjects() {
 
     // Update Fixed Targets
     for (String key : FIXED_TARGETS) {
@@ -198,6 +201,10 @@ public class RobotContainer {
           .getObject("Robot " + key)
           .setPose(new Pose2d(x, y, new Rotation2d()));
     }
+
+    robotField.setRobotPose(driveSubsystem.getPose());
+    robotField.getObject("Target").setPose(new Pose2d(targetingSupplier.get().toTranslation2d(),Rotation2d.kZero));
+
   }
 
   public void configureBindings() {
@@ -215,6 +222,12 @@ public class RobotContainer {
 
     Trigger solverValid =
         new Trigger(() -> TurretSolver.solve(driveSubsystem.getPose(),driveSubsystem.getVelocity(),targetingSupplier.get(),Constants.Turret.SOLVER_CONFIG).isValid());
+      
+    solverValid.onTrue(
+      Commands.runOnce(() -> SmartDashboard.putBoolean("Turret/SolverValid",true)).ignoringDisable(true)
+    ).onFalse(
+      Commands.runOnce(() -> SmartDashboard.putBoolean("Turret/SolverValid",false)).ignoringDisable(true)
+    );
 
     /* Shooter runs while button held */
     shootTrigger.whileTrue(
@@ -330,7 +343,7 @@ shootTrigger.onFalse(
       // 2 - Vision robot targeting
       if (xHeld || yHeld) {
         String targetKey = xHeld ? "X" : "Y";
-        String basePath = "/SmartDashboard/Targeting/RobotTargets/" + targetKey + "/";
+        String basePath = "Targeting/RobotTargets/" + targetKey + "/";
 
         // Parse team number from string safely
         int teamNumber;
@@ -371,17 +384,17 @@ shootTrigger.onFalse(
       switch (selectedFixedTarget) {
 
         case A: {
-          String basePath = "/SmartDashboard/Targeting/FixedTargets/A/";
+          String basePath = "Targeting/FixedTargets/A/";
 
           double x = SmartDashboard.getNumber(basePath + "X", 0.0);
           double y = SmartDashboard.getNumber(basePath + "Y", 0.0);
           double z = SmartDashboard.getNumber(basePath + "Z", 0.0);
-
+          
           return FieldUtil.flipIfRed(new Translation3d(x, y, z));
         }
 
         case B: {
-          String basePath = "/SmartDashboard/Targeting/FixedTargets/B/";
+          String basePath = "Targeting/FixedTargets/B/";
 
           double x = SmartDashboard.getNumber(basePath + "X", 0.0);
           double y = SmartDashboard.getNumber(basePath + "Y", 0.0);
@@ -392,7 +405,7 @@ shootTrigger.onFalse(
 
         default: {
           // Default safely to A if somehow null
-          String basePath = "/SmartDashboard/Targeting/FixedTargets/A/";
+          String basePath = "Targeting/FixedTargets/A/";
 
           double x = SmartDashboard.getNumber(basePath + "X", 0.0);
           double y = SmartDashboard.getNumber(basePath + "Y", 0.0);

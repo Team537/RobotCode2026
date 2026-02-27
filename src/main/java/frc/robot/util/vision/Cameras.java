@@ -48,6 +48,18 @@ public enum Cameras {
         VisionOdometryConstants.CENTER_CAMERA_TRANSLATION,
         VisionOdometryConstants.CENTER_SINGLE_TAG_STANDARD_DEVIATION,
         VisionOdometryConstants.CENTER_MULTI_TAG_STANDARD_DEVIATION
+    ),
+    LEFT_CAMERA(VisionOdometryConstants.LEFT_CAMERA_NAME,
+        VisionOdometryConstants.LEFT_CAMERA_ROTATION,
+        VisionOdometryConstants.LEFT_CAMERA_TRANSLATION,
+        VisionOdometryConstants.LEFT_SINGLE_TAG_STANDARD_DEVIATION,
+        VisionOdometryConstants.LEFT_MULTI_TAG_STANDARD_DEVIATION
+    ),
+    RIGHT_CAMERA(VisionOdometryConstants.RIGHT_CAMERA_NAME,
+        VisionOdometryConstants.RIGHT_CAMERA_ROTATION,
+        VisionOdometryConstants.RIGHT_CAMERA_TRANSLATION,
+        VisionOdometryConstants.RIGHT_SINGLE_TAG_STANDARD_DEVIATION,
+        VisionOdometryConstants.RIGHT_MULTI_TAG_STANDARD_DEVIATION
     );
 
     /**

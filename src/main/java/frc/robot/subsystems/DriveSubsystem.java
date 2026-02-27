@@ -22,12 +22,14 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.subsystems.vision.PhotonVisionOdometry;
+import frc.robot.subsystems.vision.Raycast;
 import frc.robot.util.swerve.Obstacle;
 import frc.robot.util.swerve.requests.RotationRequest;
 import frc.robot.util.swerve.requests.TranslationRequest;
@@ -40,6 +42,7 @@ public class DriveSubsystem extends SubsystemBase {
 
     private SwerveDrive swerveDrive;
     private PhotonVisionOdometry visionOdometry;
+    private Raycast raycast;
 
     PIDController xController;
     PIDController yController;
@@ -69,7 +72,6 @@ public class DriveSubsystem extends SubsystemBase {
         swerveDrive.setCosineCompensator(true);
         swerveDrive.setAngularVelocityCompensation(true, true, Constants.Drive.ANGULAR_VELOCITY_COMPENSATION_COEFFICIENT);
         swerveDrive.setModuleEncoderAutoSynchronize(true,Constants.Drive.ENCODER_AUTO_SYNCHRONIZE_DEADBAND.getDegrees());
-        swerveDrive.zeroGyro();
 
         RobotConfig pathPlannerConfig;
         try {
@@ -116,7 +118,8 @@ public class DriveSubsystem extends SubsystemBase {
             );
         }
 
-
+        // Grab a reference to the Raycast singleton.
+        raycast = Raycast.getInstance();
     }
 
     // ------------------------------
@@ -132,6 +135,9 @@ public class DriveSubsystem extends SubsystemBase {
      */
     @Override
     public void periodic() {
+
+        SmartDashboard.putNumber("Raw Gyro",swerveDrive.getGyro().getRawRotation3d().getZ());
+
         // Flatten all obstacle lists from suppliers
         List<Obstacle> obstacles = new ArrayList<>();
         obstaclesSuppliers.forEach(supplier -> supplier.get().forEach(obstacles::add));
@@ -151,11 +157,14 @@ public class DriveSubsystem extends SubsystemBase {
             visionOdometry.updatePoseEstimation(swerveDrive);
           }
 
+        // Update Raycast's pose.
         Pose2d pose = getPose();
+        raycast.publishRobotPose(pose);
+
+        // Publish data to the dashboard for visualization.
         SmartDashboard.putNumber("X Position", pose.getX());
         SmartDashboard.putNumber("Y Position", pose.getY());
         SmartDashboard.putNumber("Theta Position", pose.getRotation().getDegrees());
-
 
     }
 
@@ -185,7 +194,8 @@ public class DriveSubsystem extends SubsystemBase {
 
     /**
      * Returns the current estimated robot pose on the field.
-     *
+     * Synchronized to ensure thread safety.
+     * 
      * @return The robot's pose as a {@link Pose2d}.
      */
     public Pose2d getPose() {

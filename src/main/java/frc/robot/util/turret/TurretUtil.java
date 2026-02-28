@@ -1,5 +1,6 @@
 package frc.robot.util.turret;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import frc.robot.Constants;
@@ -55,17 +56,15 @@ public class TurretUtil {
             }
         }
 
-        // If no valid wrapped angle exists, clamp to nearest bound
+        // 2. FALLBACK: If no wrapped version fits in the range, 
+        // find which boundary is closest to the target angle itself.
         if (Double.isNaN(bestAngle)) {
-            if (cur < minA) {
-                bestAngle = minA;
-            } else if (cur > maxA) {
-                bestAngle = maxA;
-            } else {
-                double toMin = Math.abs(minA - cur);
-                double toMax = Math.abs(maxA - cur);
-                bestAngle = (toMin < toMax) ? minA : maxA;
-            }
+            // Normalize the distance from target to min/max boundaries
+            // This ensures 350 is seen as only 10 degrees away from 0
+            double distToMin = Math.abs(MathUtil.angleModulus(des - minA));
+            double distToMax = Math.abs(MathUtil.angleModulus(des - maxA));
+
+            bestAngle = (distToMin < distToMax) ? minA : maxA;
         }
 
         return new Rotation2d(bestAngle);

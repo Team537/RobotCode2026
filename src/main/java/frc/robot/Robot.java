@@ -29,7 +29,7 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
     SmartDashboard.putData("Command Scheduler", CommandScheduler.getInstance());
-    robotContainer.updateTargetFieldObjects();
+    robotContainer.updateFieldObjects();
     FieldStatePublisher.update();
     CommandTimeline.run();
   }

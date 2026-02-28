@@ -11,29 +11,30 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.swerve.CompositeDriveCommand;
-import frc.robot.commands.swerve.DriveToSequenceCommand;
 import frc.robot.commands.swerve.ManualRotationVelocityDirective;
 import frc.robot.commands.swerve.ManualTranslationVelocityDirective;
-import frc.robot.subsystems.*;
 import frc.robot.subsystems.DriveSubsystem;
+import frc.robot.subsystems.IntakePivotSubsystem;
+import frc.robot.subsystems.IntakeRollerSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
-import frc.robot.subsystems.TurretSubsystem;
 import frc.robot.subsystems.TransferSubsystem;
+import frc.robot.subsystems.TurretSubsystem;
 import frc.robot.subsystems.vision.Raycast;
 import frc.robot.util.dashboard.AdjustableDouble;
 import frc.robot.util.field.Alliance;
 import frc.robot.util.field.FieldUtil;
+import frc.robot.util.swerve.SwerveUtil;
 import frc.robot.util.swerve.requests.RotationDirective;
 import frc.robot.util.swerve.requests.TranslationDirective;
+import frc.robot.util.turret.TurretSolver;
 import frc.robot.util.vision.detections.RobotDetection;
 
 public class RobotContainer {
@@ -50,6 +51,7 @@ public class RobotContainer {
   Raycast raycast;
 
   private final Field2d targetingField = new Field2d();
+  private final Field2d robotField = new Field2d();
 
   private static final String[] FIXED_TARGETS = { "A", "B" };
   private static final String[] ROBOT_TARGETS = { "X", "Y" };
@@ -72,11 +74,12 @@ public class RobotContainer {
     driveSubsystem = new DriveSubsystem();
     intakePivot = new IntakePivotSubsystem();
     intakeRoller = new IntakeRollerSubsystem();
-    setupSmartDashboard();
-    configureBindings();
     turretSubsystem = new TurretSubsystem();
     shooterSubsystem = new ShooterSubsystem();
     transferSubsystem = new TransferSubsystem();
+
+    setupSmartDashboard();
+    configureBindings();
 
     // Setup Raycast.
     raycast = Raycast.getInstance();
@@ -144,8 +147,10 @@ public class RobotContainer {
     }
 
     // Set the targetting field's robot pose far away so its off screen
-    targetingField.setRobotPose(new Pose2d(100.0,100.0,Rotation2d.kZero));
+    targetingField.setRobotPose(new Pose2d(100.0, 100.0, Rotation2d.kZero));
     SmartDashboard.putData("Targeting/Field", targetingField);
+
+    SmartDashboard.putData("Robot/Field", robotField);
 
     // Operator Adjustments
 
@@ -157,13 +162,18 @@ public class RobotContainer {
         Double.POSITIVE_INFINITY);
     shooterPercent.setDashboardRounding(Constants.Operator.ErrorSettings.SHOOTER_PERCENT_DECIMAL_PLACE);
 
+    turretSubsystem.setTurretOffsetSupplier(
+        () -> Rotation2d.fromDegrees(SmartDashboard.getNumber("ErrorSettings/TurretOffset", 0.0)));
+    shooterSubsystem
+        .setSpeedMultiplierSupplier(() -> SmartDashboard.getNumber("ErrorSettings/ShooterPercent", 100.0) / 100.0);
+
   }
 
   /**
    * Updates all targeting objects on the Field2d display.
    * Automatically mirrors fixed targets if on Red alliance.
    */
-  public void updateTargetFieldObjects() {
+  public void updateFieldObjects() {
 
     // Update Fixed Targets
     for (String key : FIXED_TARGETS) {
@@ -191,9 +201,69 @@ public class RobotContainer {
           .getObject("Robot " + key)
           .setPose(new Pose2d(x, y, new Rotation2d()));
     }
+
+    robotField.setRobotPose(driveSubsystem.getPose());
+    robotField.getObject("Target").setPose(new Pose2d(targetingSupplier.get().toTranslation2d(), Rotation2d.kZero));
+
   }
 
   public void configureBindings() {
+
+    // Driver controls
+
+    Trigger stowTrigger = new Trigger(
+        () -> driverController.getAButton() || SwerveUtil.willRobotEnterRegion(driveSubsystem.getPose(),
+            driveSubsystem.getVelocity(), Constants.Field.TRENCH_REGION, Constants.Drive.HOOD_STOW_LOOKAHEAD_TIME));
+    stowTrigger.whileTrue(
+        turretSubsystem.getStowCommand());
+
+    Trigger shootTrigger =
+        new Trigger(() -> driverController.getRightBumperButton());
+
+    Trigger solverValid =
+        new Trigger(() -> TurretSolver.solve(driveSubsystem.getPose(),driveSubsystem.getVelocity(),targetingSupplier.get(),Constants.Turret.SOLVER_CONFIG).isValid());
+      
+    solverValid.onTrue(
+      Commands.runOnce(() -> SmartDashboard.putBoolean("Turret/SolverValid", true)).ignoringDisable(true)
+    ).onFalse(
+      Commands.runOnce(() -> SmartDashboard.putBoolean("Turret/SolverValid", false)).ignoringDisable(true)
+    );
+
+    /* Shooter runs while button held */
+    shootTrigger.whileTrue(
+        shooterSubsystem.getTargetCommand(
+            targetingSupplier,
+            driveSubsystem::getPose,
+            driveSubsystem::getVelocity
+        )
+    );
+
+    /* Intake pivot runs while button held */
+    shootTrigger.whileTrue(
+        intakePivot.deployIntakeCommand()
+    );
+
+    /* Intake roller runs while button held */
+    shootTrigger.whileTrue(
+        intakeRoller.getIntakeCommand()
+    );
+
+    /* Transfer runs ONLY while button AND solver valid */
+    shootTrigger
+        .and(solverValid)
+        .whileTrue(
+            transferSubsystem.getLoadCommand()
+        );
+
+/* Stop everything on button release */
+shootTrigger.onFalse(
+    Commands.parallel(
+        transferSubsystem.getStopCommand(),
+        shooterSubsystem.getStopCommand(),
+        intakePivot.raiseIntakeCommand(),
+        intakeRoller.getStopCommand()
+    )
+);
 
     // ==============================
     // Turret Offset Adjustment (POV Left / Right)
@@ -273,7 +343,7 @@ public class RobotContainer {
       // 2 - Vision robot targeting
       if (xHeld || yHeld) {
         String targetKey = xHeld ? "X" : "Y";
-        String basePath = "/SmartDashboard/Targeting/RobotTargets/" + targetKey + "/";
+        String basePath = "Targeting/RobotTargets/" + targetKey + "/";
 
         // Parse team number from string safely
         int teamNumber;
@@ -283,7 +353,8 @@ public class RobotContainer {
           teamNumber = -1;
         }
 
-        // Get the robot using the alliance if possible. We will never want to target a robot of the opposing alliance.
+        // Get the robot using the alliance if possible. We will never want to target a
+        // robot of the opposing alliance.
         Optional<RobotDetection> detectedRobot;
         if (alliance.isPresent()) {
           detectedRobot = raycast.getRobot(teamNumber, alliance.get(), 1);
@@ -309,21 +380,20 @@ public class RobotContainer {
         }
       }
 
-      // 3️ - Fixed target fallback (A/B)
+      // 3 - Fixed target fallback (A/B)
       switch (selectedFixedTarget) {
 
         case A: {
-          String basePath = "/SmartDashboard/Targeting/FixedTargets/A/";
+          String basePath = "Targeting/FixedTargets/A/";
 
           double x = SmartDashboard.getNumber(basePath + "X", 0.0);
           double y = SmartDashboard.getNumber(basePath + "Y", 0.0);
           double z = SmartDashboard.getNumber(basePath + "Z", 0.0);
-
           return FieldUtil.flipIfRed(new Translation3d(x, y, z));
         }
 
         case B: {
-          String basePath = "/SmartDashboard/Targeting/FixedTargets/B/";
+          String basePath = "Targeting/FixedTargets/B/";
 
           double x = SmartDashboard.getNumber(basePath + "X", 0.0);
           double y = SmartDashboard.getNumber(basePath + "Y", 0.0);
@@ -334,7 +404,7 @@ public class RobotContainer {
 
         default: {
           // Default safely to A if somehow null
-          String basePath = "/SmartDashboard/Targeting/FixedTargets/A/";
+          String basePath = "Targeting/FixedTargets/A/";
 
           double x = SmartDashboard.getNumber(basePath + "X", 0.0);
           double y = SmartDashboard.getNumber(basePath + "Y", 0.0);
@@ -383,38 +453,9 @@ public class RobotContainer {
     driveSubsystem.setDefaultCommand(manualDriveCommand);
 
     turretSubsystem.setDefaultCommand(turretSubsystem.getTargetCommand(
-      targetingSupplier,
-      driveSubsystem::getPose,
-      driveSubsystem::getVelocity
-    ));
-
-    Trigger stowTrigger = new Trigger(() -> driverController.getAButton());
-    stowTrigger.whileTrue(
-      turretSubsystem.getStowCommand()
-    );
-  
-    Trigger shootTrigger = new Trigger(() -> driverController.getRightBumperButton());
-    shootTrigger.onTrue(
-      transferSubsystem.getLoadCommand()
-    ).onTrue(
-      shooterSubsystem.getTargetCommand(
         targetingSupplier,
         driveSubsystem::getPose,
-        driveSubsystem::getVelocity
-      )
-    ).onTrue(
-      intakePivot.deployIntakeCommand()
-    ).onTrue(
-      intakeRoller.getIntakeCommand()
-    ).onFalse(
-      transferSubsystem.getStopCommand()
-    ).onFalse(
-      shooterSubsystem.getStopCommand()
-    ).onFalse(
-      intakePivot.raiseIntakeCommand()
-    ).onFalse(
-      intakeRoller.getStopCommand()
-    );
+        driveSubsystem::getVelocity));
 
   }
 

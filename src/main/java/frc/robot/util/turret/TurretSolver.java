@@ -1,5 +1,6 @@
 package frc.robot.util.turret;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -23,14 +24,16 @@ public final class TurretSolver {
         private final double maxHeight;
         private final double impactVelocity;
         private final boolean valid;
+        private final double time;
 
-        public State(double v, Rotation2d yaw, Rotation2d pitch, boolean valid, double h, double impactV) {
+        public State(double v, Rotation2d yaw, Rotation2d pitch, boolean valid, double h, double impactV, double time) {
             this.launchVelocity = v;
             this.yaw = yaw;
             this.pitch = pitch;
             this.valid = valid;
             this.maxHeight = h;
             this.impactVelocity = impactV;
+            this.time = time;
         }
 
         public double getLaunchVelocity() { return launchVelocity; }
@@ -39,6 +42,7 @@ public final class TurretSolver {
         public boolean isValid() { return valid; }
         public double getMaxHeight() { return maxHeight; }
         public double getImpactVelocity() { return impactVelocity; }
+        public double getTime() {return time; }
     }
 
     // ============================ CONFIG ============================
@@ -49,10 +53,15 @@ public final class TurretSolver {
         public final double maxLaunchSpeed;
         public final Translation3d turretOffset;
 
-        public final Rotation2d minPitch;  // can be same as maxPitch if fixed
+        public final Rotation2d minPitch;
         public final Rotation2d maxPitch;
         public final double maxHeight;
 
+        // NEW
+        public final Rotation2d minYaw;
+        public final Rotation2d maxYaw;
+
+        // === Original Constructor (assume full yaw range) ===
         public Config(
                 double gravity,
                 double poseLatency,
@@ -62,6 +71,31 @@ public final class TurretSolver {
                 Rotation2d maxPitch,
                 double maxHeight
         ) {
+            this(
+                    gravity,
+                    poseLatency,
+                    maxLaunchSpeed,
+                    turretOffset,
+                    minPitch,
+                    maxPitch,
+                    maxHeight,
+                    Rotation2d.fromDegrees(-180),
+                    Rotation2d.fromDegrees(180)
+            );
+        }
+
+        // === New Constructor With Yaw Limits ===
+        public Config(
+                double gravity,
+                double poseLatency,
+                double maxLaunchSpeed,
+                Translation3d turretOffset,
+                Rotation2d minPitch,
+                Rotation2d maxPitch,
+                double maxHeight,
+                Rotation2d minYaw,
+                Rotation2d maxYaw
+        ) {
             this.gravity = gravity;
             this.poseLatency = poseLatency;
             this.maxLaunchSpeed = maxLaunchSpeed;
@@ -69,6 +103,9 @@ public final class TurretSolver {
             this.minPitch = minPitch;
             this.maxPitch = maxPitch;
             this.maxHeight = maxHeight;
+
+            this.minYaw = minYaw;
+            this.maxYaw = maxYaw;
         }
     }
 
@@ -124,12 +161,21 @@ public final class TurretSolver {
 
             double thetaField = Math.atan2((ry / t) - vry, (rx / t) - vrx);
             Rotation2d yaw = Rotation2d.fromRadians(thetaField).minus(correctedPose.getRotation());
+            if (!isYawInRange(yaw, config.minYaw, config.maxYaw)) continue;
 
             double impactV = v * Math.sin(phi) - config.gravity * t;
 
             if (impactV >= 0) continue; // must be falling
 
-            double cost = v / Math.abs(impactV);
+            // Cost function for selecting among multiple valid ballistic solutions:
+            // - We square the launch speed (v^2) so that higher launch velocities are
+            //   penalized more aggressively than with a linear term. This biases the
+            //   solver toward lower-speed shots when several trajectories can reach
+            //   the target.
+            // - We divide by |impactV| so that, for the same launch speed, trajectories
+            //   with higher (faster) downward impact velocity are preferred, since they
+            //   tend to be less sensitive to small disturbances at the target.
+            double cost = (v * v) / Math.abs(impactV);
 
             if (cost < bestCost) {
                 bestCost = cost;
@@ -142,8 +188,8 @@ public final class TurretSolver {
             }
         }
 
-        if (!found) return new State(0, new Rotation2d(), new Rotation2d(), false, 0, 0);
-        return new State(bestV, bestYaw, bestPitch, true, bestH, bestImpactV);
+        if (!found) return new State(0, new Rotation2d(), new Rotation2d(), false, 0, 0, 0);
+        return new State(bestV, bestYaw, bestPitch, true, bestH, bestImpactV, 0);
     }
 
     // ============================ TIME SOLVER ============================
@@ -214,4 +260,21 @@ public final class TurretSolver {
 
         return dHorizontalRequired - dHorizontalAvailable;
     }
+
+    private static boolean isYawInRange(Rotation2d yaw,
+                                    Rotation2d min,
+                                    Rotation2d max) {
+
+        double y = MathUtil.angleModulus(yaw.getRadians());
+        double minR = MathUtil.angleModulus(min.getRadians());
+        double maxR = MathUtil.angleModulus(max.getRadians());
+
+        if (minR <= maxR) {
+            return y >= minR && y <= maxR;
+        } else {
+            // Wrapped range (ex: 270° → 90°)
+            return y >= minR || y <= maxR;
+        }
+    }
+
 }

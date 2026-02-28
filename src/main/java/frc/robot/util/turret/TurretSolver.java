@@ -167,6 +167,14 @@ public final class TurretSolver {
 
             if (impactV >= 0) continue; // must be falling
 
+            // Cost function for selecting among multiple valid ballistic solutions:
+            // - We square the launch speed (v^2) so that higher launch velocities are
+            //   penalized more aggressively than with a linear term. This biases the
+            //   solver toward lower-speed shots when several trajectories can reach
+            //   the target.
+            // - We divide by |impactV| so that, for the same launch speed, trajectories
+            //   with higher (faster) downward impact velocity are preferred, since they
+            //   tend to be less sensitive to small disturbances at the target.
             double cost = (v * v) / Math.abs(impactV);
 
             if (cost < bestCost) {

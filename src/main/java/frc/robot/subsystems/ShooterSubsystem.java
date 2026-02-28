@@ -259,7 +259,7 @@ public class ShooterSubsystem extends SubsystemBase {
 
     /**
      * sets the supplier of the speed multiplier
-     * @param turretOffsetSupplier the supplier of the speed multiplier. 1 means no multiplication
+     * @param speedMultiplierSupplier the supplier of the speed multiplier. 1 means no multiplication
      */
     public void setSpeedMultiplierSupplier(Supplier<Double> speedMultiplierSupplier) {
         this.speedMultiplierSupplier = speedMultiplierSupplier;

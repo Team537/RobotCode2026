@@ -203,7 +203,7 @@ public class RobotContainer {
     }
 
     robotField.setRobotPose(driveSubsystem.getPose());
-    robotField.getObject("Target").setPose(new Pose2d(targetingSupplier.get().toTranslation2d(),Rotation2d.kZero));
+    robotField.getObject("Target").setPose(new Pose2d(targetingSupplier.get().toTranslation2d(), Rotation2d.kZero));
 
   }
 

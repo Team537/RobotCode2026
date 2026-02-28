@@ -241,7 +241,7 @@ public class Constants {
 
         public static final Region3d RED_TRENCH_REGION = FieldUtil.flip(BLUE_TRENCH_REGION);
 
-        public static final Region3d TRENCH_REGION = new CompositeRegion3d(List.of(BLUE_TRENCH_REGION,RED_TRENCH_REGION));
+        public static final Region3d TRENCH_REGION = new CompositeRegion3d(List.of(BLUE_TRENCH_REGION, RED_TRENCH_REGION));
 
     }
 

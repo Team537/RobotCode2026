@@ -230,11 +230,11 @@ public class Constants {
             List.of(
                 new RectangularRegion3d(
                     new Translation2d(3.996, 8.067),
-                    new Translation2d(5.222,6.811)
+                    new Translation2d(5.222, 6.811)
                 ),
                 new RectangularRegion3d(
                     new Translation2d(3.996, 1.307),
-                    new Translation2d(5.222,0.000)
+                    new Translation2d(5.222, 0.000)
                 )
             )
         );

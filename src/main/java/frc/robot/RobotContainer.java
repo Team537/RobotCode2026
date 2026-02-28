@@ -389,7 +389,6 @@ shootTrigger.onFalse(
           double x = SmartDashboard.getNumber(basePath + "X", 0.0);
           double y = SmartDashboard.getNumber(basePath + "Y", 0.0);
           double z = SmartDashboard.getNumber(basePath + "Z", 0.0);
-          
           return FieldUtil.flipIfRed(new Translation3d(x, y, z));
         }
 

@@ -112,7 +112,7 @@ public class TurretSubsystem extends SubsystemBase {
                 Constants.Turret.MAX_ROTATION
             );
 
-        PositionVoltage positionRequest = new PositionVoltage(clampedAngle.plus(turretOffsetSupplier.get()).getRadians());
+        PositionVoltage positionRequest = new PositionVoltage(clampedAngle.getRadians() + turretOffsetSupplier.get().getRadians());
         turretMotor.setControl(positionRequest);
         SmartDashboard.putNumber("Turret Target",clampedAngle.getDegrees());
 
@@ -148,7 +148,7 @@ public class TurretSubsystem extends SubsystemBase {
      * @return the current turret yaw (robot-relative)
      */
     public Rotation2d getAngle() {
-        return Rotation2d.fromRadians(turretMotor.getPosition().getValueAsDouble()).minus(turretOffsetSupplier.get());
+        return Rotation2d.fromRadians(turretMotor.getPosition().getValueAsDouble() - turretOffsetSupplier.get().getRadians());
     }
 
 
@@ -168,7 +168,7 @@ public class TurretSubsystem extends SubsystemBase {
      * @param rotation The position to set to
      */
     public void resetTurretAngle(Rotation2d rotation) {
-        turretMotor.setPosition(rotation.plus(turretOffsetSupplier.get()).getRadians());
+        turretMotor.setPosition(rotation.getRadians() + turretOffsetSupplier.get().getRadians());
     }
 
      /**

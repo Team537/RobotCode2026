@@ -349,7 +349,7 @@ public class Constants {
             TURRET_TRANSLATION,
             Rotation2d.fromDegrees(45),
             Rotation2d.fromDegrees(85),
-            5.0,
+            3.05,
             MIN_ROTATION,
             MAX_ROTATION
         );

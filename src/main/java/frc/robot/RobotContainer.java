@@ -78,6 +78,8 @@ public class RobotContainer {
     shooterSubsystem = new ShooterSubsystem();
     transferSubsystem = new TransferSubsystem();
 
+    shooterSubsystem.setYawPitchSuppliers(() -> turretSubsystem.getAngle(), () -> turretSubsystem.getHoodAngle());
+
     setupSmartDashboard();
     configureBindings();
 
@@ -335,7 +337,7 @@ shootTrigger.onFalse(
       // 1 - Alliance hub targeting
       Optional<Alliance> alliance = FieldUtil.getAlliance();
       if (alliance.isPresent()) {
-        if (FieldUtil.flipIfRed(Constants.Field.BLUE_ALLIANCE_ZONE).contains(robotPosition)) {
+        if (true || FieldUtil.flipIfRed(Constants.Field.BLUE_ALLIANCE_ZONE).contains(robotPosition)) { //TODO: Fix via removal of the true || 
           return FieldUtil.flipIfRed(Constants.Field.BLUE_HUB_TRANSLATION);
         }
       }

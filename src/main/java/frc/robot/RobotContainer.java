@@ -15,8 +15,10 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.swerve.CompositeDriveCommand;
 import frc.robot.commands.swerve.ManualRotationVelocityDirective;
@@ -377,7 +379,7 @@ public class RobotContainer {
       // 1 - Alliance hub targeting
       Optional<Alliance> alliance = FieldUtil.getAlliance();
       if (alliance.isPresent()) {
-        if (FieldUtil.flipIfRed(Constants.Field.BLUE_ALLIANCE_ZONE).contains(robotPosition)) { //TODO: Fix via removal of the true || 
+        if (FieldUtil.flipIfRed(Constants.Field.BLUE_ALLIANCE_ZONE).contains(robotPosition)) {
           return FieldUtil.flipIfRed(Constants.Field.BLUE_HUB_TRANSLATION);
         }
       }
@@ -462,8 +464,6 @@ public class RobotContainer {
 
   public void scheduleTeleOp() {
 
-    // DISABLED because of errors during drive
-
     // Setup the translational directive for drive subsystem
     TranslationDirective manualTranslationVelocityDirective = new ManualTranslationVelocityDirective(
         driveSubsystem,
@@ -503,7 +503,41 @@ public class RobotContainer {
 
   public void scheduleAutonomous() {
 
+      turretSubsystem.setDefaultCommand(turretSubsystem.getTargetCommand(
+        targetingSupplier,
+        driveSubsystem::getPose,
+        driveSubsystem::getVelocity));
 
+      Command auto = Commands.sequence(
+      
+        Commands.deadline(
+
+          new WaitCommand(SmartDashboard.getNumber("Auto/StartDelay",0.0)),
+          
+          intakePivot.raiseIntakeCommand()
+
+        ),
+
+        Commands.deadline(
+
+          new WaitCommand(SmartDashboard.getNumber("Auto/PreloadShootTime",0.0)),
+          
+          transferSubsystem.getLoadCommand(),
+          shooterSubsystem.getTargetCommand(
+              targetingSupplier,
+              driveSubsystem::getPose,
+              driveSubsystem::getVelocity)
+
+        ),
+
+        Commands.parallel(
+          transferSubsystem.getStopCommand(),
+          shooterSubsystem.getStopCommand() 
+        )
+
+      );
+
+      CommandScheduler.getInstance().schedule(auto);
 
   }
 

@@ -92,13 +92,13 @@ public class TransferSubsystem extends SubsystemBase {
      * @return a command that runs the transfer at the load speed
      */
     public Command getLoadCommand() {
-        return getSetVelocityCommand(Constants.Transfer.LOAD_SPEED);
+        return getSetVelocityCommand(Constants.Transfer.LOAD_SPEED).withName("TransferLoad");
     }
 
     /**
      * @return a command that stops the transfer motor
      */
     public Command getStopCommand() {
-        return getSetVelocityCommand(0.0);
+        return getSetVelocityCommand(0.0).withName("TransferStop");
     }
 }

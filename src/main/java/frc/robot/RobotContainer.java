@@ -57,6 +57,7 @@ public class RobotContainer {
   private static final String[] ROBOT_TARGETS = { "X", "Y" };
 
   AdjustableDouble turretOffsetDegrees;
+  AdjustableDouble hoodOffsetDegrees;
   AdjustableDouble shooterPercent;
 
   private static enum FixedTarget {
@@ -107,10 +108,14 @@ public class RobotContainer {
 
     Command resetTurretCommand = new InstantCommand(() -> {
       turretSubsystem.resetTurretAngle(Constants.Turret.START_POSITION);
+    }).ignoringDisable(true);
+
+    Command resetHoodCommand = new InstantCommand(() -> {
       turretSubsystem.resetHoodAngle(Constants.Turret.HOOD_START_POSITION);
     }).ignoringDisable(true);
 
     SmartDashboard.putData("Reset Turret Angle", resetTurretCommand);
+    SmartDashboard.putData("Reset Hood Angle", resetTurretCommand);
     // Targeting Data
 
     // Fixed field targets (static presets with forced defaults every boot)
@@ -160,14 +165,20 @@ public class RobotContainer {
         Double.POSITIVE_INFINITY);
     turretOffsetDegrees.setDashboardRounding(Constants.Operator.ErrorSettings.TURRET_OFFSET_DECIMAL_PLACE);
 
+    hoodOffsetDegrees = new AdjustableDouble("ErrorSettings/HoodOffset", 0.0, Double.NEGATIVE_INFINITY,
+        Double.POSITIVE_INFINITY);
+    hoodOffsetDegrees.setDashboardRounding(Constants.Operator.ErrorSettings.HOOD_OFFSET_DECIMAL_PLACE);
+
     shooterPercent = new AdjustableDouble("ErrorSettings/ShooterPercent", 100.0, Double.NEGATIVE_INFINITY,
         Double.POSITIVE_INFINITY);
     shooterPercent.setDashboardRounding(Constants.Operator.ErrorSettings.SHOOTER_PERCENT_DECIMAL_PLACE);
 
     turretSubsystem.setTurretOffsetSupplier(
-        () -> Rotation2d.fromDegrees(SmartDashboard.getNumber("ErrorSettings/TurretOffset", 0.0)));
+        () -> Rotation2d.fromDegrees(-turretOffsetDegrees.get()));
+    turretSubsystem.setHoodOffsetSupplier(
+        () -> Rotation2d.fromDegrees(hoodOffsetDegrees.get()));
     shooterSubsystem
-        .setSpeedMultiplierSupplier(() -> SmartDashboard.getNumber("ErrorSettings/ShooterPercent", 100.0) / 100.0);
+        .setSpeedMultiplierSupplier(() -> shooterPercent.get() / 100.0);
 
   }
 
@@ -214,13 +225,16 @@ public class RobotContainer {
     // Driver controls
 
     Trigger stowTrigger = new Trigger(
-        () -> driverController.getAButton() || SwerveUtil.willRobotEnterRegion(driveSubsystem.getPose(),
+        () -> driverController.getBButton() || SwerveUtil.willRobotEnterRegion(driveSubsystem.getPose(),
             driveSubsystem.getVelocity(), Constants.Field.TRENCH_REGION, Constants.Drive.HOOD_STOW_LOOKAHEAD_TIME));
     stowTrigger.whileTrue(
         turretSubsystem.getStowCommand());
 
     Trigger shootTrigger =
         new Trigger(() -> driverController.getRightBumperButton());
+
+    Trigger intakeTrigger =
+        new Trigger(() -> driverController.getAButton());
 
     Trigger solverValid =
         new Trigger(() -> TurretSolver.solve(driveSubsystem.getPose(),driveSubsystem.getVelocity(),targetingSupplier.get(),Constants.Turret.SOLVER_CONFIG).isValid());
@@ -240,32 +254,38 @@ public class RobotContainer {
         )
     );
 
-    /* Intake pivot runs while button held */
-    shootTrigger.whileTrue(
-        intakePivot.deployIntakeCommand()
-    );
-
-    /* Intake roller runs while button held */
-    shootTrigger.whileTrue(
-        intakeRoller.getIntakeCommand()
-    );
-
     /* Transfer runs ONLY while button AND solver valid */
     shootTrigger
-        .and(solverValid)
         .whileTrue(
             transferSubsystem.getLoadCommand()
         );
 
-/* Stop everything on button release */
-shootTrigger.onFalse(
-    Commands.parallel(
-        transferSubsystem.getStopCommand(),
-        shooterSubsystem.getStopCommand(),
-        intakePivot.raiseIntakeCommand(),
-        intakeRoller.getStopCommand()
-    )
-);
+    /* Intake pivot runs while button held */
+    intakeTrigger.whileTrue(
+        intakePivot.deployIntakeCommand()
+    );
+
+    /* Intake roller runs while button held */
+    intakeTrigger.whileTrue(
+        intakeRoller.getIntakeCommand()
+    );
+  
+
+    /* Stop shooter on button release */
+    shootTrigger.onFalse(
+        Commands.parallel(
+            transferSubsystem.getStopCommand(),
+            shooterSubsystem.getStopCommand()
+        )
+    );
+
+    /* Stop intake on button release */
+    intakeTrigger.onFalse(
+        Commands.parallel(
+            intakePivot.raiseIntakeCommand(),
+            intakeRoller.getStopCommand()
+        )
+    );
 
     // ==============================
     // Turret Offset Adjustment (POV Left / Right)
@@ -287,6 +307,26 @@ shootTrigger.onFalse(
     })
         .whileTrue(
             turretOffsetDegrees.getHeldIntervalCommand(Constants.Operator.ErrorSettings.TURRET_OFFSET_INCREASE,
+                Constants.Operator.ErrorSettings.SETTINGS_DELAY_TIME));
+
+    // ==============================
+    // Hood Offset Adjustment (Left Bumper / Right Bumper)
+    // ==============================
+
+    // Left Bumper : Decrease turret offset
+    new Trigger(() -> {
+      return operatorController.getLeftBumperButton();
+    })
+        .whileTrue(
+            hoodOffsetDegrees.getHeldIntervalCommand(-Constants.Operator.ErrorSettings.HOOD_OFFSET_INCREASE,
+                Constants.Operator.ErrorSettings.SETTINGS_DELAY_TIME));
+
+    // Right Bumper : Increase turret offset
+    new Trigger(() -> {
+      return operatorController.getRightBumperButton();
+    })
+        .whileTrue(
+            hoodOffsetDegrees.getHeldIntervalCommand(Constants.Operator.ErrorSettings.HOOD_OFFSET_INCREASE,
                 Constants.Operator.ErrorSettings.SETTINGS_DELAY_TIME));
 
     // ==============================
@@ -337,7 +377,7 @@ shootTrigger.onFalse(
       // 1 - Alliance hub targeting
       Optional<Alliance> alliance = FieldUtil.getAlliance();
       if (alliance.isPresent()) {
-        if (true || FieldUtil.flipIfRed(Constants.Field.BLUE_ALLIANCE_ZONE).contains(robotPosition)) { //TODO: Fix via removal of the true || 
+        if (FieldUtil.flipIfRed(Constants.Field.BLUE_ALLIANCE_ZONE).contains(robotPosition)) { //TODO: Fix via removal of the true || 
           return FieldUtil.flipIfRed(Constants.Field.BLUE_HUB_TRANSLATION);
         }
       }
@@ -462,6 +502,8 @@ shootTrigger.onFalse(
   }
 
   public void scheduleAutonomous() {
+
+
 
   }
 

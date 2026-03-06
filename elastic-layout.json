@@ -121,7 +121,7 @@
             "x": 256.0,
             "y": 128.0,
             "width": 256.0,
-            "height": 192.0,
+            "height": 128.0,
             "type": "Command",
             "properties": {
               "topic": "/SmartDashboard/Reset Pose",
@@ -132,9 +132,9 @@
           },
           {
             "title": "Shooter Percent",
-            "x": 576.0,
-            "y": 0.0,
-            "width": 192.0,
+            "x": 960.0,
+            "y": 320.0,
+            "width": 256.0,
             "height": 128.0,
             "type": "Text Display",
             "properties": {
@@ -145,15 +145,16 @@
             }
           },
           {
-            "title": "TurretOffset",
-            "x": 768.0,
-            "y": 0.0,
-            "width": 192.0,
+            "title": "Turret Offset",
+            "x": 960.0,
+            "y": 448.0,
+            "width": 256.0,
             "height": 128.0,
             "type": "Text Display",
             "properties": {
-              "topic": "/SmartDashboard/ErrorSettings/Turret Offset",
+              "topic": "/SmartDashboard/ErrorSettings/TurretOffset",
               "period": 0.06,
+              "data_type": "double",
               "show_submit_button": false
             }
           },
@@ -172,9 +173,9 @@
           {
             "title": "Reset Turret Angle",
             "x": 256.0,
-            "y": 320.0,
+            "y": 256.0,
             "width": 256.0,
-            "height": 192.0,
+            "height": 128.0,
             "type": "Command",
             "properties": {
               "topic": "/SmartDashboard/Reset Turret Angle",
@@ -185,10 +186,10 @@
           },
           {
             "title": "SolverValid",
-            "x": 576.0,
-            "y": 128.0,
-            "width": 384.0,
-            "height": 192.0,
+            "x": 512.0,
+            "y": 0.0,
+            "width": 448.0,
+            "height": 512.0,
             "type": "Boolean Box",
             "properties": {
               "topic": "/SmartDashboard/Turret/SolverValid",
@@ -201,87 +202,31 @@
             }
           },
           {
-            "title": "Target Shooter Velocity",
-            "x": 576.0,
-            "y": 512.0,
-            "width": 192.0,
-            "height": 128.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/SmartDashboard/Target Shooter Velocity",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": true
-            }
-          },
-          {
-            "title": "Target Turret Angle",
-            "x": 768.0,
-            "y": 512.0,
-            "width": 192.0,
-            "height": 128.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/SmartDashboard/Target Turret Angle",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": true
-            }
-          },
-          {
-            "title": "Target Hood Angle",
+            "title": "HoodOffset",
             "x": 960.0,
-            "y": 512.0,
-            "width": 192.0,
+            "y": 576.0,
+            "width": 256.0,
             "height": 128.0,
             "type": "Text Display",
             "properties": {
-              "topic": "/SmartDashboard/Target Hood Angle",
-              "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": true
-            }
-          },
-          {
-            "title": "Current Wheel Velocity",
-            "x": 576.0,
-            "y": 320.0,
-            "width": 128.0,
-            "height": 128.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/SmartDashboard/Current Wheel Velocity",
-              "period": 0.5,
-              "data_type": "double",
-              "show_submit_button": false
-            }
-          },
-          {
-            "title": "Current Turret Angle",
-            "x": 704.0,
-            "y": 320.0,
-            "width": 128.0,
-            "height": 128.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/SmartDashboard/Current Turret Angle",
+              "topic": "/SmartDashboard/ErrorSettings/HoodOffset",
               "period": 0.06,
               "data_type": "double",
               "show_submit_button": false
             }
           },
           {
-            "title": "Current Hood Angle",
-            "x": 832.0,
-            "y": 320.0,
-            "width": 128.0,
+            "title": "Reset Hood Angle",
+            "x": 256.0,
+            "y": 384.0,
+            "width": 256.0,
             "height": 128.0,
-            "type": "Text Display",
+            "type": "Command",
             "properties": {
-              "topic": "/SmartDashboard/Current Hood Angle",
+              "topic": "/SmartDashboard/Reset Hood Angle",
               "period": 0.06,
-              "data_type": "double",
-              "show_submit_button": false
+              "show_type": true,
+              "maximize_button_space": false
             }
           }
         ]

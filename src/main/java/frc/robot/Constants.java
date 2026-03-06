@@ -50,6 +50,8 @@ public class Constants {
             public static final double SETTINGS_DELAY_TIME = 0.5;
             public static final double TURRET_OFFSET_INCREASE = 0.1; // Degrees to increase per tick
             public static final int TURRET_OFFSET_DECIMAL_PLACE = 1;
+            public static final double HOOD_OFFSET_INCREASE = 0.1;
+            public static final int HOOD_OFFSET_DECIMAL_PLACE = 1;
             public static final double SHOOTER_PERCENT_INCREASE = 0.2; // Percent to increase per tick
             public static final int SHOOTER_PERCENT_DECIMAL_PLACE = 1;
 

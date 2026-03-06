@@ -197,7 +197,7 @@ public class ShooterSubsystem extends SubsystemBase {
         return new RunCommand(() -> {
             leadShooterMotor.stopMotor();
             followerShooterMotor.stopMotor();
-        },this);
+        },this).withName("StopShooter");
     }
 
     /**
@@ -238,7 +238,7 @@ public class ShooterSubsystem extends SubsystemBase {
             SmartDashboard.putNumber("Target Max Height", solution.getMaxHeight());
             SmartDashboard.putNumber("Target Impact Velocity", solution.getImpactVelocity());
             return solution.getLaunchVelocity();
-        });
+        }).withName("Target Shooter");
     }
 
 

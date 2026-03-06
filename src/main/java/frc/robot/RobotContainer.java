@@ -169,7 +169,7 @@ public class RobotContainer {
         Double.POSITIVE_INFINITY);
     hoodOffsetDegrees.setDashboardRounding(Constants.Operator.ErrorSettings.HOOD_OFFSET_DECIMAL_PLACE);
 
-    shooterPercent = new AdjustableDouble("ErrorSettings/ShooterPercent", 100.0, Double.NEGATIVE_INFINITY,
+    shooterPercent = new AdjustableDouble("ErrorSettings/ShooterPercent", Constants.Operator.ErrorSettings.SHOOTER_PERCENT_DEFAULT, Double.NEGATIVE_INFINITY,
         Double.POSITIVE_INFINITY);
     shooterPercent.setDashboardRounding(Constants.Operator.ErrorSettings.SHOOTER_PERCENT_DECIMAL_PLACE);
 

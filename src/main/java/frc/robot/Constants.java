@@ -55,6 +55,8 @@ public class Constants {
             public static final double SHOOTER_PERCENT_INCREASE = 0.2; // Percent to increase per tick
             public static final int SHOOTER_PERCENT_DECIMAL_PLACE = 1;
 
+            public static final double SHOOTER_PERCENT_DEFAULT = 75.0;
+
         }
 
     }

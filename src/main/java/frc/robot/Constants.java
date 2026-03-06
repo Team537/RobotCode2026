@@ -425,8 +425,9 @@ public class Constants {
         public static final Translation3d LEFT_CAMERA_TRANSLATION = new Translation3d(
                 Units.inchesToMeters(-2.250),
                 Units.inchesToMeters(9.725),
-                Units.inchesToMeters(10.750));
+                Units.inchesToMeters(20.25));
 
+        long num = 999_999_999;
         public static final Vector<N3> LEFT_SINGLE_TAG_STANDARD_DEVIATION = VecBuilder.fill(4, 4, 8);
         public static final Vector<N3> LEFT_MULTI_TAG_STANDARD_DEVIATION = VecBuilder.fill(0.5, 0.5, 1);
 

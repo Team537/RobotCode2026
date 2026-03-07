@@ -107,6 +107,7 @@ public class DriveSubsystem extends SubsystemBase {
 
         obstaclesSuppliers = new ArrayList<>();
 
+        Pathfinding.ensureInitialized();
         PathfindingCommand.warmupCommand().schedule();
 
         SmartDashboard.putNumber("Compensation Coefficient", Constants.Drive.ANGULAR_VELOCITY_COMPENSATION_COEFFICIENT);

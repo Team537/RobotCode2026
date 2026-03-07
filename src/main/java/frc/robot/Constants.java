@@ -77,7 +77,7 @@ public class Constants {
             public static final Pose2d NEUTRAL_LEFT_INTAKE_POSE = new Pose2d(7.701,4.672,Rotation2d.kCW_90deg);
 
             public static final Pose2d NEUTRAL_RIGHT_READY_INTAKE_POSE = new Pose2d(7.701,1.169,Rotation2d.kCCW_90deg);
-            public static final Pose2d NEUTRAL_RIGHT_INTAKE_POSE = new Pose2d(7.701,3.589,Rotation2d.kCW_90deg);
+            public static final Pose2d NEUTRAL_RIGHT_INTAKE_POSE = new Pose2d(7.701,3.589,Rotation2d.kCCW_90deg);
 
 
         }

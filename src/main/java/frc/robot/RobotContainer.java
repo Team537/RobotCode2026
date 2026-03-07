@@ -310,45 +310,45 @@ public class RobotContainer {
                 Constants.Operator.ErrorSettings.SETTINGS_DELAY_TIME));
 
     // ==============================
-    // Hood Offset Adjustment (Left Bumper / Right Bumper)
+    // Hood Offset Adjustment (D-Pad Up / D-Pad Down)
     // ==============================
 
-    // Left Bumper : Decrease turret offset
-    new Trigger(() -> {
-      return operatorController.getLeftBumperButton();
-    })
-        .whileTrue(
-            hoodOffsetDegrees.getHeldIntervalCommand(-Constants.Operator.ErrorSettings.HOOD_OFFSET_INCREASE,
-                Constants.Operator.ErrorSettings.SETTINGS_DELAY_TIME));
-
-    // Right Bumper : Increase turret offset
-    new Trigger(() -> {
-      return operatorController.getRightBumperButton();
-    })
-        .whileTrue(
-            hoodOffsetDegrees.getHeldIntervalCommand(Constants.Operator.ErrorSettings.HOOD_OFFSET_INCREASE,
-                Constants.Operator.ErrorSettings.SETTINGS_DELAY_TIME));
-
-    // ==============================
-    // Shooter Percent Adjustment (POV Up / Down)
-    // ==============================
-
-    // POV Up (315°–45° wraparound) : Increase shooter percent
+    // D-Pad Up : Increase hood offset
     new Trigger(() -> {
       int pov = operatorController.getPOV();
       return pov >= 315 || (pov >= 0 && pov <= 45);
     })
         .whileTrue(
-            shooterPercent.getHeldIntervalCommand(Constants.Operator.ErrorSettings.SHOOTER_PERCENT_INCREASE,
+            hoodOffsetDegrees.getHeldIntervalCommand(Constants.Operator.ErrorSettings.HOOD_OFFSET_INCREASE,
                 Constants.Operator.ErrorSettings.SETTINGS_DELAY_TIME));
 
-    // POV Down (135°–225°) : Decrease shooter percent
+    // D-Pad Down : Decrease hood offset
     new Trigger(() -> {
       int pov = operatorController.getPOV();
       return pov >= 135 && pov <= 225;
     })
         .whileTrue(
+            hoodOffsetDegrees.getHeldIntervalCommand(-Constants.Operator.ErrorSettings.HOOD_OFFSET_INCREASE,
+                Constants.Operator.ErrorSettings.SETTINGS_DELAY_TIME));
+
+    // ==============================
+    // Shooter Percent Adjustment (Left Bumper / Right Bumper)
+    // ==============================
+
+    // Left Bumper : Decrease shooter percent
+    new Trigger(() -> {
+      return operatorController.getLeftBumperButton();
+    })
+        .whileTrue(
             shooterPercent.getHeldIntervalCommand(-Constants.Operator.ErrorSettings.SHOOTER_PERCENT_INCREASE,
+                Constants.Operator.ErrorSettings.SETTINGS_DELAY_TIME));
+
+    // Right Bumper : Increase shooter percent
+    new Trigger(() -> {
+      return operatorController.getRightBumperButton();
+    })
+        .whileTrue(
+            shooterPercent.getHeldIntervalCommand(Constants.Operator.ErrorSettings.SHOOTER_PERCENT_INCREASE,
                 Constants.Operator.ErrorSettings.SETTINGS_DELAY_TIME));
 
     new Trigger(

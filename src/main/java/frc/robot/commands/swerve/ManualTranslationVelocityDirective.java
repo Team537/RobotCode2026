@@ -23,6 +23,7 @@ public class ManualTranslationVelocityDirective implements TranslationDirective 
     private final double maxThrottleSpeed;
     private final double maxSlowSpeed;
     private final Rotation2d driverRotation;
+    private final Rotation2d robotRelativeRotation;
 
     public ManualTranslationVelocityDirective(
             DriveSubsystem drive,
@@ -35,7 +36,8 @@ public class ManualTranslationVelocityDirective implements TranslationDirective 
             double maxNormalSpeed,
             double maxThrottleSpeed,
             double maxSlowSpeed,
-            Rotation2d driverRotation
+            Rotation2d driverRotation,
+            Rotation2d robotRelativeRotation
     ) {
         this.drive = drive;
         this.vxSupplier = vxSupplier;
@@ -48,6 +50,7 @@ public class ManualTranslationVelocityDirective implements TranslationDirective 
         this.maxThrottleSpeed = maxThrottleSpeed;
         this.maxSlowSpeed = maxSlowSpeed;
         this.driverRotation = driverRotation;
+        this.robotRelativeRotation = robotRelativeRotation;
     }
 
     @Override
@@ -77,6 +80,8 @@ public class ManualTranslationVelocityDirective implements TranslationDirective 
         // Apply angle offsets
         if (fieldRelative) {
             angle += driverRotation.getRadians();
+        } else {
+            angle += robotRelativeRotation.getRadians();
         }
 
         // Convert back to x/y components

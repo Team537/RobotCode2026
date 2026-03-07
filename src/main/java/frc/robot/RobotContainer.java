@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.IntakeAndShootWhileDriving;
@@ -44,7 +45,9 @@ import frc.robot.util.field.Alliance;
 import frc.robot.util.field.FieldUtil;
 import frc.robot.util.swerve.SwerveUtil;
 import frc.robot.util.swerve.requests.RotationDirective;
+import frc.robot.util.swerve.requests.RotationRequest;
 import frc.robot.util.swerve.requests.TranslationDirective;
+import frc.robot.util.swerve.requests.TranslationRequest;
 import frc.robot.util.turret.TurretSolver;
 import frc.robot.util.vision.detections.RobotDetection;
 
@@ -589,18 +592,48 @@ public class RobotContainer {
             SmartDashboard.getNumber("Auto/IntakeShootTime", Constants.Operator.Auto.DEFAULT_INTAKE_SHOOT_TIME));
 
       case NEUTRAL_LEFT:
-        return new DriveToSequenceCommand(
-            driveSubsystem,
-            Constants.Operator.Auto.NEUTRAL_LEFT_POSES.stream()
-                .map(FieldUtil::flipIfRed)
-                .toList());
+        return Commands.sequence(
+
+            new DriveToSequenceCommand(
+                driveSubsystem,
+                Constants.Operator.Auto.NEUTRAL_LEFT_SEQUENCE_ONE.stream()
+                    .map(FieldUtil::flipIfRed)
+                    .toList()),
+
+            new RunCommand(
+                () -> driveSubsystem.driveWithCompositeRequests(
+                    new TranslationRequest.Position(
+                        FieldUtil.flipIfRed(Constants.Operator.Auto.NEUTRAL_LEFT_SPIN_TRANSLATION)),
+                    new RotationRequest.Velocity(-Constants.Operator.Auto.NEUTRAL_SPIN_SPEED)),
+                driveSubsystem).withTimeout(Constants.Operator.Auto.NEUTRAL_SPIN_TIME),
+
+            new DriveToSequenceCommand(
+                driveSubsystem,
+                Constants.Operator.Auto.NEUTRAL_LEFT_SEQUENCE_TWO.stream()
+                    .map(FieldUtil::flipIfRed)
+                    .toList()));
 
       case NEUTRAL_RIGHT:
-        return new DriveToSequenceCommand(
-            driveSubsystem,
-            Constants.Operator.Auto.NEUTRAL_RIGHT_POSES.stream()
-                .map(FieldUtil::flipIfRed)
-                .toList());
+        return Commands.sequence(
+
+            new DriveToSequenceCommand(
+                driveSubsystem,
+                Constants.Operator.Auto.NEUTRAL_RIGHT_SEQUENCE_ONE.stream()
+                    .map(FieldUtil::flipIfRed)
+                    .toList()),
+
+            new RunCommand(
+                () -> driveSubsystem.driveWithCompositeRequests(
+                    new TranslationRequest.Position(
+                        FieldUtil.flipIfRed(Constants.Operator.Auto.NEUTRAL_RIGHT_SPIN_TRANSLATION)),
+                    new RotationRequest.Velocity(Constants.Operator.Auto.NEUTRAL_SPIN_SPEED)),
+                driveSubsystem).withTimeout(Constants.Operator.Auto.NEUTRAL_SPIN_TIME),
+
+            new DriveToSequenceCommand(
+                driveSubsystem,
+                Constants.Operator.Auto.NEUTRAL_RIGHT_SEQUENCE_TWO.stream()
+                    .map(FieldUtil::flipIfRed)
+                    .toList()));
 
       case CUSTOM:
 

@@ -73,17 +73,36 @@ public class Constants {
             public static final Pose2d OUTPOST_READY_INTAKE_POSE = new Pose2d(1.375,0.661,Rotation2d.k180deg);
             public static final Pose2d OUTPOST_INTAKE_POSE = new Pose2d(0.619,0.661,Rotation2d.k180deg);
 
-            public static final List<Pose2d> NEUTRAL_LEFT_POSES = List.of(
+            public static final List<Pose2d> NEUTRAL_LEFT_SEQUENCE_ONE = List.of(
                 new Pose2d(7.730, 7.457, Rotation2d.fromDegrees(160)),
-                new Pose2d(7.730, 0.684, Rotation2d.fromDegrees(160)),
+                new Pose2d(7.730, 1.684, Rotation2d.fromDegrees(160))
+            );
+
+            public static final Translation2d NEUTRAL_LEFT_SPIN_TRANSLATION = new Translation2d(
+                7.730,
+                0.684
+            );
+
+            public static final List<Pose2d> NEUTRAL_LEFT_SEQUENCE_TWO = List.of(
                 new Pose2d(3.405, 0.684, Rotation2d.fromDegrees(180))
             );
 
-            public static final List<Pose2d> NEUTRAL_RIGHT_POSES = List.of(
+            public static final List<Pose2d> NEUTRAL_RIGHT_SEQUENCE_ONE = List.of(
                 new Pose2d(7.730, 0.684, Rotation2d.fromDegrees(-160)),
-                new Pose2d(7.730, 7.457, Rotation2d.fromDegrees(-160)),
-                new Pose2d(3.405, 7.7457, Rotation2d.fromDegrees(180))
+                new Pose2d(7.730, 6.457, Rotation2d.fromDegrees(-160))
             );
+
+            public static final Translation2d NEUTRAL_RIGHT_SPIN_TRANSLATION = new Translation2d(
+                7.730,
+                7.457
+            );
+
+            public static final List<Pose2d> NEUTRAL_RIGHT_SEQUENCE_TWO = List.of(
+                new Pose2d(3.405, 7.457, Rotation2d.fromDegrees(180))
+            );
+
+            public static final double NEUTRAL_SPIN_SPEED = 8.0;
+            public static final double NEUTRAL_SPIN_TIME = 5.0;
 
         }
 

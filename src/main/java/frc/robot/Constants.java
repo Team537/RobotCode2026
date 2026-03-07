@@ -62,7 +62,7 @@ public class Constants {
         public static class Auto {
 
             public static final double DEFAULT_START_DELAY = 0.0;
-            public static final double DEFAULT_PRELOAD_SHOOT_TIME = 8.0;
+            public static final double DEFAULT_PRELOAD_SHOOT_TIME = 0.0;
             public static final double DEFAULT_INTAKE_SHOOT_TIME = 4.0;
 
             public static final double AUTO_INTAKE_MAX_SPEED = 1.0;
@@ -73,12 +73,17 @@ public class Constants {
             public static final Pose2d OUTPOST_READY_INTAKE_POSE = new Pose2d(1.375,0.661,Rotation2d.k180deg);
             public static final Pose2d OUTPOST_INTAKE_POSE = new Pose2d(0.619,0.661,Rotation2d.k180deg);
 
-            public static final Pose2d NEUTRAL_LEFT_READY_INTAKE_POSE = new Pose2d(7.701,6.914,Rotation2d.kCW_90deg);
-            public static final Pose2d NEUTRAL_LEFT_INTAKE_POSE = new Pose2d(7.701,4.672,Rotation2d.kCW_90deg);
+            public static final List<Pose2d> NEUTRAL_LEFT_POSES = List.of(
+                new Pose2d(7.730, 7.457, Rotation2d.fromDegrees(160)),
+                new Pose2d(7.730, 0.684, Rotation2d.fromDegrees(160)),
+                new Pose2d(3.405, 0.684, Rotation2d.fromDegrees(180))
+            );
 
-            public static final Pose2d NEUTRAL_RIGHT_READY_INTAKE_POSE = new Pose2d(7.701,1.169,Rotation2d.kCCW_90deg);
-            public static final Pose2d NEUTRAL_RIGHT_INTAKE_POSE = new Pose2d(7.701,3.589,Rotation2d.kCCW_90deg);
-
+            public static final List<Pose2d> NEUTRAL_RIGHT_POSES = List.of(
+                new Pose2d(7.730, 0.684, Rotation2d.fromDegrees(-160)),
+                new Pose2d(7.730, 7.457, Rotation2d.fromDegrees(-160)),
+                new Pose2d(3.405, 7.7457, Rotation2d.fromDegrees(180))
+            );
 
         }
 
@@ -286,7 +291,7 @@ public class Constants {
                 Rotation2d.kPi);
 
         // Drive PID Controller Coefficients
-        public static final double TRANSLATIONAL_KP = 3.0;
+        public static final double TRANSLATIONAL_KP = 5.0;
         public static final double TRANSLATIONAL_KI = 0.0;
         public static final double TRANSLATIONAL_KD = 0.05;
 

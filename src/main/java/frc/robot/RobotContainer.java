@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -26,6 +27,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.IntakeAndShootWhileDriving;
 import frc.robot.commands.ShootPreloadCommand;
 import frc.robot.commands.swerve.CompositeDriveCommand;
+import frc.robot.commands.swerve.DriveToSequenceCommand;
 import frc.robot.commands.swerve.ManualRotationVelocityDirective;
 import frc.robot.commands.swerve.ManualTranslationVelocityDirective;
 import frc.robot.subsystems.DriveSubsystem;
@@ -180,7 +182,8 @@ public class RobotContainer {
         Double.POSITIVE_INFINITY);
     hoodOffsetDegrees.setDashboardRounding(Constants.Operator.ErrorSettings.HOOD_OFFSET_DECIMAL_PLACE);
 
-    shooterPercent = new AdjustableDouble("ErrorSettings/ShooterPercent", Constants.Operator.ErrorSettings.SHOOTER_PERCENT_DEFAULT, Double.NEGATIVE_INFINITY,
+    shooterPercent = new AdjustableDouble("ErrorSettings/ShooterPercent",
+        Constants.Operator.ErrorSettings.SHOOTER_PERCENT_DEFAULT, Double.NEGATIVE_INFINITY,
         Double.POSITIVE_INFINITY);
     shooterPercent.setDashboardRounding(Constants.Operator.ErrorSettings.SHOOTER_PERCENT_DECIMAL_PLACE);
 
@@ -205,7 +208,7 @@ public class RobotContainer {
     SmartDashboard.putNumber("Auto/CustomTargetTranslation/Y", 0.0);
     SmartDashboard.putNumber("Auto/CustomTargetTranslation/Z", 0.0);
 
-    SmartDashboard.putBoolean("Auto/RunAuto",true);
+    SmartDashboard.putBoolean("Auto/RunAuto", true);
 
     EnumPrettifier.setupSendableChooserFromEnum(intakeStrategyChooser, IntakeStrategy.class, IntakeStrategy.JUST_SHOOT);
     SmartDashboard.putData("Auto/IntakeStrategy", intakeStrategyChooser);
@@ -491,8 +494,7 @@ public class RobotContainer {
         Constants.Operator.Drive.THROTTLE_TRANSLATION_MAX_SPEED,
         Constants.Operator.Drive.SLOW_TRANSLATION_MAX_SPEED,
         FieldUtil.getAlliance().orElse(Alliance.BLUE).driverRotation,
-        Rotation2d.kPi  
-      );
+        Rotation2d.kPi);
 
     // Setup the rotational directive for drive subsystem
     RotationDirective manualRotationVelocityDirective = new ManualRotationVelocityDirective(
@@ -520,28 +522,28 @@ public class RobotContainer {
   public void scheduleAutonomous() {
 
     Command auto = Commands.sequence(
-      
-      Commands.deadline(
-        Commands.waitSeconds(SmartDashboard.getNumber("Auto/StartDelay",Constants.Operator.Auto.DEFAULT_START_DELAY)),
-        intakePivot.raiseIntakeCommand(),
-        turretSubsystem.getTargetCommand(() -> FieldUtil.flipIfRed(Constants.Field.BLUE_HUB_TRANSLATION), driveSubsystem::getPose, driveSubsystem::getVelocity)
-      ),
 
-      new ShootPreloadCommand(
-        shooterSubsystem, 
-        turretSubsystem, 
-        transferSubsystem, 
-        () -> FieldUtil.flipIfRed(Constants.Field.BLUE_HUB_TRANSLATION), 
-        driveSubsystem::getPose, 
-        driveSubsystem::getVelocity, 
-        SmartDashboard.getNumber("Auto/PreloadShootTime", Constants.Operator.Auto.DEFAULT_PRELOAD_SHOOT_TIME)
-      ),
+        Commands.deadline(
+            Commands
+                .waitSeconds(SmartDashboard.getNumber("Auto/StartDelay", Constants.Operator.Auto.DEFAULT_START_DELAY)),
+            intakePivot.raiseIntakeCommand(),
+            turretSubsystem.getTargetCommand(() -> FieldUtil.flipIfRed(Constants.Field.BLUE_HUB_TRANSLATION),
+                driveSubsystem::getPose, driveSubsystem::getVelocity)),
 
-      getIntakeStrategyCommand()
+        new ShootPreloadCommand(
+            shooterSubsystem,
+            turretSubsystem,
+            transferSubsystem,
+            () -> FieldUtil.flipIfRed(Constants.Field.BLUE_HUB_TRANSLATION),
+            driveSubsystem::getPose,
+            driveSubsystem::getVelocity,
+            SmartDashboard.getNumber("Auto/PreloadShootTime", Constants.Operator.Auto.DEFAULT_PRELOAD_SHOOT_TIME)),
+
+        getIntakeStrategyCommand()
 
     );
 
-    if (SmartDashboard.getBoolean("Auto/RunAuto",true)) {
+    if (SmartDashboard.getBoolean("Auto/RunAuto", true)) {
       CommandScheduler.getInstance().schedule(auto);
     }
 
@@ -569,8 +571,7 @@ public class RobotContainer {
             Constants.Operator.Auto.DEPOT_INTAKE_POSE,
             false,
             Constants.Operator.Auto.AUTO_INTAKE_MAX_SPEED,
-            SmartDashboard.getNumber("Auto/IntakeShootTime",Constants.Operator.Auto.DEFAULT_INTAKE_SHOOT_TIME)
-        );
+            SmartDashboard.getNumber("Auto/IntakeShootTime", Constants.Operator.Auto.DEFAULT_INTAKE_SHOOT_TIME));
 
       case OUTPOST:
         return new IntakeAndShootWhileDriving(
@@ -585,40 +586,21 @@ public class RobotContainer {
             Constants.Operator.Auto.OUTPOST_INTAKE_POSE,
             false,
             Constants.Operator.Auto.AUTO_INTAKE_MAX_SPEED,
-            SmartDashboard.getNumber("Auto/IntakeShootTime",Constants.Operator.Auto.DEFAULT_INTAKE_SHOOT_TIME)
-          );
+            SmartDashboard.getNumber("Auto/IntakeShootTime", Constants.Operator.Auto.DEFAULT_INTAKE_SHOOT_TIME));
 
       case NEUTRAL_LEFT:
-        return new IntakeAndShootWhileDriving(
+        return new DriveToSequenceCommand(
             driveSubsystem,
-            intakePivot,
-            intakeRoller,
-            shooterSubsystem,
-            turretSubsystem,
-            transferSubsystem,
-            () -> FieldUtil.flipIfRed(Constants.Field.BLUE_DEPO_TRANSLATION),
-            FieldUtil.flipIfRed(Constants.Operator.Auto.NEUTRAL_LEFT_READY_INTAKE_POSE),
-            FieldUtil.flipIfRed(Constants.Operator.Auto.NEUTRAL_LEFT_INTAKE_POSE),
-            true, // MUST STOW
-            Constants.Operator.Auto.AUTO_INTAKE_MAX_SPEED,
-            SmartDashboard.getNumber("Auto/IntakeShootTime",Constants.Operator.Auto.DEFAULT_INTAKE_SHOOT_TIME)
-        );
+            Constants.Operator.Auto.NEUTRAL_LEFT_POSES.stream()
+                .map(FieldUtil::flipIfRed)
+                .toList());
 
       case NEUTRAL_RIGHT:
-        return new IntakeAndShootWhileDriving(
+        return new DriveToSequenceCommand(
             driveSubsystem,
-            intakePivot,
-            intakeRoller,
-            shooterSubsystem,
-            turretSubsystem,
-            transferSubsystem,
-            () -> FieldUtil.flipIfRed(Constants.Field.BLUE_OUTPOST_TRANSLATION),
-            FieldUtil.flipIfRed(Constants.Operator.Auto.NEUTRAL_RIGHT_READY_INTAKE_POSE),
-            FieldUtil.flipIfRed(Constants.Operator.Auto.NEUTRAL_RIGHT_INTAKE_POSE),
-            true, // MUST STOW
-            Constants.Operator.Auto.AUTO_INTAKE_MAX_SPEED,
-            SmartDashboard.getNumber("Auto/IntakeShootTime",Constants.Operator.Auto.DEFAULT_INTAKE_SHOOT_TIME)
-        );
+            Constants.Operator.Auto.NEUTRAL_RIGHT_POSES.stream()
+                .map(FieldUtil::flipIfRed)
+                .toList());
 
       case CUSTOM:
 
@@ -640,8 +622,7 @@ public class RobotContainer {
             FieldUtil.flipIfRed(intake),
             stow,
             Constants.Operator.Auto.AUTO_INTAKE_MAX_SPEED,
-            SmartDashboard.getNumber("Auto/IntakeShootTime",Constants.Operator.Auto.DEFAULT_INTAKE_SHOOT_TIME)
-        );
+            SmartDashboard.getNumber("Auto/IntakeShootTime", Constants.Operator.Auto.DEFAULT_INTAKE_SHOOT_TIME));
 
       default:
         return Commands.none();
@@ -656,8 +637,7 @@ public class RobotContainer {
     return new Pose2d(
         x,
         y,
-        Rotation2d.fromDegrees(rotDeg)
-    );
+        Rotation2d.fromDegrees(rotDeg));
 
   }
 
@@ -669,8 +649,7 @@ public class RobotContainer {
     return new Translation3d(
         x,
         y,
-        z
-    );
+        z);
 
   }
 

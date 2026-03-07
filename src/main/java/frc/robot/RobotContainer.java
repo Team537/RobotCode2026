@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -13,6 +14,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -20,6 +22,8 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.IntakeAndShootWhileDriving;
+import frc.robot.commands.ShootPreloadCommand;
 import frc.robot.commands.swerve.CompositeDriveCommand;
 import frc.robot.commands.swerve.ManualRotationVelocityDirective;
 import frc.robot.commands.swerve.ManualTranslationVelocityDirective;
@@ -30,6 +34,8 @@ import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.TransferSubsystem;
 import frc.robot.subsystems.TurretSubsystem;
 import frc.robot.subsystems.vision.Raycast;
+import frc.robot.util.EnumPrettifier;
+import frc.robot.util.auto.IntakeStrategy;
 import frc.robot.util.dashboard.AdjustableDouble;
 import frc.robot.util.field.Alliance;
 import frc.robot.util.field.FieldUtil;
@@ -72,6 +78,8 @@ public class RobotContainer {
   boolean yHeld = false;
 
   Supplier<Translation3d> targetingSupplier = () -> Translation3d.kZero;
+
+  SendableChooser<IntakeStrategy> intakeStrategyChooser = new SendableChooser<>();
 
   public RobotContainer() {
     driveSubsystem = new DriveSubsystem();
@@ -182,6 +190,20 @@ public class RobotContainer {
     shooterSubsystem
         .setSpeedMultiplierSupplier(() -> shooterPercent.get() / 100.0);
 
+    SmartDashboard.putNumber("Auto/StartDelay", Constants.Operator.Auto.DEFAULT_START_DELAY);
+    SmartDashboard.putNumber("Auto/PreloadShootTime", Constants.Operator.Auto.DEFAULT_PRELOAD_SHOOT_TIME);
+    SmartDashboard.putNumber("Auto/IntakeShootTime", Constants.Operator.Auto.DEFAULT_INTAKE_SHOOT_TIME);
+
+    SmartDashboard.putNumber("Auto/CustomReadyPose/X", 0.0);
+    SmartDashboard.putNumber("Auto/CustomReadyPose/Y", 0.0);
+    SmartDashboard.putNumber("Auto/CustomReadyPose/Theta", 0.0);
+    SmartDashboard.putNumber("Auto/CustomIntakePose/X", 0.0);
+    SmartDashboard.putNumber("Auto/CustomIntakePose/Y", 0.0);
+    SmartDashboard.putNumber("Auto/CustomIntakePose/Theta", 0.0);
+
+    EnumPrettifier.setupSendableChooserFromEnum(intakeStrategyChooser, IntakeStrategy.class, IntakeStrategy.JUST_SHOOT);
+    SmartDashboard.putData("Auto/IntakeStrategy", intakeStrategyChooser);
+
   }
 
   /**
@@ -232,62 +254,48 @@ public class RobotContainer {
     stowTrigger.whileTrue(
         turretSubsystem.getStowCommand());
 
-    Trigger shootTrigger =
-        new Trigger(() -> driverController.getRightBumperButton());
+    Trigger shootTrigger = new Trigger(() -> driverController.getRightBumperButton());
 
-    Trigger intakeTrigger =
-        new Trigger(() -> driverController.getAButton());
+    Trigger intakeTrigger = new Trigger(() -> driverController.getAButton());
 
-    Trigger solverValid =
-        new Trigger(() -> TurretSolver.solve(driveSubsystem.getPose(),driveSubsystem.getVelocity(),targetingSupplier.get(),Constants.Turret.SOLVER_CONFIG).isValid());
-      
+    Trigger solverValid = new Trigger(() -> TurretSolver.solve(driveSubsystem.getPose(), driveSubsystem.getVelocity(),
+        targetingSupplier.get(), Constants.Turret.SOLVER_CONFIG).isValid());
+
     solverValid.onTrue(
-      Commands.runOnce(() -> SmartDashboard.putBoolean("Turret/SolverValid", true)).ignoringDisable(true)
-    ).onFalse(
-      Commands.runOnce(() -> SmartDashboard.putBoolean("Turret/SolverValid", false)).ignoringDisable(true)
-    );
+        Commands.runOnce(() -> SmartDashboard.putBoolean("Turret/SolverValid", true)).ignoringDisable(true)).onFalse(
+            Commands.runOnce(() -> SmartDashboard.putBoolean("Turret/SolverValid", false)).ignoringDisable(true));
 
     /* Shooter runs while button held */
     shootTrigger.whileTrue(
         shooterSubsystem.getTargetCommand(
             targetingSupplier,
             driveSubsystem::getPose,
-            driveSubsystem::getVelocity
-        )
-    );
+            driveSubsystem::getVelocity));
 
     /* Transfer runs ONLY while button AND solver valid */
     shootTrigger
         .whileTrue(
-            transferSubsystem.getLoadCommand()
-        );
+            transferSubsystem.getLoadCommand());
 
     /* Intake pivot runs while button held */
     intakeTrigger.whileTrue(
-        intakePivot.deployIntakeCommand()
-    );
+        intakePivot.deployIntakeCommand());
 
     /* Intake roller runs while button held */
     intakeTrigger.whileTrue(
-        intakeRoller.getIntakeCommand()
-    );
-  
+        intakeRoller.getIntakeCommand());
 
     /* Stop shooter on button release */
     shootTrigger.onFalse(
         Commands.parallel(
             transferSubsystem.getStopCommand(),
-            shooterSubsystem.getStopCommand()
-        )
-    );
+            shooterSubsystem.getStopCommand()));
 
     /* Stop intake on button release */
     intakeTrigger.onFalse(
         Commands.parallel(
             intakePivot.raiseIntakeCommand(),
-            intakeRoller.getStopCommand()
-        )
-    );
+            intakeRoller.getStopCommand()));
 
     // ==============================
     // Turret Offset Adjustment (POV Left / Right)
@@ -503,41 +511,142 @@ public class RobotContainer {
 
   public void scheduleAutonomous() {
 
-      turretSubsystem.setDefaultCommand(turretSubsystem.getTargetCommand(
-        targetingSupplier,
-        driveSubsystem::getPose,
-        driveSubsystem::getVelocity));
-
-      Command auto = Commands.sequence(
+    Command auto = Commands.sequence(
       
-        Commands.deadline(
+      Commands.deadline(
+        Commands.waitSeconds(SmartDashboard.getNumber("Auto/StartDelay",Constants.Operator.Auto.DEFAULT_START_DELAY)),
+        intakePivot.raiseIntakeCommand(),
+        turretSubsystem.getTargetCommand(targetingSupplier, driveSubsystem::getPose, driveSubsystem::getVelocity)
+      ),
 
-          new WaitCommand(SmartDashboard.getNumber("Auto/StartDelay",0.0)),
-          
-          intakePivot.raiseIntakeCommand()
+      new ShootPreloadCommand(
+        shooterSubsystem, 
+        turretSubsystem, 
+        transferSubsystem, 
+        targetingSupplier, 
+        driveSubsystem::getPose, 
+        driveSubsystem::getVelocity, 
+        SmartDashboard.getNumber("Auto/PreloadShootTime", Constants.Operator.Auto.DEFAULT_PRELOAD_SHOOT_TIME)
+      ),
 
-        ),
+      getIntakeStrategyCommand()
 
-        Commands.deadline(
+    );
 
-          new WaitCommand(SmartDashboard.getNumber("Auto/PreloadShootTime",0.0)),
-          
-          transferSubsystem.getLoadCommand(),
-          shooterSubsystem.getTargetCommand(
-              targetingSupplier,
-              driveSubsystem::getPose,
-              driveSubsystem::getVelocity)
+    CommandScheduler.getInstance().schedule(auto);
 
-        ),
+  }
 
-        Commands.parallel(
-          transferSubsystem.getStopCommand(),
-          shooterSubsystem.getStopCommand() 
-        )
+  private Command getIntakeStrategyCommand() {
 
-      );
+    IntakeStrategy strategy = intakeStrategyChooser.getSelected();
 
-      CommandScheduler.getInstance().schedule(auto);
+    switch (strategy) {
+
+      case JUST_SHOOT:
+        return Commands.none();
+
+      case DEPOT:
+        return new IntakeAndShootWhileDriving(
+            driveSubsystem,
+            intakePivot,
+            intakeRoller,
+            shooterSubsystem,
+            turretSubsystem,
+            transferSubsystem,
+            targetingSupplier,
+            Constants.Operator.Auto.DEPOT_READY_INTAKE_POSE,
+            Constants.Operator.Auto.DEPOT_INTAKE_POSE,
+            false,
+            Constants.Operator.Auto.AUTO_INTAKE_MAX_SPEED,
+            SmartDashboard.getNumber("Auto/IntakeShootTime",Constants.Operator.Auto.DEFAULT_INTAKE_SHOOT_TIME)
+        );
+
+      case OUTPOST:
+        return new IntakeAndShootWhileDriving(
+            driveSubsystem,
+            intakePivot,
+            intakeRoller,
+            shooterSubsystem,
+            turretSubsystem,
+            transferSubsystem,
+            targetingSupplier,
+            Constants.Operator.Auto.OUTPOST_READY_INTAKE_POSE,
+            Constants.Operator.Auto.OUTPOST_INTAKE_POSE,
+            false,
+            Constants.Operator.Auto.AUTO_INTAKE_MAX_SPEED,
+            SmartDashboard.getNumber("Auto/IntakeShootTime",Constants.Operator.Auto.DEFAULT_INTAKE_SHOOT_TIME)
+          );
+
+      case NEUTRAL_LEFT:
+        return new IntakeAndShootWhileDriving(
+            driveSubsystem,
+            intakePivot,
+            intakeRoller,
+            shooterSubsystem,
+            turretSubsystem,
+            transferSubsystem,
+            targetingSupplier,
+            FieldUtil.flipIfRed(Constants.Operator.Auto.NEUTRAL_LEFT_READY_INTAKE_POSE),
+            FieldUtil.flipIfRed(Constants.Operator.Auto.NEUTRAL_LEFT_INTAKE_POSE),
+            true, // MUST STOW
+            Constants.Operator.Auto.AUTO_INTAKE_MAX_SPEED,
+            SmartDashboard.getNumber("Auto/IntakeShootTime",Constants.Operator.Auto.DEFAULT_INTAKE_SHOOT_TIME)
+        );
+
+      case NEUTRAL_RIGHT:
+        return new IntakeAndShootWhileDriving(
+            driveSubsystem,
+            intakePivot,
+            intakeRoller,
+            shooterSubsystem,
+            turretSubsystem,
+            transferSubsystem,
+            targetingSupplier,
+            FieldUtil.flipIfRed(Constants.Operator.Auto.NEUTRAL_RIGHT_READY_INTAKE_POSE),
+            FieldUtil.flipIfRed(Constants.Operator.Auto.NEUTRAL_RIGHT_INTAKE_POSE),
+            true, // MUST STOW
+            Constants.Operator.Auto.AUTO_INTAKE_MAX_SPEED,
+            SmartDashboard.getNumber("Auto/IntakeShootTime",Constants.Operator.Auto.DEFAULT_INTAKE_SHOOT_TIME)
+        );
+
+      case CUSTOM:
+
+        Pose2d ready = getDashboardPose("Auto/CustomReadyPose");
+        Pose2d intake = getDashboardPose("Auto/CustomIntakePose");
+
+        boolean stow = SmartDashboard.getBoolean("Auto/CustomStowTurret", true);
+
+        return new IntakeAndShootWhileDriving(
+            driveSubsystem,
+            intakePivot,
+            intakeRoller,
+            shooterSubsystem,
+            turretSubsystem,
+            transferSubsystem,
+            targetingSupplier,
+            FieldUtil.flipIfRed(ready),
+            FieldUtil.flipIfRed(intake),
+            stow,
+            Constants.Operator.Auto.AUTO_INTAKE_MAX_SPEED,
+            SmartDashboard.getNumber("Auto/IntakeShootTime",Constants.Operator.Auto.DEFAULT_INTAKE_SHOOT_TIME)
+        );
+
+      default:
+        return Commands.none();
+    }
+  }
+
+  private Pose2d getDashboardPose(String prefix) {
+    double x = SmartDashboard.getNumber(prefix + "/X", 0.0);
+    double y = SmartDashboard.getNumber(prefix + "/Y", 0.0);
+    double rotDeg = SmartDashboard.getNumber(prefix + "/Theta", 0.0);
+
+    return new Pose2d(
+        x,
+        y,
+        Rotation2d.fromDegrees(rotDeg)
+    );
 
   }
 

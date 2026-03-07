@@ -57,6 +57,29 @@ public class Constants {
 
         }
 
+        public static class Auto {
+
+            public static final double DEFAULT_START_DELAY = 0.0;
+            public static final double DEFAULT_PRELOAD_SHOOT_TIME = 8.0;
+            public static final double DEFAULT_INTAKE_SHOOT_TIME = 4.0;
+
+            public static final double AUTO_INTAKE_MAX_SPEED = 1.0;
+
+            public static final Pose2d DEPOT_READY_INTAKE_POSE = new Pose2d(0.411,5.019,Rotation2d.kCCW_90deg);
+            public static final Pose2d DEPOT_INTAKE_POSE = new Pose2d(0.411,5.994,Rotation2d.kCCW_90deg);
+
+            public static final Pose2d OUTPOST_READY_INTAKE_POSE = new Pose2d(1.375,0.661,Rotation2d.k180deg);
+            public static final Pose2d OUTPOST_INTAKE_POSE = new Pose2d(0.619,0.661,Rotation2d.k180deg);
+
+            public static final Pose2d NEUTRAL_LEFT_READY_INTAKE_POSE = new Pose2d(7.701,6.914,Rotation2d.kCW_90deg);
+            public static final Pose2d NEUTRAL_LEFT_INTAKE_POSE = new Pose2d(7.701,4.672,Rotation2d.kCW_90deg);
+
+            public static final Pose2d NEUTRAL_RIGHT_READY_INTAKE_POSE = new Pose2d(7.701,1.169,Rotation2d.kCCW_90deg);
+            public static final Pose2d NEUTRAL_RIGHT_INTAKE_POSE = new Pose2d(7.701,3.589,Rotation2d.kCW_90deg);
+
+
+        }
+
     }
 
     public static class Field {

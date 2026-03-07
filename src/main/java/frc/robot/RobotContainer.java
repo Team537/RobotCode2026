@@ -201,6 +201,8 @@ public class RobotContainer {
     SmartDashboard.putNumber("Auto/CustomIntakePose/Y", 0.0);
     SmartDashboard.putNumber("Auto/CustomIntakePose/Theta", 0.0);
 
+    SmartDashboard.putBoolean("Auto/RunAuto",true);
+
     EnumPrettifier.setupSendableChooserFromEnum(intakeStrategyChooser, IntakeStrategy.class, IntakeStrategy.JUST_SHOOT);
     SmartDashboard.putData("Auto/IntakeStrategy", intakeStrategyChooser);
 
@@ -533,7 +535,9 @@ public class RobotContainer {
 
     );
 
-    CommandScheduler.getInstance().schedule(auto);
+    if (SmartDashboard.getBoolean("Auto/RunAuto",true)) {
+      CommandScheduler.getInstance().schedule(auto);
+    }
 
   }
 

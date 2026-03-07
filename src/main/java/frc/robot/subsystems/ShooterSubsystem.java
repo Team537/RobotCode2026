@@ -15,6 +15,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Configs;
@@ -194,7 +195,7 @@ public class ShooterSubsystem extends SubsystemBase {
      * @return A command to stop the shooter.
      */
     public Command getStopCommand() {
-        return new RunCommand(() -> {
+        return new InstantCommand(() -> {
             leadShooterMotor.stopMotor();
             followerShooterMotor.stopMotor();
         },this).withName("StopShooter");

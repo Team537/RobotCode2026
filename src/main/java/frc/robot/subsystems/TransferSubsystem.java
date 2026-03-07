@@ -99,6 +99,6 @@ public class TransferSubsystem extends SubsystemBase {
      * @return a command that stops the transfer motor
      */
     public Command getStopCommand() {
-        return getSetVelocityCommand(0.0).withName("TransferStop");
+        return new InstantCommand(() -> transferMotor.stopMotor());
     }
 }

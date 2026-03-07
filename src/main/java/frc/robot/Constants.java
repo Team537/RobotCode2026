@@ -340,6 +340,9 @@ public class Constants {
         public static final double TURN_TABLE_RATIO = 24.0 / 200.0;
         public static final double ENCODER_FACTOR = (TURRET_GEAR_REDUCTION) / (2.0 * Math.PI * TURN_TABLE_RATIO);
 
+        public static final double STOW_PUSH_DOWN_SPEED = -0.1; // percent of max speed
+        public static final double STOW_PUSH_DOWN_TIME = 0.5; // seconds
+
         public static final double PITCH_GEAR_RATIO = (26.0 / 447.2);
         public static final double PITCH_ENCODER_FACTOR = PITCH_GEAR_RATIO * (2.0 * Math.PI);
 

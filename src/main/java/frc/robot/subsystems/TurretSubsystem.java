@@ -287,7 +287,7 @@ public class TurretSubsystem extends SubsystemBase {
                 this);
 
         Command settleDown = new RunCommand(
-                () -> pitchServo.setSpeed(-Constants.Turret.STOW_PUSH_DOWN_SPEED), // small constant downward speed
+                () -> pitchServo.setSpeed((Constants.Turret.PITCH_INVERTED ? -1.0 : 1.0) * -Constants.Turret.STOW_PUSH_DOWN_SPEED), // small constant downward speed
                 this).withTimeout(Constants.Turret.STOW_PUSH_DOWN_TIME); // enough to seat the gear
 
         Command finish = new InstantCommand(() -> {

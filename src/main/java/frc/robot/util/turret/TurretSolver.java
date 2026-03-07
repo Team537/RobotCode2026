@@ -13,6 +13,11 @@ public final class TurretSolver {
     private static final double TIME_EPS = 1e-4;
     private static final int MAX_ITER = 20;
 
+    private static final double PENALTY_MAX_SPEED = 1.0;
+    private static final double PENALTY_MAX_HEIGHT = 1.0;
+    private static final double PENALTY_INVALID_YAW = 25.0;
+    private static final double PENALTY_WEIGHT = 100.0;
+
     private TurretSolver() {}
 
     // ============================ OUTPUT STATE ============================
@@ -139,13 +144,22 @@ public final class TurretSolver {
         double vrx = robotVelocity.vxMetersPerSecond;
         double vry = robotVelocity.vyMetersPerSecond;
 
-        double bestCost = Double.POSITIVE_INFINITY;
+        double bestValidCost = Double.POSITIVE_INFINITY;
+        double bestApproxCost = Double.POSITIVE_INFINITY;
+
         double bestV = 0.0;
         Rotation2d bestYaw = new Rotation2d();
         Rotation2d bestPitch = new Rotation2d();
         double bestH = 0.0;
         double bestImpactV = 0.0;
-        boolean found = false;
+
+        double approxV = 0.0;
+        Rotation2d approxYaw = new Rotation2d();
+        Rotation2d approxPitch = new Rotation2d();
+        double approxH = 0.0;
+        double approxImpactV = 0.0;
+
+        boolean foundValid = false;
 
         for (double phi = config.minPitch.getRadians(); phi <= config.maxPitch.getRadians(); phi += PITCH_STEP) {
 
@@ -153,43 +167,86 @@ public final class TurretSolver {
             if (t <= 0) continue;
 
             double v = (rz + 0.5 * config.gravity * t * t) / (t * Math.sin(phi));
-            if (v <= 0 || v > config.maxLaunchSpeed) continue;
+            if (v <= 0) continue;
 
-            double apexHeight = config.turretOffset.getZ() + (v * v * Math.sin(phi) * Math.sin(phi)) 
+            double apexHeight =
+                config.turretOffset.getZ()
+                + (v * v * Math.sin(phi) * Math.sin(phi))
                 / (2.0 * config.gravity);
-            if (apexHeight > config.maxHeight) continue;
 
             double thetaField = Math.atan2((ry / t) - vry, (rx / t) - vrx);
             Rotation2d yaw = Rotation2d.fromRadians(thetaField).minus(correctedPose.getRotation());
-            if (!isYawInRange(yaw, config.minYaw, config.maxYaw)) continue;
 
             double impactV = v * Math.sin(phi) - config.gravity * t;
 
-            if (impactV >= 0) continue; // must be falling
+            // Hard physical constraint
+            if (impactV >= 0) continue;
 
-            // Cost function for selecting among multiple valid ballistic solutions:
-            // - We square the launch speed (v^2) so that higher launch velocities are
-            //   penalized more aggressively than with a linear term. This biases the
-            //   solver toward lower-speed shots when several trajectories can reach
-            //   the target.
-            // - We divide by |impactV| so that, for the same launch speed, trajectories
-            //   with higher (faster) downward impact velocity are preferred, since they
-            //   tend to be less sensitive to small disturbances at the target.
+            // Cost function for selecting among multiple valid ballistic solutions: 
+            // - We square the launch speed (v^2) so that higher launch velocities are 
+            // penalized more aggressively than with a linear term. This biases the 
+            // solver toward lower-speed shots when several trajectories can reach 
+            // the target. 
+            // - We divide by |impactV| so that, for the same launch speed, trajectories 
+            // with higher (faster) downward impact velocity are preferred, since they 
+            // tend to be less sensitive to small disturbances at the target. double cost = (v * v) / Math.abs(impactV);
             double cost = (v * v) / Math.abs(impactV);
 
-            if (cost < bestCost) {
-                bestCost = cost;
-                bestV = v;
-                bestYaw = yaw;
-                bestPitch = Rotation2d.fromRadians(phi);
-                bestH = apexHeight;
-                bestImpactV = impactV;
-                found = true;
+            // Penalty system for approximate solutions
+            double penalty = 0.0;
+
+            if (v > config.maxLaunchSpeed) {
+                penalty += Math.pow(v - config.maxLaunchSpeed, 2) * PENALTY_MAX_SPEED;
+            }
+
+            if (apexHeight > config.maxHeight) {
+                penalty += Math.pow(apexHeight - config.maxHeight, 2) * PENALTY_MAX_HEIGHT;
+            }
+
+            if (!isYawInRange(yaw, config.minYaw, config.maxYaw)) {
+                double yawError =
+                    Math.max(
+                        config.minYaw.minus(yaw).getRadians(),
+                        yaw.minus(config.maxYaw).getRadians()
+                    );
+                penalty += yawError * yawError * PENALTY_INVALID_YAW;
+            }
+
+            boolean valid =
+                penalty == 0
+                && v <= config.maxLaunchSpeed
+                && apexHeight <= config.maxHeight
+                && isYawInRange(yaw, config.minYaw, config.maxYaw);
+
+            if (valid) {
+                if (cost < bestValidCost) {
+                    bestValidCost = cost;
+                    bestV = v;
+                    bestYaw = yaw;
+                    bestPitch = Rotation2d.fromRadians(phi);
+                    bestH = apexHeight;
+                    bestImpactV = impactV;
+                    foundValid = true;
+                }
+            }
+
+            double approxCost = cost + penalty * PENALTY_WEIGHT;
+
+            if (approxCost < bestApproxCost) {
+                bestApproxCost = approxCost;
+                approxV = v;
+                approxYaw = yaw;
+                approxPitch = Rotation2d.fromRadians(phi);
+                approxH = apexHeight;
+                approxImpactV = impactV;
             }
         }
 
-        if (!found) return new State(0, new Rotation2d(), new Rotation2d(), false, 0, 0, 0);
-        return new State(bestV, bestYaw, bestPitch, true, bestH, bestImpactV, 0);
+        if (foundValid) {
+            return new State(bestV, bestYaw, bestPitch, true, bestH, bestImpactV, 0);
+        }
+
+        return new State(approxV, approxYaw, approxPitch, false, approxH, approxImpactV, 0);
     }
 
     // ============================ TIME SOLVER ============================

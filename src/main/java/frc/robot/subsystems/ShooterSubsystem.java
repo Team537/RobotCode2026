@@ -9,6 +9,7 @@ import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.SolidColor;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -56,6 +57,8 @@ public class ShooterSubsystem extends SubsystemBase {
     private boolean atTarget = false;
 
     private Supplier<Double> speedMultiplierSupplier = () -> 1.0;
+    private Supplier<Rotation2d> yawSupplier = () -> Rotation2d.kZero;
+    private Supplier<Rotation2d> pitchSupplier = () -> Rotation2d.fromDegrees(45.0);
 
     // --------------------------------------------------------------------
     // Construction / Configuration
@@ -99,7 +102,7 @@ public class ShooterSubsystem extends SubsystemBase {
      * @param velocity desired ball velocity in meters per second
      */
     public void setBallVelocity(double velocity) {
-        setWheelVelocity(TurretUtil.wheelSurfaceSpeedFromBallSpeed(velocity));
+        setWheelVelocity(TurretUtil.wheelSurfaceSpeedFromBallSpeed(velocity,yawSupplier.get(),pitchSupplier.get()));
     }
 
     /**
@@ -113,7 +116,7 @@ public class ShooterSubsystem extends SubsystemBase {
      * @return the current velocity that a ball shot out would travel in meters per second
      */
     public double getBallVelocity() {
-        return TurretUtil.ballSpeedFromWheelSurfaceSpeed(getWheelVelocity());
+        return TurretUtil.ballSpeedFromWheelSurfaceSpeed(getWheelVelocity(),yawSupplier.get(),pitchSupplier.get());
     }
 
     // --------------------------------------------------------------------
@@ -194,7 +197,7 @@ public class ShooterSubsystem extends SubsystemBase {
         return new RunCommand(() -> {
             leadShooterMotor.stopMotor();
             followerShooterMotor.stopMotor();
-        },this);
+        },this).withName("StopShooter");
     }
 
     /**
@@ -235,7 +238,7 @@ public class ShooterSubsystem extends SubsystemBase {
             SmartDashboard.putNumber("Target Max Height", solution.getMaxHeight());
             SmartDashboard.putNumber("Target Impact Velocity", solution.getImpactVelocity());
             return solution.getLaunchVelocity();
-        });
+        }).withName("Target Shooter");
     }
 
 
@@ -263,6 +266,14 @@ public class ShooterSubsystem extends SubsystemBase {
      */
     public void setSpeedMultiplierSupplier(Supplier<Double> speedMultiplierSupplier) {
         this.speedMultiplierSupplier = speedMultiplierSupplier;
+    }
+
+    /**
+     * Adds suppliers to the shooter subsystem to better control wheel and ball velocity
+     */
+    public void setYawPitchSuppliers(Supplier<Rotation2d> yawSupplier, Supplier<Rotation2d> pitchSupplier) {
+        this.yawSupplier = yawSupplier;
+        this.pitchSupplier = pitchSupplier;
     }
 
 }

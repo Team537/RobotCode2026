@@ -33,15 +33,18 @@ import frc.robot.util.turret.TurretUtil;
 /**
  * Subsystem responsible for controlling the robot's turret yaw.
  *
- * <p>This subsystem:
+ * <p>
+ * This subsystem:
  * <ul>
- *   <li>Controls a closed-loop motor for turret rotation</li>
- *   <li>Tracks whether the turret is within an angular tolerance of its target</li>
- *   <li>Supports both robot-relative and field-relative aiming</li>
- *   <li>Integrates with {@link TurretSolver} for dynamic target tracking</li>
+ * <li>Controls a closed-loop motor for turret rotation</li>
+ * <li>Tracks whether the turret is within an angular tolerance of its
+ * target</li>
+ * <li>Supports both robot-relative and field-relative aiming</li>
+ * <li>Integrates with {@link TurretSolver} for dynamic target tracking</li>
  * </ul>
  *
- * <p>All angles are represented using {@link Rotation2d}. Internally, the turret
+ * <p>
+ * All angles are represented using {@link Rotation2d}. Internally, the turret
  * is controlled in robot-relative coordinates.
  */
 public class TurretSubsystem extends SubsystemBase {
@@ -59,8 +62,10 @@ public class TurretSubsystem extends SubsystemBase {
     private volatile boolean hoodClosedLoopActive = false;
 
     private Supplier<Rotation2d> turretOffsetSupplier = () -> Rotation2d.kZero;
+    private Supplier<Rotation2d> hoodOffsetSupplier = () -> Rotation2d.kZero;
 
-    PIDController hoodController = new PIDController(Constants.Turret.PITCH_KP, Constants.Turret.PITCH_KI, Constants.Turret.PITCH_KD);
+    PIDController hoodController = new PIDController(Constants.Turret.PITCH_KP, Constants.Turret.PITCH_KI,
+            Constants.Turret.PITCH_KD);
 
     // --------------------------------------------------------------------
     // Internal State
@@ -97,24 +102,25 @@ public class TurretSubsystem extends SubsystemBase {
     /**
      * Commands the turret to rotate to a robot-relative angle.
      *
-     * <p>The requested angle is clamped to the allowed mechanical range,
-     * selecting the closest valid equivalent rotation.</p>
+     * <p>
+     * The requested angle is clamped to the allowed mechanical range,
+     * selecting the closest valid equivalent rotation.
+     * </p>
      *
      * @param angle desired turret yaw (robot-relative)
      */
     public void setTurretAngle(Rotation2d angle) {
 
-        Rotation2d clampedAngle =
-            TurretUtil.resolveClosestValidAngle(
+        Rotation2d clampedAngle = TurretUtil.resolveClosestValidAngle(
                 getAngle(),
                 angle,
                 Constants.Turret.MIN_ROTATION,
-                Constants.Turret.MAX_ROTATION
-            );
+                Constants.Turret.MAX_ROTATION);
 
-        PositionVoltage positionRequest = new PositionVoltage(clampedAngle.plus(turretOffsetSupplier.get()).getRadians());
+        PositionVoltage positionRequest = new PositionVoltage(
+                clampedAngle.getRadians() + turretOffsetSupplier.get().getRadians());
         turretMotor.setControl(positionRequest);
-        SmartDashboard.putNumber("Turret Target",clampedAngle.getDegrees());
+        SmartDashboard.putNumber("Turret Target", clampedAngle.getDegrees());
 
     }
 
@@ -125,17 +131,18 @@ public class TurretSubsystem extends SubsystemBase {
         double clamped = Math.max(minR, Math.min(maxR, angle.getRadians()));
 
         hoodSetpointRad = clamped;
-        hoodController.reset();
-        hoodController.setSetpoint(hoodSetpointRad);
+        hoodController.setSetpoint(hoodSetpointRad + hoodOffsetSupplier.get().getRadians());
         hoodClosedLoopActive = true;
 
-        SmartDashboard.putNumber("Hood Target",Rotation2d.fromRadians(clamped).getDegrees());
+        SmartDashboard.putNumber("Hood Target", Rotation2d.fromRadians(clamped).getDegrees());
     }
 
     /**
      * Commands the turret to rotate to a field-relative yaw.
      *
-     * <p>This automatically compensates for the robot's current heading.</p>
+     * <p>
+     * This automatically compensates for the robot's current heading.
+     * </p>
      *
      * @param fieldAngle desired turret yaw in the field frame
      */
@@ -148,12 +155,14 @@ public class TurretSubsystem extends SubsystemBase {
      * @return the current turret yaw (robot-relative)
      */
     public Rotation2d getAngle() {
-        return Rotation2d.fromRadians(turretMotor.getPosition().getValueAsDouble()).minus(turretOffsetSupplier.get());
+        return Rotation2d
+                .fromRadians(turretMotor.getPosition().getValueAsDouble() - turretOffsetSupplier.get().getRadians());
     }
 
-
     public Rotation2d getHoodAngle() {
-        return Rotation2d.fromRadians(pitchEncoder.getPosition().getValueAsDouble() * Constants.Turret.PITCH_ENCODER_FACTOR);
+        return Rotation2d
+                .fromRadians(pitchEncoder.getPosition().getValueAsDouble() * Constants.Turret.PITCH_ENCODER_FACTOR
+                        - hoodOffsetSupplier.get().getRadians());
     }
 
     /**
@@ -165,30 +174,30 @@ public class TurretSubsystem extends SubsystemBase {
 
     /**
      * Sets the position of the turret
+     * 
      * @param rotation The position to set to
      */
     public void resetTurretAngle(Rotation2d rotation) {
-        turretMotor.setPosition(rotation.plus(turretOffsetSupplier.get()).getRadians());
+        turretMotor.setPosition(rotation.getRadians() + turretOffsetSupplier.get().getRadians());
     }
 
-     /**
+    /**
      * Sets the position of the hood
+     * 
      * @param rotation The position to set to
      */
     public void resetHoodAngle(Rotation2d rotation) {
-        pitchEncoder.setPosition(rotation.getRadians() / Constants.Turret.PITCH_ENCODER_FACTOR);
+        pitchEncoder.setPosition(rotation.getRadians() / Constants.Turret.PITCH_ENCODER_FACTOR + hoodOffsetSupplier.get().getRadians());
     }
 
     public void stopTurretMotor() {
         turretMotor.stopMotor();
     }
 
-
     public void stopHoodServo() {
         hoodClosedLoopActive = false;
         pitchServo.setSpeed(0);
     }
-
 
     public void periodic() {
 
@@ -212,112 +221,102 @@ public class TurretSubsystem extends SubsystemBase {
      * Creates a command that continuously drives the turret toward a
      * robot-relative target angle.
      *
-     * <p>While running, the command updates an internal {@code atTarget} flag
+     * <p>
+     * While running, the command updates an internal {@code atTarget} flag
      * whenever the angular error is within the configured tolerance.
-     * The flag is cleared when the command ends.</p>
+     * The flag is cleared when the command ends.
+     * </p>
      *
      * @param angleSupplier supplies the desired turret angle (robot-relative)
      * @return a continuously running turret-aiming command
      */
     public Command getAngleCommand(
-        Supplier<Rotation2d> angleSupplier,
-        Supplier<Rotation2d> hoodAngleSupplier
-    ) {
+            Supplier<Rotation2d> angleSupplier,
+            Supplier<Rotation2d> hoodAngleSupplier) {
         return new FunctionalCommand(
-            () -> {},
+                () -> {
+                },
 
-            () -> {
-                Rotation2d targetAngle = angleSupplier.get();
-                setTurretAngle(targetAngle);
+                () -> {
+                    Rotation2d targetAngle = angleSupplier.get();
+                    setTurretAngle(targetAngle);
 
-                Rotation2d targetHoodAngle = hoodAngleSupplier.get();
-                setHoodAngle(targetHoodAngle);
+                    Rotation2d targetHoodAngle = hoodAngleSupplier.get();
+                    setHoodAngle(targetHoodAngle);
 
-                atTarget =
-                    Math.abs(
-                        getAngle()
-                            .minus(targetAngle)
-                            .getRadians()
-                    ) < Constants.Turret.TURRET_TOLERANCE.getRadians();
+                    atTarget = Math.abs(
+                            getAngle()
+                                    .minus(targetAngle)
+                                    .getRadians()) < Constants.Turret.TURRET_TOLERANCE.getRadians();
 
-                atHoodTarget = 
-                    Math.abs(
-                        getHoodAngle()
-                            .minus(targetHoodAngle)
-                            .getRadians()
-                    ) < Constants.Turret.HOOD_TOLERANCE.getRadians();
-            },
+                    atHoodTarget = Math.abs(
+                            getHoodAngle()
+                                    .minus(targetHoodAngle)
+                                    .getRadians()) < Constants.Turret.HOOD_TOLERANCE.getRadians();
+                },
 
-            interrupted -> {
-                atTarget = false;
-                stopHoodServo();
-            },
-            () -> false,
-            this
-        );
+                interrupted -> {
+                    atTarget = false;
+                    stopHoodServo();
+                },
+                () -> false,
+                this);
     }
 
     public Command getStowCommand() {
         return new FunctionalCommand(
-            () -> {
-                SmartDashboard.putBoolean("Turret/IsStowing",true);
-            },
+                () -> {
+                    SmartDashboard.putBoolean("Turret/IsStowing", true);
+                },
 
-            () -> {
-                setHoodAngle(Constants.Turret.HOOD_STOW_POSITION);
-                atHoodTarget = 
-                    Math.abs(
-                        getHoodAngle()
-                            .minus(Constants.Turret.HOOD_STOW_POSITION)
-                            .getRadians()
-                    ) < Constants.Turret.HOOD_TOLERANCE.getRadians();
-            },
+                () -> {
+                    setHoodAngle(Constants.Turret.HOOD_STOW_POSITION);
+                    atHoodTarget = Math.abs(
+                            getHoodAngle()
+                                    .minus(Constants.Turret.HOOD_STOW_POSITION)
+                                    .getRadians()) < Constants.Turret.HOOD_TOLERANCE.getRadians();
+                },
 
-            interrupted -> {
-                atHoodTarget = false;
-                SmartDashboard.putBoolean("Turret/IsStowing",false);
-            },
-            () -> false,
-            this
-        );
+                interrupted -> {
+                    atHoodTarget = false;
+                    SmartDashboard.putBoolean("Turret/IsStowing", false);
+                },
+                () -> false,
+                this).withName("StowHood");
     }
 
     /**
      * Creates a command that automatically aims the turret at a field-relative
      * 3D target using the ballistic {@link TurretSolver}.
      *
-     * <p>The solver accounts for robot motion and returns the required yaw.</p>
+     * <p>
+     * The solver accounts for robot motion and returns the required yaw.
+     * </p>
      *
      * @param targetTranslationSupplier supplies the field-relative target position
      * @return a turret-aiming command driven by the solver
      */
     public Command getTargetCommand(
-        Supplier<Translation3d> targetTranslationSupplier,
-        Supplier<Pose2d> robotPoseSupplier,
-        Supplier<ChassisSpeeds> robotVelocitySupplier
-    ) {
+            Supplier<Translation3d> targetTranslationSupplier,
+            Supplier<Pose2d> robotPoseSupplier,
+            Supplier<ChassisSpeeds> robotVelocitySupplier) {
         return getAngleCommand(
-            () -> {
-                TurretSolver.State solution =
-                    TurretSolver.solve(
-                        robotPoseSupplier.get(),
-                        robotVelocitySupplier.get(),
-                        targetTranslationSupplier.get(),
-                        Constants.Turret.SOLVER_CONFIG
-                    );
-                return solution.getYaw();
-            },
-            () -> {
-               TurretSolver.State solution =
-                    TurretSolver.solve(
-                        robotPoseSupplier.get(),
-                        robotVelocitySupplier.get(),
-                        targetTranslationSupplier.get(),
-                        Constants.Turret.SOLVER_CONFIG
-                    );
-                return Rotation2d.fromRadians(0.5 * Math.PI).minus(solution.getPitch()); 
-            }
-        );
+                () -> {
+                    TurretSolver.State solution = TurretSolver.solve(
+                            robotPoseSupplier.get(),
+                            robotVelocitySupplier.get(),
+                            targetTranslationSupplier.get(),
+                            Constants.Turret.SOLVER_CONFIG);
+                    return solution.getYaw();
+                },
+                () -> {
+                    TurretSolver.State solution = TurretSolver.solve(
+                            robotPoseSupplier.get(),
+                            robotVelocitySupplier.get(),
+                            targetTranslationSupplier.get(),
+                            Constants.Turret.SOLVER_CONFIG);
+                    return Rotation2d.fromRadians(0.5 * Math.PI).minus(solution.getPitch());
+                }).withName("TargetTurret");
     }
 
     // --------------------------------------------------------------------
@@ -337,10 +336,22 @@ public class TurretSubsystem extends SubsystemBase {
 
     /**
      * sets the supplier of the turret offset
-     * @param turretOffsetSupplier the supplier of the turret offset. 0 means no offset
+     * 
+     * @param turretOffsetSupplier the supplier of the turret offset. 0 means no
+     *                             offset
      */
     public void setTurretOffsetSupplier(Supplier<Rotation2d> turretOffsetSupplier) {
         this.turretOffsetSupplier = turretOffsetSupplier;
+    }
+
+    /**
+     * sets the supplier of the hood offset
+     * 
+     * @param hoodOffsetSupplier the supplier of the hood offset. 0 means no
+     *                             offset
+     */
+    public void setHoodOffsetSupplier(Supplier<Rotation2d> hoodOffsetSupplier) {
+        this.hoodOffsetSupplier = hoodOffsetSupplier;
     }
 
 }

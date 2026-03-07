@@ -67,38 +67,54 @@ public class TurretUtil {
             bestAngle = (distToMin < distToMax) ? minA : maxA;
         }
 
-        return new Rotation2d(bestAngle);
+        return new Rotation2d(MathUtil.clamp(bestAngle,minA,maxA));
     }
 
-    private static InterpolatingDoubleTreeMap wheelToBall = new InterpolatingDoubleTreeMap();
-    private static InterpolatingDoubleTreeMap ballToWheel = new InterpolatingDoubleTreeMap();
+    private static final double BALL_SPEED_GAIN = 4.88072;
+    private static final double YAW_COS_COEFFICIENT = -1.20843;
+    private static final double PITCH_SIN_COEFFICIENT = 11.20532;
+    private static final double PITCH_PHASE_OFFSET_RAD = Math.toRadians(12.65252);
+    private static final double MODEL_BIAS = -26.67181;
 
-    static {
-        for (double[] point : Constants.Shooter.WHEEL_SPEED_TO_BALL_SPEED_POINTS) {
-            double wheel = point[0];
-            double ball = point[1];
+    /**
+     * Computes the wheel surface speed required to produce a given ball exit speed
+     * using the regression model derived from shooter characterization data.
+     *
+     * @param ballSpeed Ball exit velocity in meters per second.
+     * @param yaw Turret yaw angle.
+     * @param pitch Hood pitch angle.
+     * @return Wheel surface speed in meters per second.
+     */
+    public static double wheelSurfaceSpeedFromBallSpeed(
+            double ballSpeed,
+            Rotation2d yaw,
+            Rotation2d pitch) {
 
-            wheelToBall.put(wheel, ball);
-            ballToWheel.put(ball, wheel);
-        }
+        return (BALL_SPEED_GAIN * ballSpeed)
+            + (YAW_COS_COEFFICIENT * Math.cos(yaw.getRadians()))
+            + (PITCH_SIN_COEFFICIENT * Math.sin(pitch.getRadians() + PITCH_PHASE_OFFSET_RAD))
+            + MODEL_BIAS;
     }
 
     /**
-     * Gets the wheel speed that would shoot the ball at provided speed from a regression model.
-     * @param ballSpeed The speed of the ball in meters per second.
-     * @return The wheel surface speed that will shoot the ball in meters per second.
+     * Computes the resulting ball exit speed produced by a given wheel surface speed.
+     *
+     * @param wheelSurfaceSpeed Flywheel surface speed in meters per second.
+     * @param yaw Turret yaw angle.
+     * @param pitch Hood pitch angle.
+     * @return Ball exit velocity in meters per second.
      */
-    public static double wheelSurfaceSpeedFromBallSpeed(double ballSpeed) {
-        return ballToWheel.get(ballSpeed);
-    }
+    public static double ballSpeedFromWheelSurfaceSpeed(
+            double wheelSurfaceSpeed,
+            Rotation2d yaw,
+            Rotation2d pitch) {
 
-    /**
-     * Gets the ball speed that a given wheel speed would shoot it out from a regression model.
-     * @param wheelSurfaceSpeed The speed of the surface of the flywheel in meters per second.
-     * @return The speed the ball will shoot out in meters per second.
-     */
-    public static double ballSpeedFromWheelSurfaceSpeed(double wheelSurfaceSpeed) {
-        return wheelToBall.get(wheelSurfaceSpeed);
+        return (
+            wheelSurfaceSpeed
+            - (YAW_COS_COEFFICIENT * Math.cos(yaw.getRadians()))
+            - (PITCH_SIN_COEFFICIENT * Math.sin(pitch.getRadians() + PITCH_PHASE_OFFSET_RAD))
+            - MODEL_BIAS
+        ) / BALL_SPEED_GAIN;
     }
 
 

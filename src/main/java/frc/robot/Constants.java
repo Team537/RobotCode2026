@@ -50,8 +50,12 @@ public class Constants {
             public static final double SETTINGS_DELAY_TIME = 0.5;
             public static final double TURRET_OFFSET_INCREASE = 0.1; // Degrees to increase per tick
             public static final int TURRET_OFFSET_DECIMAL_PLACE = 1;
+            public static final double HOOD_OFFSET_INCREASE = 0.1;
+            public static final int HOOD_OFFSET_DECIMAL_PLACE = 1;
             public static final double SHOOTER_PERCENT_INCREASE = 0.2; // Percent to increase per tick
             public static final int SHOOTER_PERCENT_DECIMAL_PLACE = 1;
+
+            public static final double SHOOTER_PERCENT_DEFAULT = 75.0;
 
         }
 
@@ -303,7 +307,7 @@ public class Constants {
         public static final double KV = 0.0;
         public static final double KA = 0.0;
 
-        public static final double PITCH_KP = 3.0;
+        public static final double PITCH_KP = 2.0;
         public static final double PITCH_KI = 0.0;
         public static final double PITCH_KD = 0.0;
 
@@ -349,7 +353,7 @@ public class Constants {
             TURRET_TRANSLATION,
             Rotation2d.fromDegrees(45),
             Rotation2d.fromDegrees(85),
-            5.0,
+            3.05,
             MIN_ROTATION,
             MAX_ROTATION
         );
@@ -378,12 +382,7 @@ public class Constants {
 
         public static final double TOLERANCE = 0.1; // Meters per second
 
-        public static final double[][] WHEEL_SPEED_TO_BALL_SPEED_POINTS = {
-            {0.0,0.0},
-            {40.0,12.50}
-        }; // Meters per second to meters per second
-
-        public static final double MAX_BALL_SPEED = 12.5; // Meters per second
+        public static final double MAX_BALL_SPEED = 11.5; // Meters per second
 
         public static final boolean MOTOR_INVERTED = false;
 

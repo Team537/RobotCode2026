@@ -7,6 +7,7 @@ package frc.robot;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.zip.ZipException;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -200,6 +201,9 @@ public class RobotContainer {
     SmartDashboard.putNumber("Auto/CustomIntakePose/X", 0.0);
     SmartDashboard.putNumber("Auto/CustomIntakePose/Y", 0.0);
     SmartDashboard.putNumber("Auto/CustomIntakePose/Theta", 0.0);
+    SmartDashboard.putNumber("Auto/CustomTargetTranslation/X", 0.0);
+    SmartDashboard.putNumber("Auto/CustomTargetTranslation/Y", 0.0);
+    SmartDashboard.putNumber("Auto/CustomTargetTranslation/Z", 0.0);
 
     SmartDashboard.putBoolean("Auto/RunAuto",true);
 
@@ -253,7 +257,7 @@ public class RobotContainer {
     Trigger stowTrigger = new Trigger(
         () -> driverController.getBButton() || SwerveUtil.willRobotEnterRegion(driveSubsystem.getPose(),
             driveSubsystem.getVelocity(), Constants.Field.TRENCH_REGION, Constants.Drive.HOOD_STOW_LOOKAHEAD_TIME));
-    stowTrigger.whileTrue(
+    stowTrigger.and(() -> !FieldUtil.isAutonomous()).whileTrue(
         turretSubsystem.getStowCommand());
 
     Trigger shootTrigger = new Trigger(() -> driverController.getRightBumperButton());
@@ -520,14 +524,14 @@ public class RobotContainer {
       Commands.deadline(
         Commands.waitSeconds(SmartDashboard.getNumber("Auto/StartDelay",Constants.Operator.Auto.DEFAULT_START_DELAY)),
         intakePivot.raiseIntakeCommand(),
-        turretSubsystem.getTargetCommand(targetingSupplier, driveSubsystem::getPose, driveSubsystem::getVelocity)
+        turretSubsystem.getTargetCommand(() -> FieldUtil.flipIfRed(Constants.Field.BLUE_HUB_TRANSLATION), driveSubsystem::getPose, driveSubsystem::getVelocity)
       ),
 
       new ShootPreloadCommand(
         shooterSubsystem, 
         turretSubsystem, 
         transferSubsystem, 
-        targetingSupplier, 
+        () -> FieldUtil.flipIfRed(Constants.Field.BLUE_HUB_TRANSLATION), 
         driveSubsystem::getPose, 
         driveSubsystem::getVelocity, 
         SmartDashboard.getNumber("Auto/PreloadShootTime", Constants.Operator.Auto.DEFAULT_PRELOAD_SHOOT_TIME)
@@ -560,7 +564,7 @@ public class RobotContainer {
             shooterSubsystem,
             turretSubsystem,
             transferSubsystem,
-            targetingSupplier,
+            () -> FieldUtil.flipIfRed(Constants.Field.BLUE_HUB_TRANSLATION),
             Constants.Operator.Auto.DEPOT_READY_INTAKE_POSE,
             Constants.Operator.Auto.DEPOT_INTAKE_POSE,
             false,
@@ -576,7 +580,7 @@ public class RobotContainer {
             shooterSubsystem,
             turretSubsystem,
             transferSubsystem,
-            targetingSupplier,
+            () -> FieldUtil.flipIfRed(Constants.Field.BLUE_HUB_TRANSLATION),
             Constants.Operator.Auto.OUTPOST_READY_INTAKE_POSE,
             Constants.Operator.Auto.OUTPOST_INTAKE_POSE,
             false,
@@ -592,7 +596,7 @@ public class RobotContainer {
             shooterSubsystem,
             turretSubsystem,
             transferSubsystem,
-            targetingSupplier,
+            () -> FieldUtil.flipIfRed(Constants.Field.BLUE_DEPO_TRANSLATION),
             FieldUtil.flipIfRed(Constants.Operator.Auto.NEUTRAL_LEFT_READY_INTAKE_POSE),
             FieldUtil.flipIfRed(Constants.Operator.Auto.NEUTRAL_LEFT_INTAKE_POSE),
             true, // MUST STOW
@@ -608,7 +612,7 @@ public class RobotContainer {
             shooterSubsystem,
             turretSubsystem,
             transferSubsystem,
-            targetingSupplier,
+            () -> FieldUtil.flipIfRed(Constants.Field.BLUE_OUTPOST_TRANSLATION),
             FieldUtil.flipIfRed(Constants.Operator.Auto.NEUTRAL_RIGHT_READY_INTAKE_POSE),
             FieldUtil.flipIfRed(Constants.Operator.Auto.NEUTRAL_RIGHT_INTAKE_POSE),
             true, // MUST STOW
@@ -620,6 +624,7 @@ public class RobotContainer {
 
         Pose2d ready = getDashboardPose("Auto/CustomReadyPose");
         Pose2d intake = getDashboardPose("Auto/CustomIntakePose");
+        Translation3d target = getDashboardTranslation3d("Auto/CustomTargetTranslation");
 
         boolean stow = SmartDashboard.getBoolean("Auto/CustomStowTurret", true);
 
@@ -630,7 +635,7 @@ public class RobotContainer {
             shooterSubsystem,
             turretSubsystem,
             transferSubsystem,
-            targetingSupplier,
+            () -> FieldUtil.flipIfRed(target),
             FieldUtil.flipIfRed(ready),
             FieldUtil.flipIfRed(intake),
             stow,
@@ -652,6 +657,19 @@ public class RobotContainer {
         x,
         y,
         Rotation2d.fromDegrees(rotDeg)
+    );
+
+  }
+
+  private Translation3d getDashboardTranslation3d(String prefix) {
+    double x = SmartDashboard.getNumber(prefix + "/X", 0.0);
+    double y = SmartDashboard.getNumber(prefix + "/Y", 0.0);
+    double z = SmartDashboard.getNumber(prefix + "/Z", 0.0);
+
+    return new Translation3d(
+        x,
+        y,
+        z
     );
 
   }

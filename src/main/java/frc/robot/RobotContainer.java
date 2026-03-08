@@ -635,6 +635,16 @@ public class RobotContainer {
                     .map(FieldUtil::flipIfRed)
                     .toList()));
 
+      case RAM_LEFT:
+        return new DriveToSequenceCommand(driveSubsystem, Constants.Operator.Auto.RAM_LEFT_SEQUENCE.stream()
+            .map(FieldUtil::flipIfRed)
+            .toList());
+
+      case RAM_RIGHT:
+        return new DriveToSequenceCommand(driveSubsystem, Constants.Operator.Auto.RAM_RIGHT_SEQUENCE.stream()
+            .map(FieldUtil::flipIfRed)
+            .toList());
+
       case CUSTOM:
 
         Pose2d ready = getDashboardPose("Auto/CustomReadyPose");

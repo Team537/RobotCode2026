@@ -6,6 +6,8 @@ public enum IntakeStrategy {
     OUTPOST,
     NEUTRAL_LEFT,
     NEUTRAL_RIGHT,
+    RAM_LEFT,
+    RAM_RIGHT,
     JUST_SHOOT,
     CUSTOM
     

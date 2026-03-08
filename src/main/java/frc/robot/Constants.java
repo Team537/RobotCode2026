@@ -102,7 +102,18 @@ public class Constants {
             );
 
             public static final double NEUTRAL_SPIN_SPEED = 8.0;
-            public static final double NEUTRAL_SPIN_TIME = 5.0;
+            public static final double NEUTRAL_SPIN_TIME = 1.0;
+
+            public static final List<Pose2d> RAM_LEFT_SEQUENCE = List.of(
+                new Pose2d(7.797,5.902,Rotation2d.kCW_90deg),
+                new Pose2d(7.829,4.051,Rotation2d.kCW_90deg)
+            );
+
+            public static final List<Pose2d> RAM_RIGHT_SEQUENCE = List.of(
+                new Pose2d(7.797,2.168,Rotation2d.kCW_90deg),
+                new Pose2d(7.829,4.051,Rotation2d.kCW_90deg)
+            );
+
 
         }
 
@@ -323,8 +334,8 @@ public class Constants {
 
         // NOTE: This value is only used in the trapezoidal motion profiling of the
         // robot. Other maximums are stored in deploy settings.
-        public static final double MAX_TRANSLATIONAL_ACCELERATION = 2.0; // Meters per second squared
-        public static final double MAX_ROTATIONAL_ACCELERATION = 2.0;
+        public static final double MAX_TRANSLATIONAL_ACCELERATION = 10.0; // Meters per second squared
+        public static final double MAX_ROTATIONAL_ACCELERATION = 10.0;
 
         public static final File YAGSL_CONFIG = new File(Filesystem.getDeployDirectory(), "swerve/ourSetup");
         public static final double ANGULAR_VELOCITY_COMPENSATION_COEFFICIENT = 0.1;

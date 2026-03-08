@@ -334,8 +334,8 @@ public class Constants {
 
         // NOTE: This value is only used in the trapezoidal motion profiling of the
         // robot. Other maximums are stored in deploy settings.
-        public static final double MAX_TRANSLATIONAL_ACCELERATION = 10.0; // Meters per second squared
-        public static final double MAX_ROTATIONAL_ACCELERATION = 10.0;
+        public static final double MAX_TRANSLATIONAL_ACCELERATION = 2.0; // Meters per second squared
+        public static final double MAX_ROTATIONAL_ACCELERATION = 3.0;
 
         public static final File YAGSL_CONFIG = new File(Filesystem.getDeployDirectory(), "swerve/ourSetup");
         public static final double ANGULAR_VELOCITY_COMPENSATION_COEFFICIENT = 0.1;

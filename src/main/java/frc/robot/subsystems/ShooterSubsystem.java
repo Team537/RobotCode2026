@@ -15,6 +15,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Configs;
@@ -68,13 +69,13 @@ public class ShooterSubsystem extends SubsystemBase {
      * Creates the shooter subsystem and applies motor configuration.
      */
     public ShooterSubsystem() {
-        leadShooterMotor = new TalonFX(Constants.Shooter.LEAD_SHOOTER_ID);
+        leadShooterMotor = new TalonFX(Constants.Shooter.LEAD_SHOOTER_ID, Constants.CANIVORE_LOOP_NAME);
         leadShooterMotor
             .getConfigurator()
             .apply(Configs.Shooter.SHOOTER_CONFIGURATION);
         leadShooterMotor.setPosition(0.0);
 
-        followerShooterMotor = new TalonFX(Constants.Shooter.FOLLOWER_SHOOTER_ID);
+        followerShooterMotor = new TalonFX(Constants.Shooter.FOLLOWER_SHOOTER_ID, Constants.CANIVORE_LOOP_NAME);
         followerShooterMotor
             .getConfigurator()
             .apply(Configs.Shooter.SHOOTER_CONFIGURATION);
@@ -194,7 +195,7 @@ public class ShooterSubsystem extends SubsystemBase {
      * @return A command to stop the shooter.
      */
     public Command getStopCommand() {
-        return new RunCommand(() -> {
+        return new InstantCommand(() -> {
             leadShooterMotor.stopMotor();
             followerShooterMotor.stopMotor();
         },this).withName("StopShooter");
@@ -226,7 +227,7 @@ public class ShooterSubsystem extends SubsystemBase {
         Supplier<Pose2d> robotPoseSupplier,
         Supplier<ChassisSpeeds> robotVelocitySupplier
     ) {
-        return getBallVelocityCommand(() -> {
+        return getWheelVelocityCommand(() -> {
             TurretSolver.State solution =
                 TurretSolver.solve(
                     robotPoseSupplier.get(),
@@ -235,6 +236,7 @@ public class ShooterSubsystem extends SubsystemBase {
                     Constants.Turret.SOLVER_CONFIG
                 );
 
+            SmartDashboard.putNumber("Target Velocity", solution.getLaunchVelocity());
             SmartDashboard.putNumber("Target Max Height", solution.getMaxHeight());
             SmartDashboard.putNumber("Target Impact Velocity", solution.getImpactVelocity());
             return solution.getLaunchVelocity();

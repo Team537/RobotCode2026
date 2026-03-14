@@ -108,7 +108,7 @@
             "title": "FMSInfo",
             "x": 0.0,
             "y": 0.0,
-            "width": 512.0,
+            "width": 384.0,
             "height": 128.0,
             "type": "FMSInfo",
             "properties": {
@@ -118,10 +118,10 @@
           },
           {
             "title": "Reset Pose",
-            "x": 256.0,
-            "y": 128.0,
+            "x": 0.0,
+            "y": 512.0,
             "width": 256.0,
-            "height": 128.0,
+            "height": 192.0,
             "type": "Command",
             "properties": {
               "topic": "/SmartDashboard/Reset Pose",
@@ -162,7 +162,7 @@
             "title": "Command Scheduler",
             "x": 0.0,
             "y": 128.0,
-            "width": 256.0,
+            "width": 384.0,
             "height": 384.0,
             "type": "Scheduler",
             "properties": {
@@ -173,9 +173,9 @@
           {
             "title": "Reset Turret Angle",
             "x": 256.0,
-            "y": 256.0,
+            "y": 512.0,
             "width": 256.0,
-            "height": 128.0,
+            "height": 192.0,
             "type": "Command",
             "properties": {
               "topic": "/SmartDashboard/Reset Turret Angle",
@@ -186,10 +186,10 @@
           },
           {
             "title": "SolverValid",
-            "x": 512.0,
-            "y": 0.0,
-            "width": 448.0,
-            "height": 512.0,
+            "x": 768.0,
+            "y": 512.0,
+            "width": 192.0,
+            "height": 192.0,
             "type": "Boolean Box",
             "properties": {
               "topic": "/SmartDashboard/Turret/SolverValid",
@@ -217,16 +217,29 @@
           },
           {
             "title": "Reset Hood Angle",
-            "x": 256.0,
-            "y": 384.0,
+            "x": 512.0,
+            "y": 512.0,
             "width": 256.0,
-            "height": 128.0,
+            "height": 192.0,
             "type": "Command",
             "properties": {
               "topic": "/SmartDashboard/Reset Hood Angle",
               "period": 0.06,
               "show_type": true,
               "maximize_button_space": false
+            }
+          },
+          {
+            "title": "Driver Camera",
+            "x": 384.0,
+            "y": 0.0,
+            "width": 576.0,
+            "height": 512.0,
+            "type": "Camera Stream",
+            "properties": {
+              "topic": "/CameraPublisher/back-raw",
+              "period": 0.06,
+              "rotation_turns": 0
             }
           }
         ]
@@ -235,17 +248,181 @@
     {
       "name": "Autonomous",
       "grid_layout": {
-        "layouts": [],
+        "layouts": [
+          {
+            "title": "CustomIntakePose",
+            "x": 960.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 256.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "Theta",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/Auto/CustomIntakePose/Theta",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "X",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/Auto/CustomIntakePose/X",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Y",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/Auto/CustomIntakePose/Y",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              }
+            ]
+          },
+          {
+            "title": "CustomReadyPose",
+            "x": 704.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 256.0,
+            "type": "List Layout",
+            "properties": {
+              "label_position": "TOP"
+            },
+            "children": [
+              {
+                "title": "Theta",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/Auto/CustomReadyPose/Theta",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "X",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/Auto/CustomReadyPose/X",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              },
+              {
+                "title": "Y",
+                "x": 0.0,
+                "y": 0.0,
+                "width": 128.0,
+                "height": 128.0,
+                "type": "Text Display",
+                "properties": {
+                  "topic": "/SmartDashboard/Auto/CustomReadyPose/Y",
+                  "period": 0.06,
+                  "data_type": "double",
+                  "show_submit_button": false
+                }
+              }
+            ]
+          }
+        ],
         "containers": [
           {
-            "title": "Compensation Coefficient",
+            "title": "IntakeStrategy",
+            "x": 0.0,
+            "y": 128.0,
+            "width": 704.0,
+            "height": 128.0,
+            "type": "Split Button Chooser",
+            "properties": {
+              "topic": "/SmartDashboard/Auto/IntakeStrategy",
+              "period": 0.06
+            }
+          },
+          {
+            "title": "IntakeShootTime",
+            "x": 512.0,
+            "y": 0.0,
+            "width": 192.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/Auto/IntakeShootTime",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "PreloadShootTime",
+            "x": 320.0,
+            "y": 0.0,
+            "width": 192.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/Auto/PreloadShootTime",
+              "period": 0.06,
+              "data_type": "double",
+              "show_submit_button": false
+            }
+          },
+          {
+            "title": "RunAuto",
             "x": 0.0,
             "y": 0.0,
             "width": 128.0,
             "height": 128.0,
+            "type": "Toggle Switch",
+            "properties": {
+              "topic": "/SmartDashboard/Auto/RunAuto",
+              "period": 0.06,
+              "data_type": "boolean"
+            }
+          },
+          {
+            "title": "StartDelay",
+            "x": 128.0,
+            "y": 0.0,
+            "width": 192.0,
+            "height": 128.0,
             "type": "Text Display",
             "properties": {
-              "topic": "/SmartDashboard/Compensation Coefficient",
+              "topic": "/SmartDashboard/Auto/StartDelay",
               "period": 0.06,
               "data_type": "double",
               "show_submit_button": false

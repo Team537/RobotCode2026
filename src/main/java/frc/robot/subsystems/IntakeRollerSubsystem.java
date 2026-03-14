@@ -24,7 +24,7 @@ public class IntakeRollerSubsystem extends SubsystemBase {
     // --------------------------------------------------------------------
 
     public IntakeRollerSubsystem() {
-        intakeRoller = new TalonFX(Constants.IntakeRoller.INTAKE_ID);
+        intakeRoller = new TalonFX(Constants.IntakeRoller.INTAKE_ID, Constants.CANIVORE_LOOP_NAME);
         intakeRoller.getConfigurator().apply(Configs.Intake.INTAKE_CONFIGURATION);
     }
 
@@ -48,10 +48,10 @@ public class IntakeRollerSubsystem extends SubsystemBase {
     // Commands
     // --------------------------------------------------------------------
     public Command getIntakeCommand() {
-        return new RunCommand(() -> intakeRoller.set(Constants.IntakeRoller.INTAKE_POWER),this).withName("RunIntake");
+        return new InstantCommand(() -> intakeRoller.set(Constants.IntakeRoller.INTAKE_POWER),this).withName("RunIntake");
     }
 
     public Command getStopCommand() {
-        return new RunCommand(() -> intakeRoller.stopMotor(),this).withName("StopIntake");
+        return new InstantCommand(() -> intakeRoller.stopMotor(),this).withName("StopIntake");
     }
 }

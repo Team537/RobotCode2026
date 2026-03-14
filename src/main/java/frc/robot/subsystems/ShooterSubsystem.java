@@ -239,8 +239,7 @@ public class ShooterSubsystem extends SubsystemBase {
             SmartDashboard.putNumber("Target Velocity", solution.getLaunchVelocity());
             SmartDashboard.putNumber("Target Max Height", solution.getMaxHeight());
             SmartDashboard.putNumber("Target Impact Velocity", solution.getImpactVelocity());
-
-            return SmartDashboard.getNumber("TargetShooterVelocity",0.0);
+            return solution.getLaunchVelocity();
         }).withName("Target Shooter");
     }
 

@@ -129,32 +129,6 @@ public class Configs {
     public static final TalonFXConfiguration TRANSFER_CONFIG = new TalonFXConfiguration();
 
     static {
-        TRANSFER_CONFIG
-            .Feedback.SensorToMechanismRatio = Constants.Transfer.ENCODER_FACTOR;
-
-        TRANSFER_CONFIG
-            .Slot0
-                .kP = Constants.Transfer.KP;
-
-        TRANSFER_CONFIG
-            .Slot0
-                .kI = Constants.Transfer.KI;
-
-        TRANSFER_CONFIG
-            .Slot0
-                .kD = Constants.Transfer.KD;
-
-        TRANSFER_CONFIG
-            .Slot0
-                .kS = Constants.Transfer.KS;
-
-        TRANSFER_CONFIG
-            .Slot0
-                .kV = Constants.Transfer.KV;
-
-        TRANSFER_CONFIG
-            .Slot0
-                .kA = Constants.Transfer.KA;
 
         TRANSFER_CONFIG
             .CurrentLimits

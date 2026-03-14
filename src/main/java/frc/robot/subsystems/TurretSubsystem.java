@@ -90,11 +90,11 @@ public class TurretSubsystem extends SubsystemBase {
      * Creates the turret subsystem and configures the motor controller.
      */
     public TurretSubsystem() {
-        turretMotor = new TalonFX(Constants.Turret.TURRET_ID);
+        turretMotor = new TalonFX(Constants.Turret.TURRET_ID, Constants.CANIVORE_LOOP_NAME);
         turretMotor.getConfigurator().apply(Configs.TURRET_CONFIG);
         resetTurretAngle(Constants.Turret.START_POSITION);
         pitchServo = new PWM(Constants.Turret.PITCH_SERVO_ID);
-        pitchEncoder = new CANcoder(Constants.Turret.PITCH_CANCODER_ID);
+        pitchEncoder = new CANcoder(Constants.Turret.PITCH_CANCODER_ID, Constants.CANIVORE_LOOP_NAME);
         resetHoodAngle(Constants.Turret.HOOD_START_POSITION);
     }
 
@@ -294,7 +294,7 @@ public class TurretSubsystem extends SubsystemBase {
             pitchServo.setSpeed(0.0);
         });
 
-        return Commands.sequence(moveToTarget, settleDown, finish)
+        return Commands.sequence(moveToTarget, settleDown, finish, Commands.idle())
                 .withName("StowHood");
     }
 

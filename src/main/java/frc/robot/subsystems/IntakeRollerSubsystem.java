@@ -24,7 +24,7 @@ public class IntakeRollerSubsystem extends SubsystemBase {
     // --------------------------------------------------------------------
 
     public IntakeRollerSubsystem() {
-        intakeRoller = new TalonFX(Constants.IntakeRoller.INTAKE_ID);
+        intakeRoller = new TalonFX(Constants.IntakeRoller.INTAKE_ID, Constants.CANIVORE_LOOP_NAME);
         intakeRoller.getConfigurator().apply(Configs.Intake.INTAKE_CONFIGURATION);
     }
 

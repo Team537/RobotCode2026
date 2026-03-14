@@ -55,7 +55,7 @@ public class Constants {
             public static final double SHOOTER_PERCENT_INCREASE = 0.2; // Percent to increase per tick
             public static final int SHOOTER_PERCENT_DECIMAL_PLACE = 1;
 
-            public static final double SHOOTER_PERCENT_DEFAULT = 75.0;
+            public static final double SHOOTER_PERCENT_DEFAULT = 100.0;
 
         }
 
@@ -118,6 +118,8 @@ public class Constants {
         }
 
     }
+
+    public static final String CANIVORE_LOOP_NAME = "Upper";
 
     public static class Field {
 
@@ -365,7 +367,7 @@ public class Constants {
         public static final double KV = 0.0;
         public static final double KA = 0.0;
 
-        public static final double PITCH_KP = 2.0;
+        public static final double PITCH_KP = 4.0;
         public static final double PITCH_KI = 0.0;
         public static final double PITCH_KD = 0.0;
 
@@ -395,7 +397,7 @@ public class Constants {
         public static final double CURRENT_LOWER_TIME = 0.5;
 
         public static final Rotation2d START_POSITION = Rotation2d.fromRadians(1.5 * Math.PI);
-        public static final Rotation2d MIN_ROTATION = Rotation2d.fromRadians(1.0 * Math.PI);
+        public static final Rotation2d MIN_ROTATION = Rotation2d.fromRadians(1.25 * Math.PI);
         public static final Rotation2d MAX_ROTATION = Rotation2d.fromRadians(2.0 * Math.PI);
 
         public static final Rotation2d TURRET_TOLERANCE = Rotation2d.fromDegrees(3.0);
@@ -413,8 +415,8 @@ public class Constants {
             Shooter.MAX_BALL_SPEED, 
             TURRET_TRANSLATION,
             Rotation2d.fromDegrees(45),
-            Rotation2d.fromDegrees(85),
-            3.05,
+            Rotation2d.fromDegrees(80),
+            6.0,
             MIN_ROTATION,
             MAX_ROTATION
         );
@@ -455,20 +457,9 @@ public class Constants {
         public static final int CURRENT_LOWER_LIMIT = 25;
         public static final double CURRENT_LOWER_TIME = 0.5;
 
-        public static final double KP = 0.0;
-        public static final double KI = 0.0;
-        public static final double KD = 0.0;
-        public static final double KS = 0.0;
-        public static final double KV = 2.3;
-        public static final double KA = 0.3;
-
-        public static final double TRANSFER_GEAR_REDUCTION = 1.0;
-        public static final double TRANSFER_WHEEL_RADIUS = 0.0254;
-        public static final double ENCODER_FACTOR = TRANSFER_GEAR_REDUCTION / (2.0 * Math.PI * TRANSFER_WHEEL_RADIUS);
-
         public static final boolean MOTOR_INVERTED = true;
 
-        public static final double LOAD_SPEED = 16.0;
+        public static final double LOAD_POWER = 0.25;
     }
 
     public static class VisionOdometryConstants {

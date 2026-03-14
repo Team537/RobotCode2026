@@ -131,7 +131,7 @@ public class RobotContainer {
     }).ignoringDisable(true);
 
     SmartDashboard.putData("Reset Turret Angle", resetTurretCommand);
-    SmartDashboard.putData("Reset Hood Angle", resetTurretCommand);
+    SmartDashboard.putData("Reset Hood Angle", resetHoodCommand);
     // Targeting Data
 
     // Fixed field targets (static presets with forced defaults every boot)
@@ -266,9 +266,9 @@ public class RobotContainer {
     stowTrigger.and(() -> !FieldUtil.isAutonomous()).whileTrue(
         turretSubsystem.getStowCommand());
 
-    Trigger shootTrigger = new Trigger(() -> driverController.getRightBumperButton());
+    Trigger shootTrigger = new Trigger(() -> driverController.getAButton());
 
-    Trigger intakeTrigger = new Trigger(() -> driverController.getAButton());
+    Trigger intakeTrigger = new Trigger(() -> driverController.getRightBumperButton());
 
     Trigger solverValid = new Trigger(() -> TurretSolver.solve(driveSubsystem.getPose(), driveSubsystem.getVelocity(),
         targetingSupplier.get(), Constants.Turret.SOLVER_CONFIG).isValid());

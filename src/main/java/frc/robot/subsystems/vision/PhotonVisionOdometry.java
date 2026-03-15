@@ -2,14 +2,21 @@ package frc.robot.subsystems.vision;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform2d;
-
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Robot;
 import frc.robot.util.vision.Cameras;
+import frc.robot.util.vision.VisionObservation;
 
 import java.awt.Desktop;
 import java.util.ArrayList;
@@ -18,9 +25,13 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonUtils;
+import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.simulation.VisionSystemSim;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
+
+import com.fasterxml.jackson.databind.ser.impl.PropertySerializerMap;
+
 import swervelib.SwerveDrive;
 import swervelib.telemetry.SwerveDriveTelemetry;
 
@@ -102,6 +113,83 @@ public class PhotonVisionOdometry {
 
   }
   
+  /*
+   * POSITION ESTIMATION
+   */
+  private double averageTagDistance(EstimatedRobotPose est) {
+    if (est.targetsUsed == null || est.targetsUsed.isEmpty()) return Double.POSITIVE_INFINITY;
+
+    double sum = 0.0;
+    for (var target : est.targetsUsed) {
+      sum += target.getBestCameraToTarget().getTranslation().getNorm();
+    }
+    return sum / est.targetsUsed.size();
+  }
+
+  private double maxAmbiguity(EstimatedRobotPose est) {
+    if (est.targetsUsed == null || est.targetsUsed.isEmpty()) return 1.0;
+
+    double max = 0.0;
+    for (var target : est.targetsUsed) {
+      max = Math.max(max, target.getPoseAmbiguity());
+    }
+    return max;
+  }
+
+  private boolean agrees(Pose2d posA, Pose2d posB, double maxXY, double maxThetaRad) {
+    return posA.getTranslation().getDistance(posB.getTranslation()) < maxXY
+        && Math.abs(posA.getRotation().minus(posB.getRotation()).getRadians()) < maxThetaRad;
+  }
+
+  private List<VisionObservation> filterByConsensus(List<VisionObservation> obs) {
+    List<VisionObservation> accepted = new ArrayList<>();
+
+    for (VisionObservation obsA : obs) {
+      int agreements = 0;
+      for (VisionObservation obsB : obs) {
+        if (obsA == obsB) continue;
+        if (agrees(obsA.pose, obsB.pose, 0.6, Math.toRadians(15))) {
+          agreements++;
+        }
+      }
+
+      // keep if another camera agrees, or if it is strong multitag
+      if (agreements > 0 || (obsA.isMultiTag && obsA.tagCount >= 2 && obsA.avgTagDistance < 4.0)) {
+        accepted.add(obsA);
+      }
+    }
+
+    return accepted;
+  }
+
+  private boolean shouldAcceptEnabledMeasurement(
+      VisionObservation obs,
+      Pose2d currentPose,
+      ChassisSpeeds speeds,
+      int supportCount) {
+
+    double translationalError =
+        currentPose.getTranslation().getDistance(obs.pose.getTranslation());
+    double headingError =
+        Math.abs(currentPose.getRotation().minus(obs.pose.getRotation()).getRadians());
+
+    double speed = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
+
+    // Base tolerance
+    double maxTranslationJump = 0.5 + 0.35 * speed;
+    double maxHeadingJump = Math.toRadians(20);
+
+    // Strong multitag or multi-camera consensus may correct larger errors
+    boolean strongVision = obs.isMultiTag && obs.avgTagDistance < 4.0;
+    boolean hasSupport = supportCount >= 2;
+
+    if (translationalError < maxTranslationJump && headingError < maxHeadingJump) {
+      return true;
+    }
+
+    return strongVision || hasSupport;
+  }
+
   /**
    * Update the pose estimation inside of {@link SwerveDrive} with all of the
    * given poses.
@@ -122,21 +210,61 @@ public class PhotonVisionOdometry {
        */
       visionSim.update(swerveDrive.getSimulationDriveTrainPose().get());
     }
+    
+    // Get the robot's current position for reference.
+    Pose2d currentPose = swerveDrive.getPose();
+    ChassisSpeeds speeds = swerveDrive.getRobotVelocity();
+
+    List<VisionObservation> observations = new ArrayList<>();
     for (Cameras camera : Cameras.values()) {
       Optional<EstimatedRobotPose> poseEst = getEstimatedGlobalPose(camera);
-      if (poseEst.isPresent()) {
+      if (!poseEst.isPresent()) continue; 
 
-        var pose = poseEst.get();
-        swerveDrive.addVisionMeasurement(
-            pose.estimatedPose.toPose2d(),
-            pose.timestampSeconds,
-            camera.curStdDevs);
+      EstimatedRobotPose estPos =  poseEst.get();
+      Pose2d estPose2d = estPos.estimatedPose.toPose2d();
+      
+      int tagsUsed = estPos.targetsUsed == null ? 0 : estPos.targetsUsed.size();
+      if (tagsUsed == 0) continue;
 
-        SmartDashboard.putNumber("VisionX", pose.estimatedPose.getX());
-        SmartDashboard.putNumber("VisionY", pose.estimatedPose.getY());
-      }
+      double avgDist = averageTagDistance(estPos);
+      double maxAmbiguity = maxAmbiguity(estPos);
+      boolean isMultiTag = tagsUsed >= 2;
+      Matrix<N3, N1> currStdDevs = camera.curStdDevs;
+
+      observations.add(new VisionObservation(
+        camera,
+        estPos,
+        estPose2d, 
+        maxAmbiguity, 
+        tagsUsed, 
+        avgDist, 
+        maxAmbiguity, 
+        isMultiTag, 
+        currStdDevs
+        ));
     }
 
+    if (observations.isEmpty()) return;
+
+    // Reject inconsistent outliers using cross-camera agreement
+    List<VisionObservation> filtered = filterByConsensus(observations);
+
+    if (filtered.isEmpty()) {
+      filtered = observations.stream()
+          .filter(o -> o.isMultiTag)
+          .toList();
+    }
+
+    if (filtered.isEmpty()) {
+      return;
+    }
+
+    // Update the robot's position using the valid position observations.
+    for (VisionObservation obs : filtered) {
+      if (shouldAcceptEnabledMeasurement(obs, currentPose, speeds, filtered.size())) {
+        swerveDrive.addVisionMeasurement(obs.pose, obs.timestamp, obs.stdDevs);
+      }
+    } 
   }
 
   /**

@@ -6,14 +6,10 @@ import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Robot;
 import frc.robot.util.vision.Cameras;
 import frc.robot.util.vision.VisionObservation;
@@ -25,12 +21,9 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonUtils;
-import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.simulation.VisionSystemSim;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
-
-import com.fasterxml.jackson.databind.ser.impl.PropertySerializerMap;
 
 import swervelib.SwerveDrive;
 import swervelib.telemetry.SwerveDriveTelemetry;

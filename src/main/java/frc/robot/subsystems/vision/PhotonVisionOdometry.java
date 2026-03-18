@@ -375,7 +375,7 @@ public void updatePoseEstimation(SwerveDrive swerveDrive) {
     Matrix<N3, N1> currStdDevs = camera.curStdDevs;
 
     // Reject highly ambiguous estimates before they enter the consensus pipeline.
-    if (maxAmbiguity > maximumAmbiguity) {
+    if (maxTagAmbiguity > maximumAmbiguity) {
       continue;
     }
 

@@ -362,6 +362,11 @@ public void updatePoseEstimation(SwerveDrive swerveDrive) {
     boolean isMultiTag = tagsUsed >= 2;
     Matrix<N3, N1> currStdDevs = camera.curStdDevs;
 
+    // Reject highly ambiguous estimates before they enter the consensus pipeline.
+    if (maxAmbiguity > maximumAmbiguity) {
+      continue;
+    }
+
     /*
      * Store a normalized observation record for later filtering.
      * This keeps the later pipeline cleaner by collecting all relevant

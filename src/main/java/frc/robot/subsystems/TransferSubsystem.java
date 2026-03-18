@@ -41,13 +41,8 @@ public class TransferSubsystem extends SubsystemBase {
      * Creates and configures the transfer subsystem.
      */
     public TransferSubsystem() {
-        transferMotor = new TalonFX(Constants.Transfer.TRANSFER_MOTOR_ID);
+        transferMotor = new TalonFX(Constants.Transfer.TRANSFER_MOTOR_ID, Constants.CANIVORE_LOOP_NAME);
         transferMotor.getConfigurator().apply(Configs.TRANSFER_CONFIG);
-    }
-
-    @Override
-    public void periodic() {
-        SmartDashboard.putNumber("Transfer Velocity",getVelocity());
     }
 
     // --------------------------------------------------------------------
@@ -55,17 +50,12 @@ public class TransferSubsystem extends SubsystemBase {
     // --------------------------------------------------------------------
 
     /**
-     * Commands the transfer motor to a target velocity.
+     * Commands the transfer motor to a target power.
      *
-     * @param velocity desired velocity in mechanism units per second
+     * @param power desired power
      */
-    public void setVelocity(double velocity) {
-        VelocityVoltage velocityRequest = new VelocityVoltage(velocity);
-        transferMotor.setControl(velocityRequest);
-    }
-
-    public double getVelocity() {
-        return transferMotor.getVelocity().getValueAsDouble();
+    public void setPower(double power) {
+        transferMotor.set(power);
     }
 
     // --------------------------------------------------------------------
@@ -73,17 +63,17 @@ public class TransferSubsystem extends SubsystemBase {
     // --------------------------------------------------------------------
 
     /**
-     * Creates a command that immediately sets the transfer velocity.
+     * Creates a command that immediately sets the transfer power.
      *
      * <p>This command finishes instantly and leaves the motor
      * running at the requested speed.</p>
      *
-     * @param velocity desired transfer velocity
-     * @return an instant command that sets motor velocity
+     * @param power desired transfer power
+     * @return an instant command that sets motor power
      */
-    public Command getSetVelocityCommand(double velocity) {
+    public Command getSetPowerCommand(double power) {
         return new InstantCommand(
-            () -> setVelocity(velocity),
+            () -> setPower(power),
             this
         );
     }
@@ -92,13 +82,13 @@ public class TransferSubsystem extends SubsystemBase {
      * @return a command that runs the transfer at the load speed
      */
     public Command getLoadCommand() {
-        return getSetVelocityCommand(Constants.Transfer.LOAD_SPEED).withName("TransferLoad");
+        return getSetPowerCommand(Constants.Transfer.LOAD_POWER).withName("TransferLoad");
     }
 
     /**
      * @return a command that stops the transfer motor
      */
     public Command getStopCommand() {
-        return getSetVelocityCommand(0.0).withName("TransferStop");
+        return new InstantCommand(() -> transferMotor.stopMotor());
     }
 }

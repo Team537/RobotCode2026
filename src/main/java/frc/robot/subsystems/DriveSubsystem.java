@@ -13,6 +13,7 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
@@ -106,6 +107,7 @@ public class DriveSubsystem extends SubsystemBase {
 
         obstaclesSuppliers = new ArrayList<>();
 
+        Pathfinding.ensureInitialized();
         PathfindingCommand.warmupCommand().schedule();
 
         SmartDashboard.putNumber("Compensation Coefficient", Constants.Drive.ANGULAR_VELOCITY_COMPENSATION_COEFFICIENT);
@@ -248,10 +250,19 @@ public class DriveSubsystem extends SubsystemBase {
         if (tReq instanceof TranslationRequest.Velocity vel) {
             vx = vel.velocity().getX();
             vy = vel.velocity().getY();
-            // fieldRelative is handled below in final drive call
+            // fieldRelative handled below
         } else if (tReq instanceof TranslationRequest.Position pos) {
             vx = xController.calculate(getPose().getX(), pos.position().getX());
             vy = yController.calculate(getPose().getY(), pos.position().getY());
+
+            double speed = Math.hypot(vx, vy);
+            double max = pos.maxSpeed();
+
+            if (speed > max) {
+                double scale = max / speed;
+                vx *= scale;
+                vy *= scale;
+            }
         } else if (tReq instanceof TranslationRequest.Stop) {
             vx = 0.0;
             vy = 0.0;
@@ -261,8 +272,12 @@ public class DriveSubsystem extends SubsystemBase {
         if (rReq instanceof RotationRequest.Velocity rotVel) {
             omega = rotVel.velocity();
         } else if (rReq instanceof RotationRequest.Position rotPos) {
-            omega = thetaController.calculate(getPose().getRotation().getRadians(),
-                                            rotPos.position().getRadians());
+            omega = thetaController.calculate(
+                getPose().getRotation().getRadians(),
+                rotPos.position().getRadians()
+            );
+
+            omega = MathUtil.clamp(omega, -rotPos.maxSpeed(), rotPos.maxSpeed());
         } else if (rReq instanceof RotationRequest.Stop) {
             omega = 0.0;
         }
@@ -414,6 +429,53 @@ public class DriveSubsystem extends SubsystemBase {
      */
     public Command getStopCommand() {
         return runOnce(() -> stop());
+    }
+
+    // ======================================================================
+    // UNIVERSAL DRIVE-TO-POSE
+    // ======================================================================
+
+    public Command getDriveToPoseCommand(
+        Supplier<Pose2d> targetSupplier,
+        double translationTolerance,
+        Rotation2d rotationTolerance,
+        double maxLinearSpeed,
+        double maxAngularSpeed,
+        boolean finish
+    ) {
+
+        Command cmd = run(() -> {
+            Pose2d target = targetSupplier.get();
+
+            driveWithCompositeRequests(
+                new TranslationRequest.Position(target.getTranslation(), maxLinearSpeed),
+                new RotationRequest.Position(target.getRotation(), maxAngularSpeed)
+            );
+        });
+
+        if (!finish) return cmd;
+
+        return cmd.until(() -> {
+            Pose2d target = targetSupplier.get();
+            Pose2d current = getPose();
+
+            boolean withinTranslation =
+                current.getTranslation()
+                    .getDistance(target.getTranslation())
+                < translationTolerance;
+
+            boolean withinRotation =
+                Math.abs(
+                    edu.wpi.first.math.MathUtil.angleModulus(
+                        current.getRotation()
+                            .minus(target.getRotation())
+                            .getRadians()
+                    )
+                ) < rotationTolerance.getRadians();
+
+            return withinTranslation && withinRotation;
+
+        }).andThen(getStopCommand());
     }
 
     // ======================================================================

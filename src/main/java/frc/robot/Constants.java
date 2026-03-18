@@ -59,11 +59,71 @@ public class Constants {
             public static final double SHOOTER_PERCENT_INCREASE = 0.2; // Percent to increase per tick
             public static final int SHOOTER_PERCENT_DECIMAL_PLACE = 1;
 
-            public static final double SHOOTER_PERCENT_DEFAULT = 75.0;
+            public static final double SHOOTER_PERCENT_DEFAULT = 100.0;
+
+        }
+
+        public static class Auto {
+
+            public static final double DEFAULT_START_DELAY = 0.0;
+            public static final double DEFAULT_PRELOAD_SHOOT_TIME = 0.0;
+            public static final double DEFAULT_INTAKE_SHOOT_TIME = 4.0;
+
+            public static final double AUTO_INTAKE_MAX_SPEED = 1.0;
+
+            public static final Pose2d DEPOT_READY_INTAKE_POSE = new Pose2d(0.411,5.019,Rotation2d.kCCW_90deg);
+            public static final Pose2d DEPOT_INTAKE_POSE = new Pose2d(0.411,5.994,Rotation2d.kCCW_90deg);
+
+            public static final Pose2d OUTPOST_READY_INTAKE_POSE = new Pose2d(1.375,0.661,Rotation2d.k180deg);
+            public static final Pose2d OUTPOST_INTAKE_POSE = new Pose2d(0.619,0.661,Rotation2d.k180deg);
+
+            public static final List<Pose2d> NEUTRAL_LEFT_SEQUENCE_ONE = List.of(
+                new Pose2d(7.730, 7.457, Rotation2d.fromDegrees(160)),
+                new Pose2d(7.730, 1.684, Rotation2d.fromDegrees(160))
+            );
+
+            public static final Translation2d NEUTRAL_LEFT_SPIN_TRANSLATION = new Translation2d(
+                7.730,
+                0.684
+            );
+
+            public static final List<Pose2d> NEUTRAL_LEFT_SEQUENCE_TWO = List.of(
+                new Pose2d(3.405, 0.684, Rotation2d.fromDegrees(180))
+            );
+
+            public static final List<Pose2d> NEUTRAL_RIGHT_SEQUENCE_ONE = List.of(
+                new Pose2d(7.730, 0.684, Rotation2d.fromDegrees(-160)),
+                new Pose2d(7.730, 6.457, Rotation2d.fromDegrees(-160))
+            );
+
+            public static final Translation2d NEUTRAL_RIGHT_SPIN_TRANSLATION = new Translation2d(
+                7.730,
+                7.457
+            );
+
+            public static final List<Pose2d> NEUTRAL_RIGHT_SEQUENCE_TWO = List.of(
+                new Pose2d(3.405, 7.457, Rotation2d.fromDegrees(180))
+            );
+
+            public static final double NEUTRAL_SPIN_SPEED = 8.0;
+            public static final double NEUTRAL_SPIN_TIME = 1.0;
+
+            public static final List<Pose2d> RAM_LEFT_SEQUENCE = List.of(
+                new Pose2d(7.797,5.902,Rotation2d.kCW_90deg),
+                new Pose2d(7.829,4.051,Rotation2d.kCW_90deg)
+            );
+
+            public static final List<Pose2d> RAM_RIGHT_SEQUENCE = List.of(
+                new Pose2d(7.797,2.168,Rotation2d.kCW_90deg),
+                new Pose2d(7.829,4.051,Rotation2d.kCW_90deg)
+            );
+
 
         }
 
     }
+
+    public static final String CANIVORE_LOOP_NAME = "Upper";
 
     public static class Field {
 
@@ -267,7 +327,7 @@ public class Constants {
                 Rotation2d.kPi);
 
         // Drive PID Controller Coefficients
-        public static final double TRANSLATIONAL_KP = 3.0;
+        public static final double TRANSLATIONAL_KP = 5.0;
         public static final double TRANSLATIONAL_KI = 0.0;
         public static final double TRANSLATIONAL_KD = 0.05;
 
@@ -281,7 +341,7 @@ public class Constants {
         // NOTE: This value is only used in the trapezoidal motion profiling of the
         // robot. Other maximums are stored in deploy settings.
         public static final double MAX_TRANSLATIONAL_ACCELERATION = 2.0; // Meters per second squared
-        public static final double MAX_ROTATIONAL_ACCELERATION = 2.0;
+        public static final double MAX_ROTATIONAL_ACCELERATION = 3.0;
 
         public static final File YAGSL_CONFIG = new File(Filesystem.getDeployDirectory(), "swerve/ourSetup");
         public static final double ANGULAR_VELOCITY_COMPENSATION_COEFFICIENT = 0.1;
@@ -311,7 +371,7 @@ public class Constants {
         public static final double KV = 0.0;
         public static final double KA = 0.0;
 
-        public static final double PITCH_KP = 2.0;
+        public static final double PITCH_KP = 4.0;
         public static final double PITCH_KI = 0.0;
         public static final double PITCH_KD = 0.0;
 
@@ -320,6 +380,9 @@ public class Constants {
         public static final double TURRET_GEAR_REDUCTION = 5.0;
         public static final double TURN_TABLE_RATIO = 24.0 / 200.0;
         public static final double ENCODER_FACTOR = (TURRET_GEAR_REDUCTION) / (2.0 * Math.PI * TURN_TABLE_RATIO);
+
+        public static final double STOW_PUSH_DOWN_SPEED = -0.1; // percent of max speed
+        public static final double STOW_PUSH_DOWN_TIME = 0.5; // seconds
 
         public static final double PITCH_GEAR_RATIO = (26.0 / 447.2);
         public static final double PITCH_ENCODER_FACTOR = PITCH_GEAR_RATIO * (2.0 * Math.PI);
@@ -338,7 +401,7 @@ public class Constants {
         public static final double CURRENT_LOWER_TIME = 0.5;
 
         public static final Rotation2d START_POSITION = Rotation2d.fromRadians(1.5 * Math.PI);
-        public static final Rotation2d MIN_ROTATION = Rotation2d.fromRadians(1.0 * Math.PI);
+        public static final Rotation2d MIN_ROTATION = Rotation2d.fromRadians(1.25 * Math.PI);
         public static final Rotation2d MAX_ROTATION = Rotation2d.fromRadians(2.0 * Math.PI);
 
         public static final Rotation2d TURRET_TOLERANCE = Rotation2d.fromDegrees(3.0);
@@ -356,8 +419,8 @@ public class Constants {
             Shooter.MAX_BALL_SPEED, 
             TURRET_TRANSLATION,
             Rotation2d.fromDegrees(45),
-            Rotation2d.fromDegrees(85),
-            3.05,
+            Rotation2d.fromDegrees(80),
+            6.0,
             MIN_ROTATION,
             MAX_ROTATION
         );
@@ -398,20 +461,9 @@ public class Constants {
         public static final int CURRENT_LOWER_LIMIT = 25;
         public static final double CURRENT_LOWER_TIME = 0.5;
 
-        public static final double KP = 0.0;
-        public static final double KI = 0.0;
-        public static final double KD = 0.0;
-        public static final double KS = 0.0;
-        public static final double KV = 2.3;
-        public static final double KA = 0.3;
-
-        public static final double TRANSFER_GEAR_REDUCTION = 1.0;
-        public static final double TRANSFER_WHEEL_RADIUS = 0.0254;
-        public static final double ENCODER_FACTOR = TRANSFER_GEAR_REDUCTION / (2.0 * Math.PI * TRANSFER_WHEEL_RADIUS);
-
         public static final boolean MOTOR_INVERTED = true;
 
-        public static final double LOAD_SPEED = 16.0;
+        public static final double LOAD_POWER = 0.25;
     }
 
     public static class VisionOdometryConstants {

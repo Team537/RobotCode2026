@@ -24,7 +24,10 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PWM;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Configs;
 import frc.robot.Constants;
@@ -88,11 +91,11 @@ public class TurretSubsystem extends SubsystemBase {
      * Creates the turret subsystem and configures the motor controller.
      */
     public TurretSubsystem() {
-        turretMotor = new TalonFX(Constants.Turret.TURRET_ID);
+        turretMotor = new TalonFX(Constants.Turret.TURRET_ID, Constants.CANIVORE_LOOP_NAME);
         turretMotor.getConfigurator().apply(Configs.TURRET_CONFIG);
         resetTurretAngle(Constants.Turret.START_POSITION);
         pitchServo = new PWM(Constants.Turret.PITCH_SERVO_ID);
-        pitchEncoder = new CANcoder(Constants.Turret.PITCH_CANCODER_ID);
+        pitchEncoder = new CANcoder(Constants.Turret.PITCH_CANCODER_ID, Constants.CANIVORE_LOOP_NAME);
         resetHoodAngle(Constants.Turret.HOOD_START_POSITION);
     }
 
@@ -266,25 +269,34 @@ public class TurretSubsystem extends SubsystemBase {
     }
 
     public Command getStowCommand() {
-        return new FunctionalCommand(
-                () -> {
-                    SmartDashboard.putBoolean("Turret/IsStowing", true);
-                },
+
+        Command moveToTarget = new FunctionalCommand(
+                () -> SmartDashboard.putBoolean("Turret/IsStowing", true),
 
                 () -> {
                     setHoodAngle(Constants.Turret.HOOD_STOW_POSITION);
-                    atHoodTarget = Math.abs(
-                            getHoodAngle()
-                                    .minus(Constants.Turret.HOOD_STOW_POSITION)
-                                    .getRadians()) < Constants.Turret.HOOD_TOLERANCE.getRadians();
                 },
 
                 interrupted -> {
-                    atHoodTarget = false;
-                    SmartDashboard.putBoolean("Turret/IsStowing", false);
                 },
-                () -> false,
-                this).withName("StowHood");
+
+                () -> Math.abs(
+                        getHoodAngle()
+                                .minus(Constants.Turret.HOOD_STOW_POSITION)
+                                .getRadians()) < Constants.Turret.HOOD_TOLERANCE.getRadians(),
+
+                this);
+
+        Command settleDown = new RunCommand(
+                () -> pitchServo.setSpeed((Constants.Turret.PITCH_INVERTED ? -1.0 : 1.0) * -Constants.Turret.STOW_PUSH_DOWN_SPEED), // small constant downward speed
+                this).withTimeout(Constants.Turret.STOW_PUSH_DOWN_TIME); // enough to seat the gear
+
+        Command finish = new InstantCommand(() -> {
+            pitchServo.setSpeed(0.0);
+        });
+
+        return Commands.sequence(moveToTarget, settleDown, finish, Commands.idle())
+                .withName("StowHood");
     }
 
     /**

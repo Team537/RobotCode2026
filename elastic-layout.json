@@ -163,7 +163,7 @@
             "x": 0.0,
             "y": 128.0,
             "width": 384.0,
-            "height": 256.0,
+            "height": 384.0,
             "type": "Scheduler",
             "properties": {
               "topic": "/SmartDashboard/Command Scheduler",
@@ -230,30 +230,16 @@
             }
           },
           {
-            "title": "photonvision_Port_1182_Output_MJPEG_Server",
+            "title": "Driver Camera",
             "x": 384.0,
             "y": 0.0,
             "width": 576.0,
             "height": 512.0,
             "type": "Camera Stream",
             "properties": {
-              "topic": "/CameraPublisher/photonvision_Port_1182_Output_MJPEG_Server",
+              "topic": "/CameraPublisher/back-raw",
               "period": 0.06,
               "rotation_turns": 0
-            }
-          },
-          {
-            "title": "FloatCommand",
-            "x": 0.0,
-            "y": 384.0,
-            "width": 384.0,
-            "height": 128.0,
-            "type": "Command",
-            "properties": {
-              "topic": "/SmartDashboard/FloatCommand",
-              "period": 0.06,
-              "show_type": true,
-              "maximize_button_space": false
             }
           }
         ]
@@ -285,7 +271,7 @@
                   "topic": "/SmartDashboard/Auto/CustomIntakePose/Theta",
                   "period": 0.06,
                   "data_type": "double",
-                  "show_submit_button": true
+                  "show_submit_button": false
                 }
               },
               {
@@ -299,7 +285,7 @@
                   "topic": "/SmartDashboard/Auto/CustomIntakePose/X",
                   "period": 0.06,
                   "data_type": "double",
-                  "show_submit_button": true
+                  "show_submit_button": false
                 }
               },
               {
@@ -313,7 +299,7 @@
                   "topic": "/SmartDashboard/Auto/CustomIntakePose/Y",
                   "period": 0.06,
                   "data_type": "double",
-                  "show_submit_button": true
+                  "show_submit_button": false
                 }
               }
             ]
@@ -340,7 +326,7 @@
                   "topic": "/SmartDashboard/Auto/CustomReadyPose/Theta",
                   "period": 0.06,
                   "data_type": "double",
-                  "show_submit_button": true
+                  "show_submit_button": false
                 }
               },
               {
@@ -354,7 +340,7 @@
                   "topic": "/SmartDashboard/Auto/CustomReadyPose/X",
                   "period": 0.06,
                   "data_type": "double",
-                  "show_submit_button": true
+                  "show_submit_button": false
                 }
               },
               {
@@ -368,7 +354,7 @@
                   "topic": "/SmartDashboard/Auto/CustomReadyPose/Y",
                   "period": 0.06,
                   "data_type": "double",
-                  "show_submit_button": true
+                  "show_submit_button": false
                 }
               }
             ]
@@ -398,7 +384,7 @@
               "topic": "/SmartDashboard/Auto/IntakeShootTime",
               "period": 0.06,
               "data_type": "double",
-              "show_submit_button": true
+              "show_submit_button": false
             }
           },
           {
@@ -412,7 +398,7 @@
               "topic": "/SmartDashboard/Auto/PreloadShootTime",
               "period": 0.06,
               "data_type": "double",
-              "show_submit_button": true
+              "show_submit_button": false
             }
           },
           {

@@ -419,11 +419,44 @@ public void updatePoseEstimation(SwerveDrive swerveDrive) {
   }
 
   /*
+   * Compute per-observation support: for each observation, count how many other
+   * observations have a sufficiently similar pose (i.e., they agree). This avoids
+   * treating all multitag observations as mutually supporting when they disagree.
+   */
+  int n = filtered.size();
+  List<Integer> supportCounts = new ArrayList<>(n);
+  for (int i = 0; i < n; i++) {
+    // Start each observation with a support count of 1 (itself).
+    supportCounts.add(1);
+  }
+
+  // Thresholds for considering two observations to be in agreement.
+  final double translationEpsMeters = 0.5; // positional agreement threshold
+  final double rotationEpsRadians = Math.toRadians(10.0); // angular agreement threshold
+
+  for (int i = 0; i < n; i++) {
+    Pose2d poseI = filtered.get(i).pose;
+    for (int j = i + 1; j < n; j++) {
+      Pose2d poseJ = filtered.get(j).pose;
+      Transform2d delta = poseI.minus(poseJ);
+      double dist = delta.getTranslation().getNorm();
+      double rotDiff = Math.abs(delta.getRotation().getRadians());
+      if (dist <= translationEpsMeters && rotDiff <= rotationEpsRadians) {
+        // Observations i and j agree; increment support for both.
+        supportCounts.set(i, supportCounts.get(i) + 1);
+        supportCounts.set(j, supportCounts.get(j) + 1);
+      }
+    }
+  }
+
+  /*
    * Feed accepted vision measurements into the drivetrain pose estimator.
    * Each measurement is individually gated against current pose and robot motion.
    */
-  for (VisionObservation obs : filtered) {
-    if (shouldAcceptEnabledMeasurement(obs, currentPose, speeds, filtered.size())) {
+  for (int i = 0; i < n; i++) {
+    VisionObservation obs = filtered.get(i);
+    int support = supportCounts.get(i);
+    if (shouldAcceptEnabledMeasurement(obs, currentPose, speeds, support)) {
       swerveDrive.addVisionMeasurement(obs.pose, obs.timestamp, obs.stdDevs);
     }
   }

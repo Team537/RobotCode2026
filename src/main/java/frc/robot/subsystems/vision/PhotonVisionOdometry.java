@@ -237,10 +237,10 @@ private List<VisionObservation> filterByConsensus(List<VisionObservation> obs) {
 }
 
 /**
- * Determines whether a vision measurement should be accepted while the robot is enabled.
+ * Determines whether a vision measurement should be accepted given the current robot state.
  *
- * <p>When enabled, robot motion and odometry updates are actively occurring, so blindly accepting
- * large pose jumps can destabilize localization. This method allows:
+ * <p>Robot motion and odometry updates are actively occurring, so blindly accepting large pose
+ * jumps can destabilize localization. This method allows:
  * <ul>
  *   <li>Measurements close to the current pose estimate</li>
  *   <li>Larger corrections if the vision is especially strong</li>

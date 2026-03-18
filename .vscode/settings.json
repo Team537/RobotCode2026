@@ -56,5 +56,18 @@
     "edu.wpi.first.math.proto.*",
     "edu.wpi.first.math.**.proto.*",
     "edu.wpi.first.math.**.struct.*",
+  ],
+  "java.dependency.enableDependencyCheckup": false,
+  "cSpell.words": [
+    "dataclass",
+    "datagram",
+    "dedupe",
+    "gson",
+    "Holonomic",
+    "Jetson",
+    "PATHFIND",
+    "Pathfinding",
+    "Pathfinds",
+    "YAGSL"
   ]
 }

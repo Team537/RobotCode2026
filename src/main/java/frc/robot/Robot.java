@@ -5,21 +5,33 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.util.CommandTimeline;
+import frc.robot.util.field.FieldStatePublisher;
+import frc.robot.util.field.FieldUtil;
 
 public class Robot extends TimedRobot {
-  private Command m_autonomousCommand;
 
-  private final RobotContainer m_robotContainer;
+  private final RobotContainer robotContainer;
 
   public Robot() {
-    m_robotContainer = new RobotContainer();
+    robotContainer = new RobotContainer();
+  }
+
+  @Override
+  public void robotInit() {
+    FieldUtil.init();
+    DeployMetadata.publishAtStartup();
   }
 
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
+    SmartDashboard.putData("Command Scheduler", CommandScheduler.getInstance());
+    robotContainer.updateFieldObjects();
+    FieldStatePublisher.update();
+    CommandTimeline.run();
   }
 
   @Override
@@ -33,11 +45,10 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
-    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
-
-    if (m_autonomousCommand != null) {
-      m_autonomousCommand.schedule();
-    }
+    CommandScheduler.getInstance().cancelAll();
+    CommandTimeline.cancelAll();
+    FieldStatePublisher.setupElasticNotifications();
+    robotContainer.scheduleAutonomous();
   }
 
   @Override
@@ -48,9 +59,8 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
-    if (m_autonomousCommand != null) {
-      m_autonomousCommand.cancel();
-    }
+    CommandScheduler.getInstance().cancelAll();
+    robotContainer.scheduleTeleOp();
   }
 
   @Override

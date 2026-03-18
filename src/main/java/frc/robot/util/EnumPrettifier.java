@@ -13,7 +13,10 @@ public final class EnumPrettifier {
         return valuesToReturn;
     }
 
-    public static <E extends Enum<E>> void setupSendableChooserFromEnum(SendableChooser<E> chooser, Class<E> enumToEvaluate, E defaultValue) {
+    public static <E extends Enum<E>> void 
+    
+    
+    setupSendableChooserFromEnum(SendableChooser<E> chooser, Class<E> enumToEvaluate, E defaultValue) {
         chooser.setDefaultOption(getTitleCaseString(defaultValue.toString()), defaultValue);
         for (E option : enumToEvaluate.getEnumConstants()) {
             chooser.addOption(getTitleCaseString(option.toString()), option);

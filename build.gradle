@@ -1,6 +1,6 @@
 plugins {
     id "java"
-    id "edu.wpi.first.GradleRIO" version "2025.3.2"
+    id "edu.wpi.first.GradleRIO" version "2026.2.1"
 }
 
 java {
@@ -9,6 +9,54 @@ java {
 }
 
 def ROBOT_MAIN_CLASS = "frc.robot.Main"
+
+import java.net.InetAddress
+import java.time.OffsetDateTime
+
+def deployMetadataFile = layout.buildDirectory.file("deploy/537metadata.txt")
+
+tasks.register("generateDeployMetadata") {
+    outputs.file(deployMetadataFile)
+    outputs.upToDateWhen { false } // Always regenerate - timestamp should always be current
+    doLast {
+        def user = System.getProperty("user.name") ?: "unknown"
+        def host = { ->
+            try { InetAddress.getLocalHost().getHostName() } catch (Exception ignored) { "unknown" }
+        }.call()
+
+        def gitBranch = { ->
+            try {
+                def out = new ByteArrayOutputStream()
+                exec { commandLine "git", "rev-parse", "--abbrev-ref", "HEAD"; standardOutput = out; ignoreExitValue = true }
+                out.toString("UTF-8").trim()
+            } catch (Exception ignored) { "unknown" }
+        }.call()
+
+        def gitCommit = { ->
+            try {
+                def out = new ByteArrayOutputStream()
+                exec { commandLine "git", "rev-parse", "HEAD"; standardOutput = out; ignoreExitValue = true }
+                out.toString("UTF-8").trim()
+            } catch (Exception ignored) { "unknown" }
+        }.call()
+
+        def ts = OffsetDateTime.now().toString()
+
+        def f = deployMetadataFile.get().asFile
+        f.parentFile.mkdirs()
+        f.text = """user=${user}
+host=${host}
+gitBranch=${gitBranch}
+gitCommit=${gitCommit}
+deployTimestamp=${ts}
+""".stripIndent()
+    }
+}
+
+// Ensure metadata is generated before deploy
+tasks.matching { it.name == "deploy" }.configureEach {
+    dependsOn("generateDeployMetadata")
+}
 
 // Define my targets (RoboRIO) and artifacts (deployable files)
 // This is added by GradleRIO's backing project DeployUtils.
@@ -36,6 +84,14 @@ deploy {
                     deleteOldFiles = false // Change to true to delete files on roboRIO that no
                                            // longer exist in deploy directory of this project
                 }
+
+                // Fix: declare as a proper FileArtifact (was using invalid/misspelled map arg)
+                // TODO JD:  Should the folder be /home/lvuser or /home/lvuser/deploy?
+                deployMetadataFileArtifact(getArtifactTypeClass('FileArtifact')) {
+                    file = deployMetadataFile.get().asFile
+                    directory = "/home/lvuser"
+                    dependsOn(tasks.named("generateDeployMetadata"))
+                }
             }
         }
     }
@@ -43,7 +99,8 @@ deploy {
 
 def deployArtifact = deploy.targets.roborio.artifacts.frcJava
 
-// Set to true to use debug for JNI.
+// Set to true to use debug for all targets including JNI, which will drastically impact
+// performance.
 wpi.java.debugJni = false
 
 // Set this to true to enable desktop support.
@@ -55,8 +112,6 @@ dependencies {
     annotationProcessor wpi.java.deps.wpilibAnnotations()
     implementation wpi.java.deps.wpilib()
     implementation wpi.java.vendor.java()
-
-    implementation 'com.google.code.gson:gson:2.12.1'
 
     roborioDebug wpi.java.deps.wpilibJniDebug(wpi.platforms.roborio)
     roborioDebug wpi.java.vendor.jniDebug(wpi.platforms.roborio)
@@ -74,6 +129,10 @@ dependencies {
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'org.mockito:mockito-core:5.8.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.8.0'
+    implementation 'com.google.code.gson:gson:2.10.1'
+    implementation 'org.apache.commons:commons-text:1.15.0'
 }
 
 test {
@@ -90,7 +149,9 @@ wpi.sim.addDriverstation()
 // knows where to look for our Robot Class.
 jar {
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
-    from sourceSets.main.allSource
+    from('src') { into 'backup/src' }
+    from('vendordeps') { into 'backup/vendordeps' }
+    from('build.gradle') { into 'backup' }
     manifest edu.wpi.first.gradlerio.GradleRIOPlugin.javaManifest(ROBOT_MAIN_CLASS)
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }

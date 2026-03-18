@@ -358,7 +358,7 @@ public void updatePoseEstimation(SwerveDrive swerveDrive) {
 
     // Compute quality metrics used later for filtering and acceptance decisions.
     double avgDist = averageTagDistance(estPos);
-    double maxAmbiguity = maxAmbiguity(estPos);
+    double maxTagAmbiguity = maxAmbiguity(estPos);
     boolean isMultiTag = tagsUsed >= 2;
     Matrix<N3, N1> currStdDevs = camera.curStdDevs;
 
@@ -374,7 +374,7 @@ public void updatePoseEstimation(SwerveDrive swerveDrive) {
       estPos.timestampSeconds,
       tagsUsed,
       avgDist,
-      maxAmbiguity,
+      maxTagAmbiguity,
       isMultiTag,
       currStdDevs
     ));

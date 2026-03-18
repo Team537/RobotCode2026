@@ -70,6 +70,16 @@ public class TurretSubsystem extends SubsystemBase {
     PIDController hoodController = new PIDController(Constants.Turret.PITCH_KP, Constants.Turret.PITCH_KI,
             Constants.Turret.PITCH_KD);
 
+    // Shadow values used to detect dashboard-driven PID changes.
+    private double lastHoodKp = Constants.Turret.PITCH_KP;
+    private double lastHoodKi = Constants.Turret.PITCH_KI;
+    private double lastHoodKd = Constants.Turret.PITCH_KD;
+
+    // SmartDashboard keys for the hood PID gains.
+    private static final String HOOD_KP_KEY = "Hood PID/kP";
+    private static final String HOOD_KI_KEY = "Hood PID/kI";
+    private static final String HOOD_KD_KEY = "Hood PID/kD";
+
     // --------------------------------------------------------------------
     // Internal State
     // --------------------------------------------------------------------
@@ -96,6 +106,12 @@ public class TurretSubsystem extends SubsystemBase {
         pitchServo = new PWM(Constants.Turret.PITCH_SERVO_ID);
         pitchEncoder = new CANcoder(Constants.Turret.PITCH_CANCODER_ID, Constants.CANIVORE_LOOP_NAME);
         resetHoodAngle(Constants.Turret.HOOD_START_POSITION);
+
+        // Publish initial hood PID gains so they appear as editable fields
+        // in Elastic / AdvantageScope / Shuffleboard.
+        SmartDashboard.putNumber(HOOD_KP_KEY, Constants.Turret.PITCH_KP);
+        SmartDashboard.putNumber(HOOD_KI_KEY, Constants.Turret.PITCH_KI);
+        SmartDashboard.putNumber(HOOD_KD_KEY, Constants.Turret.PITCH_KD);
     }
 
     // --------------------------------------------------------------------
@@ -208,6 +224,19 @@ public class TurretSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("Current Turret Angle", getAngle().getDegrees());
         SmartDashboard.putNumber("Current Hood Angle", getHoodAngle().getDegrees());
         SmartDashboard.putNumber("Current Hood Speed", pitchServo.getSpeed());
+
+        // Read PID gains from the dashboard and update the controller if anything changed.
+        double dashKp = SmartDashboard.getNumber(HOOD_KP_KEY, lastHoodKp);
+        double dashKi = SmartDashboard.getNumber(HOOD_KI_KEY, lastHoodKi);
+        double dashKd = SmartDashboard.getNumber(HOOD_KD_KEY, lastHoodKd);
+
+        if (dashKp != lastHoodKp || dashKi != lastHoodKi || dashKd != lastHoodKd) {
+            hoodController.setPID(dashKp, dashKi, dashKd);
+            lastHoodKp = dashKp;
+            lastHoodKi = dashKi;
+            lastHoodKd = dashKd;
+        }
+
         if (hoodClosedLoopActive && DriverStation.isEnabled()) {
             double current = getHoodAngle().getRadians();
             double output = hoodController.calculate(current);

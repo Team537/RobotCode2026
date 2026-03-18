@@ -107,11 +107,12 @@ public class TurretSubsystem extends SubsystemBase {
         pitchEncoder = new CANcoder(Constants.Turret.PITCH_CANCODER_ID, Constants.CANIVORE_LOOP_NAME);
         resetHoodAngle(Constants.Turret.HOOD_START_POSITION);
 
-        // Publish initial hood PID gains so they appear as editable fields
-        // in Elastic / AdvantageScope / Shuffleboard.
-        SmartDashboard.putNumber(HOOD_KP_KEY, Constants.Turret.PITCH_KP);
-        SmartDashboard.putNumber(HOOD_KI_KEY, Constants.Turret.PITCH_KI);
-        SmartDashboard.putNumber(HOOD_KD_KEY, Constants.Turret.PITCH_KD);
+        // Publish default hood PID gains so they appear as editable fields
+        // in Elastic / AdvantageScope / Shuffleboard without overwriting
+        // any existing persisted/tuned values.
+        SmartDashboard.setDefaultNumber(HOOD_KP_KEY, Constants.Turret.PITCH_KP);
+        SmartDashboard.setDefaultNumber(HOOD_KI_KEY, Constants.Turret.PITCH_KI);
+        SmartDashboard.setDefaultNumber(HOOD_KD_KEY, Constants.Turret.PITCH_KD);
     }
 
     // --------------------------------------------------------------------

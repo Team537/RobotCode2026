@@ -437,7 +437,7 @@ public class DriveSubsystem extends SubsystemBase {
      * This should orient modules and hold position to resist external pushes.
      */
     public void lockPose() {
-        // Delegate to the swervelib's lock helper. Adapt if your library uses a different name.
+        // Delegate to the swervelib lockPose helper.
         swerveDrive.lockPose();
     }
 

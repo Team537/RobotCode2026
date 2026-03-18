@@ -6,6 +6,7 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -187,7 +188,8 @@ public class TurretSubsystem extends SubsystemBase {
      * @param rotation The position to set to
      */
     public void resetHoodAngle(Rotation2d rotation) {
-        pitchEncoder.setPosition(rotation.getRadians() / Constants.Turret.PITCH_ENCODER_FACTOR + hoodOffsetSupplier.get().getRadians());
+        pitchEncoder.setPosition(
+                rotation.getRadians() / Constants.Turret.PITCH_ENCODER_FACTOR + hoodOffsetSupplier.get().getRadians());
     }
 
     public void stopTurretMotor() {
@@ -319,6 +321,20 @@ public class TurretSubsystem extends SubsystemBase {
                 }).withName("TargetTurret");
     }
 
+    /**
+     * Creates a command to float the motor temporarily
+     * @return
+     */
+    public Command getFloatCommand() {
+        return new FunctionalCommand(
+            () -> turretMotor.setNeutralMode(NeutralModeValue.Coast),
+            () -> {},
+            (interrupted) -> turretMotor.setNeutralMode(NeutralModeValue.Brake), 
+            () -> false,
+            this
+        );
+    }
+
     // --------------------------------------------------------------------
     // Status
     // --------------------------------------------------------------------
@@ -348,7 +364,7 @@ public class TurretSubsystem extends SubsystemBase {
      * sets the supplier of the hood offset
      * 
      * @param hoodOffsetSupplier the supplier of the hood offset. 0 means no
-     *                             offset
+     *                           offset
      */
     public void setHoodOffsetSupplier(Supplier<Rotation2d> hoodOffsetSupplier) {
         this.hoodOffsetSupplier = hoodOffsetSupplier;

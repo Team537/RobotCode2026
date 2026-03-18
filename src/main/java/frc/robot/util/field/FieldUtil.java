@@ -95,6 +95,13 @@ public final class FieldUtil {
         return DriverStation.isTeleopEnabled();
     }
 
+    /**
+     * @return true if the robot is currently enabled
+     */
+    public static boolean isEnabled() {
+        return DriverStation.isEnabled();
+    }
+
     /* --------------------------------------------------------------------- */
     /* Alliance utilities */
     /* --------------------------------------------------------------------- */

@@ -237,7 +237,7 @@ public class TurretSubsystem extends SubsystemBase {
             lastHoodKi = dashKi;
             lastHoodKd = dashKd;
             // Reset PID internal state when gains change to avoid large transients.
-            hoodController.reset(getHoodAngle().getRadians());
+            hoodController.reset();
         }
 
         if (hoodClosedLoopActive && DriverStation.isEnabled()) {

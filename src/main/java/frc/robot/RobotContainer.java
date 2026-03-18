@@ -95,6 +95,10 @@ public class RobotContainer {
     shooterSubsystem = new ShooterSubsystem();
     transferSubsystem = new TransferSubsystem();
 
+    // Driver X button: hold to lock robot pose (X-lock)
+    Trigger xLockTrigger = new Trigger(() -> driverController.getXButton());
+    xLockTrigger.whileTrue(driveSubsystem.getLockPoseCommand());
+
     shooterSubsystem.setYawPitchSuppliers(() -> turretSubsystem.getAngle(), () -> turretSubsystem.getHoodAngle());
 
     setupSmartDashboard();

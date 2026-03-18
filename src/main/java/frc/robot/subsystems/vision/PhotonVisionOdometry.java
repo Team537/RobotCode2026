@@ -35,6 +35,11 @@ import swervelib.telemetry.SwerveDriveTelemetry;
  */
 public class PhotonVisionOdometry {
 
+  // Tuning constants for cross-camera consensus and multitag filtering.
+  private static final double CONSENSUS_MAX_TRANSLATION_METERS = 0.6;
+  private static final double CONSENSUS_MAX_ROTATION_RADIANS = Math.toRadians(15.0);
+  private static final double STRONG_MULTITAG_MAX_DISTANCE_METERS = 4.0;
+
   /**
    * April Tag Field Layout of the year.
    */
@@ -218,7 +223,11 @@ private List<VisionObservation> filterByConsensus(List<VisionObservation> obs) {
        * Count how many other observations are spatially consistent with this one.
        * The thresholds here define what "agreement" means across cameras.
        */
-      if (agrees(obsA.pose, obsB.pose, 0.6, Math.toRadians(15))) {
+      if (agrees(
+          obsA.pose,
+          obsB.pose,
+          CONSENSUS_MAX_TRANSLATION_METERS,
+          CONSENSUS_MAX_ROTATION_RADIANS)) {
         agreements++;
       }
     }
@@ -228,7 +237,10 @@ private List<VisionObservation> filterByConsensus(List<VisionObservation> obs) {
      * 1. At least one other camera agrees with it, indicating cross-camera consensus, or
      * 2. It is a strong multitag result, which is generally more trustworthy on its own.
      */
-    if (agreements > 0 || (obsA.isMultiTag && obsA.tagCount >= 2 && obsA.avgTagDistance < 4.0)) {
+    if (agreements > 0
+        || (obsA.isMultiTag
+            && obsA.tagCount >= 2
+            && obsA.avgTagDistance < STRONG_MULTITAG_MAX_DISTANCE_METERS)) {
       accepted.add(obsA);
     }
   }

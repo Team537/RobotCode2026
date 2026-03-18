@@ -232,19 +232,44 @@ public class TurretSubsystem extends SubsystemBase {
         double dashKd = SmartDashboard.getNumber(HOOD_KD_KEY, lastHoodKd);
 
         if (dashKp != lastHoodKp || dashKi != lastHoodKi || dashKd != lastHoodKd) {
-            hoodController.setPID(dashKp, dashKi, dashKd);
-            lastHoodKp = dashKp;
-            lastHoodKi = dashKi;
-            lastHoodKd = dashKd;
-            // Reset PID internal state when gains change to avoid large transients.
-            hoodController.reset();
+            boolean finite  = Double.isFinite(dashKp) && Double.isFinite(dashKi) && Double.isFinite(dashKd);
+            boolean nonNeg  = dashKp >= 0.0 && dashKi >= 0.0 && dashKd >= 0.0;
+
+            if (finite && nonNeg) {
+                hoodController.setPID(dashKp, dashKi, dashKd);
+                lastHoodKp = dashKp;
+                lastHoodKi = dashKi;
+                lastHoodKd = dashKd;
+                // Reset PID internal state when gains change to avoid large transients.
+                hoodController.reset();
+            } else {
+                // Gains are non-finite or negative — revert the dashboard entries to the
+                // last known-good values so the bad value is visible but not applied.
+                String reason = !finite ? "non-finite" : "negative";
+                DriverStation.reportWarning(
+                        "Hood PID: rejected " + reason + " gain(s) from dashboard "
+                                + "(kP=" + dashKp + ", kI=" + dashKi + ", kD=" + dashKd
+                                + "). Reverting to last valid values "
+                                + "(kP=" + lastHoodKp + ", kI=" + lastHoodKi + ", kD=" + lastHoodKd + ").",
+                        false);
+                SmartDashboard.putNumber(HOOD_KP_KEY, lastHoodKp);
+                SmartDashboard.putNumber(HOOD_KI_KEY, lastHoodKi);
+                SmartDashboard.putNumber(HOOD_KD_KEY, lastHoodKd);
+            }
         }
 
         if (hoodClosedLoopActive && DriverStation.isEnabled()) {
             double current = getHoodAngle().getRadians();
             double output = hoodController.calculate(current);
 
-            pitchServo.setSpeed((Constants.Turret.PITCH_INVERTED ? -1.0 : 1.0) * output);
+            if (Double.isFinite(output)) {
+                pitchServo.setSpeed((Constants.Turret.PITCH_INVERTED ? -1.0 : 1.0) * output);
+            } else {
+                // Encoder or controller produced a non-finite output — stop the servo safely.
+                DriverStation.reportWarning(
+                        "Hood PID: non-finite output (" + output + ") from controller; stopping servo.", false);
+                pitchServo.setSpeed(0);
+            }
         }
 
     }

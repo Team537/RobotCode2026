@@ -406,7 +406,7 @@ public class Constants {
 
         public static final Rotation2d TURRET_TOLERANCE = Rotation2d.fromDegrees(3.0);
 
-        public static final Rotation2d HOOD_TOLERANCE = Rotation2d.fromDegrees(3.0);
+        public static final Rotation2d HOOD_TOLERANCE = Rotation2d.fromDegrees(0.5);
 
         public static final Translation3d TURRET_TRANSLATION = new Translation3d(
             -0.089,

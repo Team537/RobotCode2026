@@ -152,10 +152,24 @@ public class TurretSubsystem extends SubsystemBase {
         double clamped = Math.max(minR, Math.min(maxR, angle.getRadians()));
 
         hoodSetpointRad = clamped;
-        hoodController.setSetpoint(hoodSetpointRad + hoodOffsetSupplier.get().getRadians());
+        double setpointWithOffset = hoodSetpointRad + hoodOffsetSupplier.get().getRadians();
+
+        double current = getHoodAngle().getRadians();
+        double error = Math.abs(clamped - current);
+
+        if (error < Constants.Turret.HOOD_TOLERANCE.getRadians()) {
+            hoodController.reset(); // clear I
+            hoodClosedLoopActive = false;
+            pitchServo.setSpeed(0.0);
+            return;
+        }
+
+        hoodController.setSetpoint(setpointWithOffset);
         hoodClosedLoopActive = true;
 
-        SmartDashboard.putNumber("Hood Target", Rotation2d.fromRadians(clamped).getDegrees());
+        SmartDashboard.putNumber(
+                "Hood Target",
+                Rotation2d.fromRadians(clamped).getDegrees());
     }
 
     /**
@@ -227,14 +241,15 @@ public class TurretSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("Current Hood Angle", getHoodAngle().getDegrees());
         SmartDashboard.putNumber("Current Hood Speed", pitchServo.getSpeed());
 
-        // Read PID gains from the dashboard and update the controller if anything changed.
+        // Read PID gains from the dashboard and update the controller if anything
+        // changed.
         double dashKp = SmartDashboard.getNumber(HOOD_KP_KEY, lastHoodKp);
         double dashKi = SmartDashboard.getNumber(HOOD_KI_KEY, lastHoodKi);
         double dashKd = SmartDashboard.getNumber(HOOD_KD_KEY, lastHoodKd);
 
         if (dashKp != lastHoodKp || dashKi != lastHoodKi || dashKd != lastHoodKd) {
-            boolean finite  = Double.isFinite(dashKp) && Double.isFinite(dashKi) && Double.isFinite(dashKd);
-            boolean nonNeg  = dashKp >= 0.0 && dashKi >= 0.0 && dashKd >= 0.0;
+            boolean finite = Double.isFinite(dashKp) && Double.isFinite(dashKi) && Double.isFinite(dashKd);
+            boolean nonNeg = dashKp >= 0.0 && dashKi >= 0.0 && dashKd >= 0.0;
 
             if (finite && nonNeg) {
                 hoodController.setPID(dashKp, dashKi, dashKd);
@@ -345,7 +360,11 @@ public class TurretSubsystem extends SubsystemBase {
                 this);
 
         Command settleDown = new RunCommand(
-                () -> pitchServo.setSpeed((Constants.Turret.PITCH_INVERTED ? -1.0 : 1.0) * -Constants.Turret.STOW_PUSH_DOWN_SPEED), // small constant downward speed
+                () -> pitchServo.setSpeed(
+                        (Constants.Turret.PITCH_INVERTED ? -1.0 : 1.0) * -Constants.Turret.STOW_PUSH_DOWN_SPEED), // small
+                                                                                                                  // constant
+                                                                                                                  // downward
+                                                                                                                  // speed
                 this).withTimeout(Constants.Turret.STOW_PUSH_DOWN_TIME); // enough to seat the gear
 
         Command finish = new InstantCommand(() -> {
@@ -392,16 +411,17 @@ public class TurretSubsystem extends SubsystemBase {
 
     /**
      * Creates a command to float the motor temporarily
+     * 
      * @return
      */
     public Command getFloatCommand() {
         return new FunctionalCommand(
-            () -> turretMotor.setNeutralMode(NeutralModeValue.Coast),
-            () -> {},
-            (interrupted) -> turretMotor.setNeutralMode(NeutralModeValue.Brake), 
-            () -> false,
-            this
-        );
+                () -> turretMotor.setNeutralMode(NeutralModeValue.Coast),
+                () -> {
+                },
+                (interrupted) -> turretMotor.setNeutralMode(NeutralModeValue.Brake),
+                () -> false,
+                this);
     }
 
     // --------------------------------------------------------------------

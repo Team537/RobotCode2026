@@ -229,6 +229,9 @@ public class RobotContainer {
     EnumPrettifier.setupSendableChooserFromEnum(intakeStrategyChooser, IntakeStrategy.class, IntakeStrategy.JUST_SHOOT);
     SmartDashboard.putData("Auto/IntakeStrategy", intakeStrategyChooser);
 
+    SmartDashboard.putNumber("Target Turret Angle",0.0);
+    SmartDashboard.putNumber("Target Hood Angle",0.0);
+
   }
 
   /**
@@ -528,10 +531,15 @@ public class RobotContainer {
         manualRotationVelocityDirective, null, null);
     driveSubsystem.setDefaultCommand(manualDriveCommand);
 
-    turretSubsystem.setDefaultCommand(turretSubsystem.getTargetCommand(
+    /*turretSubsystem.setDefaultCommand(turretSubsystem.getTargetCommand(
         targetingSupplier,
         driveSubsystem::getPose,
-        driveSubsystem::getVelocity));
+        driveSubsystem::getVelocity));*/ //TODO: FIX LATER
+
+    turretSubsystem.setDefaultCommand(turretSubsystem.getAngleCommand(
+      () -> Rotation2d.fromDegrees(SmartDashboard.getNumber("Target Turret Angle",0.0)),
+      () -> Rotation2d.fromDegrees(SmartDashboard.getNumber("Target Hood Angle",0.0))
+    ));
 
   }
 

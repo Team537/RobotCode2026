@@ -374,6 +374,7 @@ public class Constants {
         public static final double PITCH_KP = 4.0;
         public static final double PITCH_KI = 0.0;
         public static final double PITCH_KD = 0.0;
+        public static final double PITCH_INTEGRATOR_RANGE = 1.0;
 
         public static final boolean MOTOR_INVERTED = true;
 

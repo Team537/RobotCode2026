@@ -15,6 +15,7 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.FeedForwardConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
+import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -108,6 +109,8 @@ public class TurretSubsystem extends SubsystemBase {
         pitchEncoder = new CANcoder(Constants.Turret.PITCH_CANCODER_ID, Constants.CANIVORE_LOOP_NAME);
         resetHoodAngle(Constants.Turret.HOOD_START_POSITION);
 
+        hoodController.setIntegratorRange(-Constants.Turret.PITCH_INTEGRATOR_RANGE, Constants.Turret.PITCH_INTEGRATOR_RANGE);
+
         // Publish default hood PID gains so they appear as editable fields
         // in Elastic / AdvantageScope / Shuffleboard without overwriting
         // any existing persisted/tuned values.
@@ -153,18 +156,8 @@ public class TurretSubsystem extends SubsystemBase {
 
         hoodSetpointRad = clamped;
         double setpointWithOffset = hoodSetpointRad + hoodOffsetSupplier.get().getRadians();
-
-        double current = getHoodAngle().getRadians();
-        double error = Math.abs(clamped - current);
-
-        if (error < Constants.Turret.HOOD_TOLERANCE.getRadians()) {
-            hoodController.reset(); // clear I
-            hoodClosedLoopActive = false;
-            pitchServo.setSpeed(0.0);
-            return;
-        }
-
         hoodController.setSetpoint(setpointWithOffset);
+
         hoodClosedLoopActive = true;
 
         SmartDashboard.putNumber(

@@ -22,7 +22,7 @@ public class IntakePivotSubsystem extends SubsystemBase {
 
     //Configuration
     public IntakePivotSubsystem() {
-        intake = new TalonFX(Constants.IntakePivot.INTAKE_ID, Constants.CANIVORE_LOOP_NAME);
+        intake = new TalonFX(Constants.IntakePivot.INTAKE_ID);
         StatusCode status = intake.getConfigurator().apply(Configs.IntakePivot.INTAKE_PIVOT_CONFIGURATION);
         
         if (!status.isOK()) {

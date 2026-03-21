@@ -229,6 +229,9 @@ public class RobotContainer {
     EnumPrettifier.setupSendableChooserFromEnum(intakeStrategyChooser, IntakeStrategy.class, IntakeStrategy.JUST_SHOOT);
     SmartDashboard.putData("Auto/IntakeStrategy", intakeStrategyChooser);
 
+    SmartDashboard.putNumber("Target Turret Angle",0.0);
+    SmartDashboard.putNumber("Target Hood Angle",0.0);
+
   }
 
   /**
@@ -279,9 +282,9 @@ public class RobotContainer {
     stowTrigger.and(() -> !FieldUtil.isAutonomous()).whileTrue(
         turretSubsystem.getStowCommand());
 
-    Trigger shootTrigger = new Trigger(() -> driverController.getRightBumperButton());
+    Trigger shootTrigger = new Trigger(() -> driverController.getAButton());
 
-    Trigger intakeTrigger = new Trigger(() -> driverController.getAButton());
+    Trigger intakeTrigger = new Trigger(() -> driverController.getRightBumperButton());
 
     Trigger solverValid = new Trigger(() -> TurretSolver.solve(driveSubsystem.getPose(), driveSubsystem.getVelocity(),
         targetingSupplier.get(), Constants.Turret.SOLVER_CONFIG).isValid());
@@ -296,6 +299,8 @@ public class RobotContainer {
             targetingSupplier,
             driveSubsystem::getPose,
             driveSubsystem::getVelocity));
+    
+    
 
     /* Transfer runs ONLY while button AND solver valid */
     shootTrigger

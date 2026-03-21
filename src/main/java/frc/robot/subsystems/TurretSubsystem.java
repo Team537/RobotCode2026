@@ -15,6 +15,7 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.FeedForwardConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
+import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -71,6 +72,16 @@ public class TurretSubsystem extends SubsystemBase {
     PIDController hoodController = new PIDController(Constants.Turret.PITCH_KP, Constants.Turret.PITCH_KI,
             Constants.Turret.PITCH_KD);
 
+    // Shadow values used to detect dashboard-driven PID changes.
+    private double lastHoodKp = Constants.Turret.PITCH_KP;
+    private double lastHoodKi = Constants.Turret.PITCH_KI;
+    private double lastHoodKd = Constants.Turret.PITCH_KD;
+
+    // SmartDashboard keys for the hood PID gains.
+    private static final String HOOD_KP_KEY = "Hood PID/kP";
+    private static final String HOOD_KI_KEY = "Hood PID/kI";
+    private static final String HOOD_KD_KEY = "Hood PID/kD";
+
     // --------------------------------------------------------------------
     // Internal State
     // --------------------------------------------------------------------
@@ -97,6 +108,16 @@ public class TurretSubsystem extends SubsystemBase {
         pitchServo = new PWM(Constants.Turret.PITCH_SERVO_ID);
         pitchEncoder = new CANcoder(Constants.Turret.PITCH_CANCODER_ID, Constants.CANIVORE_LOOP_NAME);
         resetHoodAngle(Constants.Turret.HOOD_START_POSITION);
+
+        hoodController.setIntegratorRange(-Constants.Turret.PITCH_INTEGRATOR_RANGE, Constants.Turret.PITCH_INTEGRATOR_RANGE);
+
+        // Publish default hood PID gains so they appear as editable fields
+        // in Elastic / AdvantageScope / Shuffleboard without overwriting
+        // any existing persisted/tuned values.
+        SmartDashboard.setDefaultNumber(HOOD_KP_KEY, Constants.Turret.PITCH_KP);
+        SmartDashboard.setDefaultNumber(HOOD_KI_KEY, Constants.Turret.PITCH_KI);
+        SmartDashboard.setDefaultNumber(HOOD_KD_KEY, Constants.Turret.PITCH_KD);
+        SmartDashboard.putNumber("Turret Test Offset",0.0);
     }
 
     // --------------------------------------------------------------------
@@ -135,10 +156,14 @@ public class TurretSubsystem extends SubsystemBase {
         double clamped = Math.max(minR, Math.min(maxR, angle.getRadians()));
 
         hoodSetpointRad = clamped;
-        hoodController.setSetpoint(hoodSetpointRad + hoodOffsetSupplier.get().getRadians());
+        double setpointWithOffset = hoodSetpointRad + hoodOffsetSupplier.get().getRadians();
+        hoodController.setSetpoint(setpointWithOffset);
+
         hoodClosedLoopActive = true;
 
-        SmartDashboard.putNumber("Hood Target", Rotation2d.fromRadians(clamped).getDegrees());
+        SmartDashboard.putNumber(
+                "Hood Target",
+                Rotation2d.fromRadians(clamped).getDegrees());
     }
 
     /**
@@ -209,11 +234,52 @@ public class TurretSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("Current Turret Angle", getAngle().getDegrees());
         SmartDashboard.putNumber("Current Hood Angle", getHoodAngle().getDegrees());
         SmartDashboard.putNumber("Current Hood Speed", pitchServo.getSpeed());
+
+        // Read PID gains from the dashboard and update the controller if anything
+        // changed.
+        double dashKp = SmartDashboard.getNumber(HOOD_KP_KEY, lastHoodKp);
+        double dashKi = SmartDashboard.getNumber(HOOD_KI_KEY, lastHoodKi);
+        double dashKd = SmartDashboard.getNumber(HOOD_KD_KEY, lastHoodKd);
+
+        if (dashKp != lastHoodKp || dashKi != lastHoodKi || dashKd != lastHoodKd) {
+            boolean finite = Double.isFinite(dashKp) && Double.isFinite(dashKi) && Double.isFinite(dashKd);
+            boolean nonNeg = dashKp >= 0.0 && dashKi >= 0.0 && dashKd >= 0.0;
+
+            if (finite && nonNeg) {
+                hoodController.setPID(dashKp, dashKi, dashKd);
+                lastHoodKp = dashKp;
+                lastHoodKi = dashKi;
+                lastHoodKd = dashKd;
+                // Reset PID internal state when gains change to avoid large transients.
+                hoodController.reset();
+            } else {
+                // Gains are non-finite or negative — revert the dashboard entries to the
+                // last known-good values so the bad value is visible but not applied.
+                String reason = !finite ? "non-finite" : "negative";
+                DriverStation.reportWarning(
+                        "Hood PID: rejected " + reason + " gain(s) from dashboard "
+                                + "(kP=" + dashKp + ", kI=" + dashKi + ", kD=" + dashKd
+                                + "). Reverting to last valid values "
+                                + "(kP=" + lastHoodKp + ", kI=" + lastHoodKi + ", kD=" + lastHoodKd + ").",
+                        false);
+                SmartDashboard.putNumber(HOOD_KP_KEY, lastHoodKp);
+                SmartDashboard.putNumber(HOOD_KI_KEY, lastHoodKi);
+                SmartDashboard.putNumber(HOOD_KD_KEY, lastHoodKd);
+            }
+        }
+
         if (hoodClosedLoopActive && DriverStation.isEnabled()) {
             double current = getHoodAngle().getRadians();
             double output = hoodController.calculate(current);
 
-            pitchServo.setSpeed((Constants.Turret.PITCH_INVERTED ? -1.0 : 1.0) * output);
+            if (Double.isFinite(output)) {
+                pitchServo.setSpeed((Constants.Turret.PITCH_INVERTED ? -1.0 : 1.0) * output);
+            } else {
+                // Encoder or controller produced a non-finite output — stop the servo safely.
+                DriverStation.reportWarning(
+                        "Hood PID: non-finite output (" + output + ") from controller; stopping servo.", false);
+                pitchServo.setSpeed(0);
+            }
         }
 
     }
@@ -288,7 +354,11 @@ public class TurretSubsystem extends SubsystemBase {
                 this);
 
         Command settleDown = new RunCommand(
-                () -> pitchServo.setSpeed((Constants.Turret.PITCH_INVERTED ? -1.0 : 1.0) * -Constants.Turret.STOW_PUSH_DOWN_SPEED), // small constant downward speed
+                () -> pitchServo.setSpeed(
+                        (Constants.Turret.PITCH_INVERTED ? -1.0 : 1.0) * Constants.Turret.STOW_PUSH_DOWN_SPEED), // small
+                                                                                                                  // constant
+                                                                                                                  // downward
+                                                                                                                  // speed
                 this).withTimeout(Constants.Turret.STOW_PUSH_DOWN_TIME); // enough to seat the gear
 
         Command finish = new InstantCommand(() -> {
@@ -329,22 +399,25 @@ public class TurretSubsystem extends SubsystemBase {
                             robotVelocitySupplier.get(),
                             targetTranslationSupplier.get(),
                             Constants.Turret.SOLVER_CONFIG);
-                    return Rotation2d.fromRadians(0.5 * Math.PI).minus(solution.getPitch());
+                    return Rotation2d.fromRadians(0.5 * Math.PI).minus(solution.getPitch()).plus(
+                       TurretUtil.pitchOffsetFromYaw(getAngle())
+                    );
                 }).withName("TargetTurret");
     }
 
     /**
      * Creates a command to float the motor temporarily
+     * 
      * @return
      */
     public Command getFloatCommand() {
         return new FunctionalCommand(
-            () -> turretMotor.setNeutralMode(NeutralModeValue.Coast),
-            () -> {},
-            (interrupted) -> turretMotor.setNeutralMode(NeutralModeValue.Brake), 
-            () -> false,
-            this
-        );
+                () -> turretMotor.setNeutralMode(NeutralModeValue.Coast),
+                () -> {
+                },
+                (interrupted) -> turretMotor.setNeutralMode(NeutralModeValue.Brake),
+                () -> false,
+                this);
     }
 
     // --------------------------------------------------------------------

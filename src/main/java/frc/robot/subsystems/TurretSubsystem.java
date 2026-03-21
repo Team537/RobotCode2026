@@ -268,10 +268,15 @@ public class TurretSubsystem extends SubsystemBase {
                 this);
     }
 
-    public Command getStowCommand() {
+    public Command getStowCommand(
+            Supplier<Pose2d> robotPoseSupplier,
+            Supplier<ChassisSpeeds> robotVelocitySupplier) {
 
         Command moveToTarget = new FunctionalCommand(
-                () -> SmartDashboard.putBoolean("Turret/IsStowing", true),
+                () -> {
+                    SmartDashboard.putBoolean("Turret/IsStowing", true);
+                    lastMotionAngle = getAngle();
+                },
 
                 () -> {
                     setHoodAngle(Constants.Turret.HOOD_STOW_POSITION);
@@ -288,14 +293,29 @@ public class TurretSubsystem extends SubsystemBase {
                 this);
 
         Command settleDown = new RunCommand(
-                () -> pitchServo.setSpeed((Constants.Turret.PITCH_INVERTED ? -1.0 : 1.0) * -Constants.Turret.STOW_PUSH_DOWN_SPEED), // small constant downward speed
-                this).withTimeout(Constants.Turret.STOW_PUSH_DOWN_TIME); // enough to seat the gear
+                () -> pitchServo.setSpeed(
+                        (Constants.Turret.PITCH_INVERTED ? -1.0 : 1.0)
+                                * -Constants.Turret.STOW_PUSH_DOWN_SPEED),
+                this).withTimeout(Constants.Turret.STOW_PUSH_DOWN_TIME);
 
-        Command finish = new InstantCommand(() -> {
-            pitchServo.setSpeed(0.0);
+        Command finish = new InstantCommand(() -> pitchServo.setSpeed(0.0));
+
+        Command stowSequence = Commands.sequence(
+                moveToTarget,
+                settleDown,
+                finish);
+
+        Command trackMotion = new RunCommand(() -> {
+            Pose2d pose = robotPoseSupplier.get();
+            ChassisSpeeds velocity = robotVelocitySupplier.get();
+
+            Rotation2d targetAngle = getMotionTargetAngle(pose, velocity);
+
+            setTurretAngle(targetAngle);
         });
 
-        return Commands.sequence(moveToTarget, settleDown, finish, Commands.idle())
+        return stowSequence
+                .alongWith(trackMotion)
                 .withName("StowHood");
     }
 
@@ -335,16 +355,17 @@ public class TurretSubsystem extends SubsystemBase {
 
     /**
      * Creates a command to float the motor temporarily
+     * 
      * @return
      */
     public Command getFloatCommand() {
         return new FunctionalCommand(
-            () -> turretMotor.setNeutralMode(NeutralModeValue.Coast),
-            () -> {},
-            (interrupted) -> turretMotor.setNeutralMode(NeutralModeValue.Brake), 
-            () -> false,
-            this
-        );
+                () -> turretMotor.setNeutralMode(NeutralModeValue.Coast),
+                () -> {
+                },
+                (interrupted) -> turretMotor.setNeutralMode(NeutralModeValue.Brake),
+                () -> false,
+                this);
     }
 
     // --------------------------------------------------------------------
@@ -380,6 +401,25 @@ public class TurretSubsystem extends SubsystemBase {
      */
     public void setHoodOffsetSupplier(Supplier<Rotation2d> hoodOffsetSupplier) {
         this.hoodOffsetSupplier = hoodOffsetSupplier;
+    }
+
+    private Rotation2d lastMotionAngle = Rotation2d.kZero;
+
+    private Rotation2d getMotionTargetAngle(
+            Pose2d pose,
+            ChassisSpeeds velocity) {
+
+        double speed = Math.hypot(
+                velocity.vxMetersPerSecond,
+                velocity.vyMetersPerSecond);
+
+        if (speed > Constants.Turret.STOW_MOTION_THRESHOLD) {
+            lastMotionAngle = new Rotation2d(
+                    velocity.vxMetersPerSecond,
+                    velocity.vyMetersPerSecond);
+        }
+
+        return lastMotionAngle.minus(pose.getRotation());
     }
 
 }

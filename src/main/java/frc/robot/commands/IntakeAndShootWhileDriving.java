@@ -3,7 +3,9 @@ package frc.robot.commands;
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -30,50 +32,47 @@ public class IntakeAndShootWhileDriving extends SequentialCommandGroup {
 
         if (stowTurret) {
             pathToReady = pathToReady.alongWith(
-                    turret.getStowCommand());
+                    turret.getStowCommand(drive::getPose,drive::getVelocity));
         }
 
         addCommands(
 
-            // Drive to ready pose
-            pathToReady,
+                // Drive to ready pose
+                pathToReady,
 
-            // Intake + shoot while slowly driving
-            Commands.deadline(
-                drive.getDriveToPoseCommand(
-                        () -> intakePose,
-                        Constants.Drive.TRANSLATIONAL_TOLERANCE,
-                        Constants.Drive.ROTATIONAL_TOLERANCE,
-                        maxDriveSpeed,
-                        Double.MAX_VALUE,
-                        true),
+                // Intake + shoot while slowly driving
+                Commands.deadline(
+                        drive.getDriveToPoseCommand(
+                                () -> intakePose,
+                                Constants.Drive.TRANSLATIONAL_TOLERANCE,
+                                Constants.Drive.ROTATIONAL_TOLERANCE,
+                                maxDriveSpeed,
+                                Double.MAX_VALUE,
+                                true),
 
-                intakePivot.deployIntakeCommand(),
-                intakeRoller.getIntakeCommand(),
+                        intakePivot.deployIntakeCommand(),
+                        intakeRoller.getIntakeCommand(),
 
-                shooter.getTargetCommand(
-                        targetingSupplier,
-                        drive::getPose,
-                        drive::getVelocity),
+                        shooter.getTargetCommand(
+                                targetingSupplier,
+                                drive::getPose,
+                                drive::getVelocity),
 
-                transfer.getLoadCommand()
-            ),
+                        transfer.getLoadCommand()),
 
-            // Stop driving + intake
-            Commands.parallel(
-                drive.getStopCommand(),
-                intakePivot.raiseIntakeCommand(),
-                intakeRoller.getStopCommand()
-            ),
+                // Stop driving + intake
+                Commands.parallel(
+                        drive.getStopCommand(),
+                        intakePivot.raiseIntakeCommand(),
+                        intakeRoller.getStopCommand()),
 
-            // Wait before stopping shooter/turret
-            Commands.waitSeconds(postStopDelay),
+                // Wait before stopping shooter/turret
+                Commands.waitSeconds(postStopDelay),
 
-            // Finally stop shooter + turret
-            Commands.parallel(
-                shooter.getStopCommand(),
-                transfer.getStopCommand()
-            )
-        );
+                // Finally stop shooter + turret
+                Commands.parallel(
+                        shooter.getStopCommand(),
+                        transfer.getStopCommand()));
     }
+    
 }

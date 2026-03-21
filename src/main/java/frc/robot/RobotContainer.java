@@ -12,6 +12,7 @@ import java.util.zip.ZipException;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.XboxController;
@@ -200,14 +201,12 @@ public class RobotContainer {
         .setSpeedMultiplierSupplier(() -> shooterPercent.get() / 100.0);
 
     Command floatCommand = new ConditionalCommand(
-      Commands.parallel(
-        turretSubsystem.getFloatCommand(),
-        intakePivot.getFloatCommand()
-      )
-        .withTimeout(Constants.Operator.Misc.FLOAT_TIME),
-      Commands.none(),
-      () -> !FieldUtil.isEnabled()
-    ).ignoringDisable(true);
+        Commands.parallel(
+            turretSubsystem.getFloatCommand(),
+            intakePivot.getFloatCommand())
+            .withTimeout(Constants.Operator.Misc.FLOAT_TIME),
+        Commands.none(),
+        () -> !FieldUtil.isEnabled()).ignoringDisable(true);
 
     SmartDashboard.putData("FloatCommand", floatCommand);
     SmartDashboard.putNumber("Auto/StartDelay", Constants.Operator.Auto.DEFAULT_START_DELAY);
@@ -267,6 +266,13 @@ public class RobotContainer {
     robotField.setRobotPose(driveSubsystem.getPose());
     robotField.getObject("Target").setPose(new Pose2d(targetingSupplier.get().toTranslation2d(), Rotation2d.kZero));
 
+    Pose2d turretPose = driveSubsystem.getPose().transformBy(
+        new Transform2d(
+            Constants.Turret.TURRET_TRANSLATION.toTranslation2d(),
+            turretSubsystem.getAngle()));
+
+    robotField.getObject("Turret").setPose(turretPose);
+
   }
 
   public void configureBindings() {
@@ -277,7 +283,7 @@ public class RobotContainer {
         () -> driverController.getBButton() || SwerveUtil.willRobotEnterRegion(driveSubsystem.getPose(),
             driveSubsystem.getVelocity(), Constants.Field.TRENCH_REGION, Constants.Drive.HOOD_STOW_LOOKAHEAD_TIME));
     stowTrigger.and(() -> !FieldUtil.isAutonomous()).whileTrue(
-        turretSubsystem.getStowCommand());
+        turretSubsystem.getStowCommand(driveSubsystem::getPose, driveSubsystem::getVelocity));
 
     Trigger shootTrigger = new Trigger(() -> driverController.getRightBumperButton());
 
@@ -293,6 +299,13 @@ public class RobotContainer {
     /* Shooter runs while button held */
     shootTrigger.whileTrue(
         shooterSubsystem.getTargetCommand(
+            targetingSupplier,
+            driveSubsystem::getPose,
+            driveSubsystem::getVelocity));
+
+    /* Turret runs while button held */
+    shootTrigger.whileTrue(
+        turretSubsystem.getTargetCommand(
             targetingSupplier,
             driveSubsystem::getPose,
             driveSubsystem::getVelocity));
@@ -528,10 +541,8 @@ public class RobotContainer {
         manualRotationVelocityDirective, null, null);
     driveSubsystem.setDefaultCommand(manualDriveCommand);
 
-    turretSubsystem.setDefaultCommand(turretSubsystem.getTargetCommand(
-        targetingSupplier,
-        driveSubsystem::getPose,
-        driveSubsystem::getVelocity));
+    turretSubsystem
+        .setDefaultCommand(turretSubsystem.getStowCommand(driveSubsystem::getPose, driveSubsystem::getVelocity));
 
   }
 

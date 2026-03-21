@@ -6,6 +6,7 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -330,6 +331,20 @@ public class TurretSubsystem extends SubsystemBase {
                             Constants.Turret.SOLVER_CONFIG);
                     return Rotation2d.fromRadians(0.5 * Math.PI).minus(solution.getPitch());
                 }).withName("TargetTurret");
+    }
+
+    /**
+     * Creates a command to float the motor temporarily
+     * @return
+     */
+    public Command getFloatCommand() {
+        return new FunctionalCommand(
+            () -> turretMotor.setNeutralMode(NeutralModeValue.Coast),
+            () -> {},
+            (interrupted) -> turretMotor.setNeutralMode(NeutralModeValue.Brake), 
+            () -> false,
+            this
+        );
     }
 
     // --------------------------------------------------------------------

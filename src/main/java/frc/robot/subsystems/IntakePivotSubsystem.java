@@ -2,13 +2,14 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.hardware.TalonFX;
-
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.controls.PositionVoltage;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Configs;
@@ -113,4 +114,19 @@ public class IntakePivotSubsystem extends SubsystemBase {
         return setIntakeAngleCommand(Constants.IntakePivot.INTAKE_DEPLOYED_ANGLE)
             .withName("DeployIntake");
     }
+
+    /**
+     * Creates a command to float the motor temporarily
+     * @return
+     */
+    public Command getFloatCommand() {
+        return new FunctionalCommand(
+            () -> intake.setNeutralMode(NeutralModeValue.Coast),
+            () -> {},
+            (interrupted) -> intake.setNeutralMode(NeutralModeValue.Brake), 
+            () -> false,
+            this
+        );
+    }
+
 }

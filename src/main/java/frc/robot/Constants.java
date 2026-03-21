@@ -45,6 +45,10 @@ public class Constants {
 
         }
 
+        public static class Misc {
+            public static final double FLOAT_TIME = 10.0;
+        }
+
         public static class ErrorSettings {
 
             public static final double SETTINGS_DELAY_TIME = 0.5;

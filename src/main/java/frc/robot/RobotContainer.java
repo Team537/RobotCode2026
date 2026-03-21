@@ -21,7 +21,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -197,6 +199,17 @@ public class RobotContainer {
     shooterSubsystem
         .setSpeedMultiplierSupplier(() -> shooterPercent.get() / 100.0);
 
+    Command floatCommand = new ConditionalCommand(
+      Commands.parallel(
+        turretSubsystem.getFloatCommand(),
+        intakePivot.getFloatCommand()
+      )
+        .withTimeout(Constants.Operator.Misc.FLOAT_TIME),
+      Commands.none(),
+      () -> !FieldUtil.isEnabled()
+    ).ignoringDisable(true);
+
+    SmartDashboard.putData("FloatCommand", floatCommand);
     SmartDashboard.putNumber("Auto/StartDelay", Constants.Operator.Auto.DEFAULT_START_DELAY);
     SmartDashboard.putNumber("Auto/PreloadShootTime", Constants.Operator.Auto.DEFAULT_PRELOAD_SHOOT_TIME);
     SmartDashboard.putNumber("Auto/IntakeShootTime", Constants.Operator.Auto.DEFAULT_INTAKE_SHOOT_TIME);
@@ -266,9 +279,9 @@ public class RobotContainer {
     stowTrigger.and(() -> !FieldUtil.isAutonomous()).whileTrue(
         turretSubsystem.getStowCommand());
 
-    Trigger shootTrigger = new Trigger(() -> driverController.getAButton());
+    Trigger shootTrigger = new Trigger(() -> driverController.getRightBumperButton());
 
-    Trigger intakeTrigger = new Trigger(() -> driverController.getRightBumperButton());
+    Trigger intakeTrigger = new Trigger(() -> driverController.getAButton());
 
     Trigger solverValid = new Trigger(() -> TurretSolver.solve(driveSubsystem.getPose(), driveSubsystem.getVelocity(),
         targetingSupplier.get(), Constants.Turret.SOLVER_CONFIG).isValid());
@@ -309,7 +322,7 @@ public class RobotContainer {
             intakePivot.raiseIntakeCommand(),
             intakeRoller.getStopCommand()));
 
-    // ==============================
+    // =========================
     // Turret Offset Adjustment (POV Left / Right)
     // ==============================
 

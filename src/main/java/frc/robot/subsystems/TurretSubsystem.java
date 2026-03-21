@@ -117,6 +117,7 @@ public class TurretSubsystem extends SubsystemBase {
         SmartDashboard.setDefaultNumber(HOOD_KP_KEY, Constants.Turret.PITCH_KP);
         SmartDashboard.setDefaultNumber(HOOD_KI_KEY, Constants.Turret.PITCH_KI);
         SmartDashboard.setDefaultNumber(HOOD_KD_KEY, Constants.Turret.PITCH_KD);
+        SmartDashboard.putNumber("Turret Test Offset",0.0);
     }
 
     // --------------------------------------------------------------------
@@ -354,7 +355,7 @@ public class TurretSubsystem extends SubsystemBase {
 
         Command settleDown = new RunCommand(
                 () -> pitchServo.setSpeed(
-                        (Constants.Turret.PITCH_INVERTED ? -1.0 : 1.0) * -Constants.Turret.STOW_PUSH_DOWN_SPEED), // small
+                        (Constants.Turret.PITCH_INVERTED ? -1.0 : 1.0) * Constants.Turret.STOW_PUSH_DOWN_SPEED), // small
                                                                                                                   // constant
                                                                                                                   // downward
                                                                                                                   // speed
@@ -398,7 +399,9 @@ public class TurretSubsystem extends SubsystemBase {
                             robotVelocitySupplier.get(),
                             targetTranslationSupplier.get(),
                             Constants.Turret.SOLVER_CONFIG);
-                    return Rotation2d.fromRadians(0.5 * Math.PI).minus(solution.getPitch());
+                    return Rotation2d.fromRadians(0.5 * Math.PI).minus(solution.getPitch()).plus(
+                       TurretUtil.pitchOffsetFromYaw(getAngle())
+                    );
                 }).withName("TargetTurret");
     }
 

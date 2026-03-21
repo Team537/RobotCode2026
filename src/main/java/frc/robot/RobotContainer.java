@@ -282,9 +282,9 @@ public class RobotContainer {
     stowTrigger.and(() -> !FieldUtil.isAutonomous()).whileTrue(
         turretSubsystem.getStowCommand());
 
-    Trigger shootTrigger = new Trigger(() -> driverController.getRightBumperButton());
+    Trigger shootTrigger = new Trigger(() -> driverController.getAButton());
 
-    Trigger intakeTrigger = new Trigger(() -> driverController.getAButton());
+    Trigger intakeTrigger = new Trigger(() -> driverController.getRightBumperButton());
 
     Trigger solverValid = new Trigger(() -> TurretSolver.solve(driveSubsystem.getPose(), driveSubsystem.getVelocity(),
         targetingSupplier.get(), Constants.Turret.SOLVER_CONFIG).isValid());
@@ -299,6 +299,8 @@ public class RobotContainer {
             targetingSupplier,
             driveSubsystem::getPose,
             driveSubsystem::getVelocity));
+    
+    
 
     /* Transfer runs ONLY while button AND solver valid */
     shootTrigger
@@ -531,15 +533,10 @@ public class RobotContainer {
         manualRotationVelocityDirective, null, null);
     driveSubsystem.setDefaultCommand(manualDriveCommand);
 
-    /*turretSubsystem.setDefaultCommand(turretSubsystem.getTargetCommand(
+    turretSubsystem.setDefaultCommand(turretSubsystem.getTargetCommand(
         targetingSupplier,
         driveSubsystem::getPose,
-        driveSubsystem::getVelocity));*/ //TODO: FIX LATER
-
-    turretSubsystem.setDefaultCommand(turretSubsystem.getAngleCommand(
-      () -> Rotation2d.fromDegrees(SmartDashboard.getNumber("Target Turret Angle",0.0)),
-      () -> Rotation2d.fromDegrees(SmartDashboard.getNumber("Target Hood Angle",0.0))
-    ));
+        driveSubsystem::getVelocity));
 
   }
 

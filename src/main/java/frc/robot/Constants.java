@@ -350,7 +350,7 @@ public class Constants {
         public static final double TRANSLATIONAL_TOLERANCE = 0.025; // Meters
         public static final Rotation2d ROTATIONAL_TOLERANCE = Rotation2d.fromDegrees(3.5);
 
-        public static final double HOOD_STOW_LOOKAHEAD_TIME = 1.0;
+        public static final double HOOD_STOW_LOOKAHEAD_TIME = 2.0;
 
     }
 
@@ -371,9 +371,9 @@ public class Constants {
         public static final double KV = 0.0;
         public static final double KA = 0.0;
 
-        public static final double PITCH_KP = 4.0;
-        public static final double PITCH_KI = 0.0;
-        public static final double PITCH_KD = 0.0;
+        public static final double PITCH_KP = 8.0;
+        public static final double PITCH_KI = 5.0;
+        public static final double PITCH_KD = 1.0;
         public static final double PITCH_INTEGRATOR_RANGE = 1.0;
 
         public static final boolean MOTOR_INVERTED = true;
@@ -382,7 +382,7 @@ public class Constants {
         public static final double TURN_TABLE_RATIO = 24.0 / 200.0;
         public static final double ENCODER_FACTOR = (TURRET_GEAR_REDUCTION) / (2.0 * Math.PI * TURN_TABLE_RATIO);
 
-        public static final double STOW_PUSH_DOWN_SPEED = -0.1; // percent of max speed
+        public static final double STOW_PUSH_DOWN_SPEED = -0.3; // percent of max speed
         public static final double STOW_PUSH_DOWN_TIME = 0.5; // seconds
 
         public static final double PITCH_GEAR_RATIO = (26.0 / 447.2);
@@ -416,7 +416,7 @@ public class Constants {
         );
         public static final TurretSolver.Config SOLVER_CONFIG = new TurretSolver.Config(
             Field.GRAVITY,
-            0.02,
+            0.25,
             Shooter.MAX_BALL_SPEED, 
             TURRET_TRANSLATION,
             Rotation2d.fromDegrees(45),

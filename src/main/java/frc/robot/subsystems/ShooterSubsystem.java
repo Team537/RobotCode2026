@@ -81,7 +81,6 @@ public class ShooterSubsystem extends SubsystemBase {
             .apply(Configs.Shooter.SHOOTER_CONFIGURATION);
         followerShooterMotor.setPosition(0.0);
 
-        SmartDashboard.putNumber("Target Shooter Speed",0.0);
     }
 
     // --------------------------------------------------------------------
@@ -241,8 +240,7 @@ public class ShooterSubsystem extends SubsystemBase {
             SmartDashboard.putNumber("Target Velocity", solution.getLaunchVelocity());
             SmartDashboard.putNumber("Target Max Height", solution.getMaxHeight());
             SmartDashboard.putNumber("Target Impact Velocity", solution.getImpactVelocity());
-            //return solution.getLaunchVelocity(); TODO: FIX LATER
-            return SmartDashboard.getNumber("Target Shooter Speed",0.0);
+            return solution.getLaunchVelocity();
         }).withName("Target Shooter");
     }
 

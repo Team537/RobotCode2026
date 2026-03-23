@@ -117,7 +117,6 @@ public class TurretSubsystem extends SubsystemBase {
         SmartDashboard.setDefaultNumber(HOOD_KP_KEY, Constants.Turret.PITCH_KP);
         SmartDashboard.setDefaultNumber(HOOD_KI_KEY, Constants.Turret.PITCH_KI);
         SmartDashboard.setDefaultNumber(HOOD_KD_KEY, Constants.Turret.PITCH_KD);
-        SmartDashboard.putNumber("Turret Test Offset",0.0);
     }
 
     // --------------------------------------------------------------------

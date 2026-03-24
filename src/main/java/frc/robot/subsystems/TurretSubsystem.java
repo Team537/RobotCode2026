@@ -398,7 +398,7 @@ public class TurretSubsystem extends SubsystemBase {
                             robotVelocitySupplier.get(),
                             targetTranslationSupplier.get(),
                             Constants.Turret.SOLVER_CONFIG);
-                    return Rotation2d.fromRadians(0.5 * Math.PI).minus(solution.getPitch()).plus(
+                    return solution.getPitch().plus(
                        TurretUtil.pitchOffsetFromYaw(getAngle())
                     );
                 }).withName("TargetTurret");

@@ -286,13 +286,6 @@ public class RobotContainer {
 
     Trigger intakeTrigger = new Trigger(() -> driverController.getRightBumperButton());
 
-    Trigger solverValid = new Trigger(() -> TurretSolver.solve(driveSubsystem.getPose(), driveSubsystem.getVelocity(),
-        targetingSupplier.get(), Constants.Turret.SOLVER_CONFIG).isValid());
-
-    solverValid.onTrue(
-        Commands.runOnce(() -> SmartDashboard.putBoolean("Turret/SolverValid", true)).ignoringDisable(true)).onFalse(
-            Commands.runOnce(() -> SmartDashboard.putBoolean("Turret/SolverValid", false)).ignoringDisable(true));
-
     /* Shooter runs while button held */
     shootTrigger.whileTrue(
         shooterSubsystem.getTargetCommand(

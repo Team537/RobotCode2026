@@ -2,6 +2,7 @@ package frc.robot;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map.Entry;
 
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
@@ -13,6 +14,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Filesystem;
@@ -406,6 +408,7 @@ public class Constants {
         public static final Rotation2d MAX_ROTATION = Rotation2d.fromDegrees(405);
 
         public static final Rotation2d TURRET_TOLERANCE = Rotation2d.fromDegrees(3.0);
+        public static final double TURRET_LOOKAHEAD_TIME = 0.25;
 
         public static final Rotation2d HOOD_TOLERANCE = Rotation2d.fromDegrees(0.5);
 
@@ -414,16 +417,19 @@ public class Constants {
             0.0,
             0.537 //537!!!
         );
+
+        public static final InterpolatingDoubleTreeMap HOOD_ANGLE_MAP = new InterpolatingDoubleTreeMap();
+        static {
+            HOOD_ANGLE_MAP.put(10.0,10.0);
+        }
+
         public static final TurretSolver.Config SOLVER_CONFIG = new TurretSolver.Config(
-            Field.GRAVITY,
-            0.25,
-            Shooter.MAX_BALL_SPEED, 
+            0.0,
             TURRET_TRANSLATION,
-            Rotation2d.fromDegrees(45),
-            Rotation2d.fromDegrees(80),
-            6.0,
-            MIN_ROTATION,
-            MAX_ROTATION
+            HOOD_ANGLE_MAP,
+            Shooter.SHOOTER_VELOCITY_MAP,
+            Shooter.TIME_MAP,
+            1.829
         );
 
     }
@@ -450,9 +456,10 @@ public class Constants {
 
         public static final double TOLERANCE = 0.1; // Meters per second
 
-        public static final double MAX_BALL_SPEED = 11.5; // Meters per second
-
         public static final boolean MOTOR_INVERTED = false;
+
+        public static final InterpolatingDoubleTreeMap SHOOTER_VELOCITY_MAP = new InterpolatingDoubleTreeMap();
+        public static final InterpolatingDoubleTreeMap TIME_MAP = new InterpolatingDoubleTreeMap();
 
     }
     public static class Transfer {

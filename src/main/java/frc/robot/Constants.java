@@ -45,6 +45,10 @@ public class Constants {
 
         }
 
+        public static class Misc {
+            public static final double FLOAT_TIME = 10.0;
+        }
+
         public static class ErrorSettings {
 
             public static final double SETTINGS_DELAY_TIME = 0.5;
@@ -397,8 +401,8 @@ public class Constants {
         public static final double CURRENT_LOWER_TIME = 0.5;
 
         public static final Rotation2d START_POSITION = Rotation2d.fromRadians(1.5 * Math.PI);
-        public static final Rotation2d MIN_ROTATION = Rotation2d.fromRadians(1.25 * Math.PI);
-        public static final Rotation2d MAX_ROTATION = Rotation2d.fromRadians(2.0 * Math.PI);
+        public static final Rotation2d MIN_ROTATION = Rotation2d.fromDegrees(45);
+        public static final Rotation2d MAX_ROTATION = Rotation2d.fromDegrees(405);
 
         public static final Rotation2d TURRET_TOLERANCE = Rotation2d.fromDegrees(3.0);
 
@@ -493,7 +497,7 @@ public class Constants {
         public static final Translation3d RIGHT_CAMERA_TRANSLATION = new Translation3d(
                 Units.inchesToMeters(-2.250),
                 Units.inchesToMeters(-9.725),
-                Units.inchesToMeters(10.750));
+                Units.inchesToMeters(20.25));
 
         public static final Vector<N3> RIGHT_SINGLE_TAG_STANDARD_DEVIATION = VecBuilder.fill(4, 4, 8);
         public static final Vector<N3> RIGHT_MULTI_TAG_STANDARD_DEVIATION = VecBuilder.fill(0.5, 0.5, 1);

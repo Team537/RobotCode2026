@@ -73,8 +73,8 @@ public class Constants {
 
             public static final double AUTO_INTAKE_MAX_SPEED = 1.0;
 
-            public static final Pose2d DEPOT_READY_INTAKE_POSE = new Pose2d(0.411,5.019,Rotation2d.kCCW_90deg);
-            public static final Pose2d DEPOT_INTAKE_POSE = new Pose2d(0.411,5.994,Rotation2d.kCCW_90deg);
+            public static final Pose2d DEPOT_READY_INTAKE_POSE = new Pose2d(1.250,6.000,Rotation2d.k180deg);
+            public static final Pose2d DEPOT_INTAKE_POSE = new Pose2d(0.650,6.000,Rotation2d.k180deg);
 
             public static final Pose2d OUTPOST_READY_INTAKE_POSE = new Pose2d(1.375,0.661,Rotation2d.k180deg);
             public static final Pose2d OUTPOST_INTAKE_POSE = new Pose2d(0.619,0.661,Rotation2d.k180deg);

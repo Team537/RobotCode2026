@@ -111,6 +111,8 @@ public class TurretSubsystem extends SubsystemBase {
 
         hoodController.setIntegratorRange(-Constants.Turret.PITCH_INTEGRATOR_RANGE, Constants.Turret.PITCH_INTEGRATOR_RANGE);
 
+        SmartDashboard.putNumber("Target Hood Angle",5.0);
+
         // Publish default hood PID gains so they appear as editable fields
         // in Elastic / AdvantageScope / Shuffleboard without overwriting
         // any existing persisted/tuned values.

@@ -420,7 +420,13 @@ public class Constants {
 
         public static final InterpolatingDoubleTreeMap HOOD_ANGLE_MAP = new InterpolatingDoubleTreeMap();
         static {
-            HOOD_ANGLE_MAP.put(10.0,10.0);
+            HOOD_ANGLE_MAP.put(3.23,14.8);
+            HOOD_ANGLE_MAP.put(4.19,16.8);
+            HOOD_ANGLE_MAP.put(4.72,18.8);
+            HOOD_ANGLE_MAP.put(5.38,19.5);
+            HOOD_ANGLE_MAP.put(4.44,16.7);
+            HOOD_ANGLE_MAP.put(2.71,12.7);
+            HOOD_ANGLE_MAP.put(1.71,10.3);
         }
 
         public static final TurretSolver.Config SOLVER_CONFIG = new TurretSolver.Config(
@@ -460,6 +466,24 @@ public class Constants {
 
         public static final InterpolatingDoubleTreeMap SHOOTER_VELOCITY_MAP = new InterpolatingDoubleTreeMap();
         public static final InterpolatingDoubleTreeMap TIME_MAP = new InterpolatingDoubleTreeMap();
+
+        static {
+            SHOOTER_VELOCITY_MAP.put(3.23,23.0);
+            SHOOTER_VELOCITY_MAP.put(4.19,25.0);
+            SHOOTER_VELOCITY_MAP.put(4.72,26.0);
+            SHOOTER_VELOCITY_MAP.put(5.38,27.0);
+            SHOOTER_VELOCITY_MAP.put(4.44,25.0);
+            SHOOTER_VELOCITY_MAP.put(2.71,21.0);
+            SHOOTER_VELOCITY_MAP.put(1.71,19.0);
+
+            TIME_MAP.put(3.23,1.41);
+            TIME_MAP.put(4.19,1.47);
+            TIME_MAP.put(4.72,1.57);
+            TIME_MAP.put(5.38,1.61);
+            TIME_MAP.put(4.44,1.45);
+            TIME_MAP.put(2.71,1.30);
+            TIME_MAP.put(1.71,1.23);
+        }
 
     }
     public static class Transfer {
@@ -561,7 +585,7 @@ public class Constants {
         public static final double KV = 0.0;
         public static final double KA = 0.0;
 
-        public static final double GEAR_RATIO = 54.0;
+        public static final double GEAR_RATIO = 90.0;
         public static final double ROTOR_TO_SENSOR_RATIO = GEAR_RATIO;
         public static final double SENSOR_TO_MECHANISM_RATIO = 1.0 / (2.0 * Math.PI);
 

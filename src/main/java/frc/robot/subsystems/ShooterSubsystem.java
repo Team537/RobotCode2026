@@ -58,8 +58,6 @@ public class ShooterSubsystem extends SubsystemBase {
     private boolean atTarget = false;
 
     private Supplier<Double> speedMultiplierSupplier = () -> 1.0;
-    private Supplier<Rotation2d> yawSupplier = () -> Rotation2d.kZero;
-    private Supplier<Rotation2d> pitchSupplier = () -> Rotation2d.fromDegrees(45.0);
 
     // --------------------------------------------------------------------
     // Construction / Configuration
@@ -80,6 +78,8 @@ public class ShooterSubsystem extends SubsystemBase {
             .getConfigurator()
             .apply(Configs.Shooter.SHOOTER_CONFIGURATION);
         followerShooterMotor.setPosition(0.0);
+
+        SmartDashboard.putNumber("Target Shooter Speed",0.0);
 
     }
 
@@ -220,14 +220,6 @@ public class ShooterSubsystem extends SubsystemBase {
      */
     public void setSpeedMultiplierSupplier(Supplier<Double> speedMultiplierSupplier) {
         this.speedMultiplierSupplier = speedMultiplierSupplier;
-    }
-
-    /**
-     * Adds suppliers to the shooter subsystem to better control wheel and ball velocity
-     */
-    public void setYawPitchSuppliers(Supplier<Rotation2d> yawSupplier, Supplier<Rotation2d> pitchSupplier) {
-        this.yawSupplier = yawSupplier;
-        this.pitchSupplier = pitchSupplier;
     }
 
 }

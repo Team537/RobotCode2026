@@ -97,8 +97,6 @@ public class RobotContainer {
     shooterSubsystem = new ShooterSubsystem();
     transferSubsystem = new TransferSubsystem();
 
-    shooterSubsystem.setYawPitchSuppliers(() -> turretSubsystem.getAngle(), () -> turretSubsystem.getHoodAngle());
-
     setupSmartDashboard();
     configureBindings();
 
@@ -228,9 +226,6 @@ public class RobotContainer {
 
     EnumPrettifier.setupSendableChooserFromEnum(intakeStrategyChooser, IntakeStrategy.class, IntakeStrategy.JUST_SHOOT);
     SmartDashboard.putData("Auto/IntakeStrategy", intakeStrategyChooser);
-
-    SmartDashboard.putNumber("Target Turret Angle",0.0);
-    SmartDashboard.putNumber("Target Hood Angle",0.0);
 
   }
 
@@ -548,6 +543,8 @@ public class RobotContainer {
             shooterSubsystem,
             turretSubsystem,
             transferSubsystem,
+            intakePivot,
+            intakeRoller,
             () -> FieldUtil.flipIfRed(Constants.Field.BLUE_HUB_TRANSLATION),
             driveSubsystem::getPose,
             driveSubsystem::getVelocity,

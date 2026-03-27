@@ -80,6 +80,7 @@ public class ShooterSubsystem extends SubsystemBase {
             .getConfigurator()
             .apply(Configs.Shooter.SHOOTER_CONFIGURATION);
         followerShooterMotor.setPosition(0.0);
+
     }
 
     // --------------------------------------------------------------------

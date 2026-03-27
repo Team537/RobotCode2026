@@ -26,6 +26,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -429,6 +430,22 @@ public class DriveSubsystem extends SubsystemBase {
      */
     public Command getStopCommand() {
         return runOnce(() -> stop());
+    }
+
+    /**
+     * Lock the robot pose using the underlying swerve drive lock function.
+     * This should orient modules and hold position to resist external pushes.
+     */
+    public void lockPose() {
+        // Delegate to the swervelib lockPose helper.
+        swerveDrive.lockPose();
+    }
+
+    /**
+     * Command factory returning a RunCommand that repeatedly calls lockPose while scheduled.
+     */
+    public Command getLockPoseCommand() {
+        return Commands.run(() -> lockPose(), this).withName("LockPose");
     }
 
     // ======================================================================

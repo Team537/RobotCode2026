@@ -292,6 +292,7 @@ public class RobotContainer {
     solverValid.onTrue(
         Commands.runOnce(() -> SmartDashboard.putBoolean("Turret/SolverValid", true)).ignoringDisable(true)).onFalse(
             Commands.runOnce(() -> SmartDashboard.putBoolean("Turret/SolverValid", false)).ignoringDisable(true));
+    Trigger reverseTransferTrigger = new Trigger(() -> driverController.getXButton());
 
     /* Shooter runs while button held */
     shootTrigger.whileTrue(
@@ -326,6 +327,9 @@ public class RobotContainer {
         Commands.parallel(
             intakePivot.raiseIntakeCommand(),
             intakeRoller.getStopCommand()));
+
+    reverseTransferTrigger.onTrue(
+      transferSubsystem.getSetPowerCommand(-1));
 
     // =========================
     // Turret Offset Adjustment (POV Left / Right)

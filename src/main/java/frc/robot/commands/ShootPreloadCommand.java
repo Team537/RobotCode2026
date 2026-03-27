@@ -9,6 +9,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants;
+import frc.robot.subsystems.IntakePivotSubsystem;
+import frc.robot.subsystems.IntakeRollerSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.TransferSubsystem;
 import frc.robot.subsystems.TurretSubsystem;
@@ -19,6 +21,8 @@ public class ShootPreloadCommand extends SequentialCommandGroup {
         ShooterSubsystem shooter,
         TurretSubsystem turret,
         TransferSubsystem transfer,
+        IntakePivotSubsystem intakePivot,
+        IntakeRollerSubsystem intakeRoller,
         Supplier<Translation3d> targetSupplier,
         Supplier<Pose2d> robotPoseSupplier,
         Supplier<ChassisSpeeds> robotVelocitySupplier,
@@ -31,13 +35,17 @@ public class ShootPreloadCommand extends SequentialCommandGroup {
                 Commands.waitSeconds(shootPreloadTime),
                 turret.getTargetCommand(targetSupplier, robotPoseSupplier, robotVelocitySupplier),
                 shooter.getTargetCommand(targetSupplier, robotPoseSupplier, robotVelocitySupplier),
-                transfer.getLoadCommand()
+                transfer.getLoadCommand(),
+                intakePivot.deployIntakeCommand(),
+                intakeRoller.getIntakeCommand()
             ),
 
             Commands.parallel(
                 shooter.getStopCommand(),
-                transfer.getStopCommand()
-            )
+                transfer.getStopCommand(),
+                intakePivot.raiseIntakeCommand(),
+                intakeRoller.getStopCommand()
+            ).withTimeout(3.0)
 
         );
 

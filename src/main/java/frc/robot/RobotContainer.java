@@ -328,7 +328,7 @@ public class RobotContainer {
             intakePivot.raiseIntakeCommand(),
             intakeRoller.getStopCommand()));
 
-    reverseTransferTrigger.onTrue(
+    reverseTransferTrigger.whileTrue(
       transferSubsystem.getSetPowerCommand(-1));
 
     // =========================

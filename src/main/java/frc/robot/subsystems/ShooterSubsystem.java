@@ -58,8 +58,6 @@ public class ShooterSubsystem extends SubsystemBase {
     private boolean atTarget = false;
 
     private Supplier<Double> speedMultiplierSupplier = () -> 1.0;
-    private Supplier<Rotation2d> yawSupplier = () -> Rotation2d.kZero;
-    private Supplier<Rotation2d> pitchSupplier = () -> Rotation2d.fromDegrees(45.0);
 
     // --------------------------------------------------------------------
     // Construction / Configuration
@@ -81,6 +79,8 @@ public class ShooterSubsystem extends SubsystemBase {
             .apply(Configs.Shooter.SHOOTER_CONFIGURATION);
         followerShooterMotor.setPosition(0.0);
 
+        SmartDashboard.putNumber("Target Shooter Speed",0.0);
+
     }
 
     // --------------------------------------------------------------------
@@ -98,27 +98,12 @@ public class ShooterSubsystem extends SubsystemBase {
         followerShooterMotor.setControl(new Follower(Constants.Shooter.LEAD_SHOOTER_ID,MotorAlignmentValue.Opposed));
         SmartDashboard.putNumber("Target Shooter Velocity (Wheel)", velocity);
     }
-    /**
-     * Commands the shooter flywheel so the ball with shoot out at the specified velocity
-     *
-     * @param velocity desired ball velocity in meters per second
-     */
-    public void setBallVelocity(double velocity) {
-        setWheelVelocity(TurretUtil.wheelSurfaceSpeedFromBallSpeed(velocity,yawSupplier.get(),pitchSupplier.get()));
-    }
 
     /**
      * @return the current shooter flywheel velocity in meters per second
      */
     public double getWheelVelocity() {
         return leadShooterMotor.getVelocity().getValueAsDouble() / speedMultiplierSupplier.get();
-    }
-
-    /**
-     * @return the current velocity that a ball shot out would travel in meters per second
-     */
-    public double getBallVelocity() {
-        return TurretUtil.ballSpeedFromWheelSurfaceSpeed(getWheelVelocity(),yawSupplier.get(),pitchSupplier.get());
     }
 
     // --------------------------------------------------------------------
@@ -156,39 +141,7 @@ public class ShooterSubsystem extends SubsystemBase {
             () -> false,
             this
         );
-    }
-
-    /**
-     * Creates a command that continuously drives the shooter toward a
-     * target velocity.
-     *
-     * <p>While running, the command updates an internal {@code atTarget}
-     * flag whenever the velocity error is within the configured tolerance.
-     * The flag is cleared when the command ends.</p>
-     *
-     * @param velocitySupplier supplies the desired shooter velocity
-     * @return a continuously running shooter velocity command
-     */
-    public Command getBallVelocityCommand(
-        Supplier<Double> velocitySupplier
-    ) {
-        return new FunctionalCommand(
-            () -> {},
-
-            () -> {
-                double targetVelocity = velocitySupplier.get();
-                setBallVelocity(targetVelocity);
-
-                atTarget =
-                    Math.abs(
-                        targetVelocity - getBallVelocity()
-                    ) < Constants.Shooter.TOLERANCE;
-            },
-
-            interrupted -> atTarget = false,
-            () -> false,
-            this
-        );
+    
     }
 
     /**
@@ -238,8 +191,6 @@ public class ShooterSubsystem extends SubsystemBase {
                 );
 
             SmartDashboard.putNumber("Target Velocity", solution.getLaunchVelocity());
-            SmartDashboard.putNumber("Target Max Height", solution.getMaxHeight());
-            SmartDashboard.putNumber("Target Impact Velocity", solution.getImpactVelocity());
             return solution.getLaunchVelocity();
         }).withName("Target Shooter");
     }
@@ -269,14 +220,6 @@ public class ShooterSubsystem extends SubsystemBase {
      */
     public void setSpeedMultiplierSupplier(Supplier<Double> speedMultiplierSupplier) {
         this.speedMultiplierSupplier = speedMultiplierSupplier;
-    }
-
-    /**
-     * Adds suppliers to the shooter subsystem to better control wheel and ball velocity
-     */
-    public void setYawPitchSuppliers(Supplier<Rotation2d> yawSupplier, Supplier<Rotation2d> pitchSupplier) {
-        this.yawSupplier = yawSupplier;
-        this.pitchSupplier = pitchSupplier;
     }
 
 }

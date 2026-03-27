@@ -97,8 +97,6 @@ public class RobotContainer {
     shooterSubsystem = new ShooterSubsystem();
     transferSubsystem = new TransferSubsystem();
 
-    shooterSubsystem.setYawPitchSuppliers(() -> turretSubsystem.getAngle(), () -> turretSubsystem.getHoodAngle());
-
     setupSmartDashboard();
     configureBindings();
 
@@ -229,9 +227,6 @@ public class RobotContainer {
     EnumPrettifier.setupSendableChooserFromEnum(intakeStrategyChooser, IntakeStrategy.class, IntakeStrategy.JUST_SHOOT);
     SmartDashboard.putData("Auto/IntakeStrategy", intakeStrategyChooser);
 
-    SmartDashboard.putNumber("Target Turret Angle",0.0);
-    SmartDashboard.putNumber("Target Hood Angle",0.0);
-
   }
 
   /**
@@ -293,6 +288,9 @@ public class RobotContainer {
         Commands.runOnce(() -> SmartDashboard.putBoolean("Turret/SolverValid", true)).ignoringDisable(true)).onFalse(
             Commands.runOnce(() -> SmartDashboard.putBoolean("Turret/SolverValid", false)).ignoringDisable(true));
     Trigger reverseTransferTrigger = new Trigger(() -> driverController.getXButton());
+    // Driver X button: hold to lock robot pose (X-lock)
+    Trigger xLockTrigger = new Trigger(() -> operatorController.getXButton());
+    xLockTrigger.whileTrue(driveSubsystem.getLockPoseCommand());
 
     /* Shooter runs while button held */
     shootTrigger.whileTrue(
@@ -409,11 +407,11 @@ public class RobotContainer {
         .onFalse(
             new InstantCommand(() -> xHeld = false));
 
-    new Trigger(
-        () -> operatorController.getYButton()).onTrue(
-            new InstantCommand(() -> yHeld = true))
-        .onFalse(
-            new InstantCommand(() -> yHeld = false));
+    // new Trigger(
+    //     () -> operatorController.getYButton()).onTrue(
+    //         new InstantCommand(() -> yHeld = true))
+    //     .onFalse(
+    //         new InstantCommand(() -> yHeld = false));
 
     targetingSupplier = () -> {
       Translation2d robotPosition = driveSubsystem.getPose().getTranslation();
@@ -559,6 +557,8 @@ public class RobotContainer {
             shooterSubsystem,
             turretSubsystem,
             transferSubsystem,
+            intakePivot,
+            intakeRoller,
             () -> FieldUtil.flipIfRed(Constants.Field.BLUE_HUB_TRANSLATION),
             driveSubsystem::getPose,
             driveSubsystem::getVelocity,

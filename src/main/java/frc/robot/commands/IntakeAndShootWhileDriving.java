@@ -55,6 +55,7 @@ public class IntakeAndShootWhileDriving extends SequentialCommandGroup {
                         targetingSupplier,
                         drive::getPose,
                         drive::getVelocity),
+                turret.getTargetCommand(targetingSupplier, drive::getPose, drive::getVelocity),
 
                 transfer.getLoadCommand()
             ),

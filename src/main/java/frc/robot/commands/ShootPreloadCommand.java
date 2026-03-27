@@ -45,7 +45,7 @@ public class ShootPreloadCommand extends SequentialCommandGroup {
                 transfer.getStopCommand(),
                 intakePivot.raiseIntakeCommand(),
                 intakeRoller.getStopCommand()
-            )
+            ).withTimeout(3.0)
 
         );
 

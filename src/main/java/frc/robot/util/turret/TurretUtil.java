@@ -85,7 +85,7 @@ public class TurretUtil {
     }
 
     public static Rotation2d getVelocityCompensatedAngle(Rotation2d angle, double rotationalVelocity) {
-        return angle.plus(Rotation2d.fromRadians(rotationalVelocity * Constants.Turret.TURRET_LOOKAHEAD_TIME));
+        return angle.minus(Rotation2d.fromRadians(rotationalVelocity * Constants.Turret.TURRET_LOOKAHEAD_TIME));
     }
 
 }

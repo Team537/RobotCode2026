@@ -15,7 +15,6 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.FeedForwardConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
-import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -407,9 +406,12 @@ public class TurretSubsystem extends SubsystemBase {
     }
 
     /**
-     * Creates a command to float the motor temporarily
-     * 
-     * @return
+     * Creates a command that temporarily floats the turret motor by setting it to
+     * coast mode while the command is scheduled and restoring brake mode when the
+     * command ends.
+     *
+     * @return a command that keeps the turret motor in coast mode until the command
+     *         is interrupted or canceled
      */
     public Command getFloatCommand() {
         return new FunctionalCommand(

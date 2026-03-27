@@ -281,6 +281,10 @@ public class RobotContainer {
 
     Trigger intakeTrigger = new Trigger(() -> driverController.getRightBumperButton());
 
+    // Driver X button: hold to lock robot pose (X-lock)
+    Trigger xLockTrigger = new Trigger(() -> operatorController.getXButton());
+    xLockTrigger.whileTrue(driveSubsystem.getLockPoseCommand());
+
     /* Shooter runs while button held */
     shootTrigger.whileTrue(
         shooterSubsystem.getTargetCommand(
@@ -393,11 +397,11 @@ public class RobotContainer {
         .onFalse(
             new InstantCommand(() -> xHeld = false));
 
-    new Trigger(
-        () -> operatorController.getYButton()).onTrue(
-            new InstantCommand(() -> yHeld = true))
-        .onFalse(
-            new InstantCommand(() -> yHeld = false));
+    // new Trigger(
+    //     () -> operatorController.getYButton()).onTrue(
+    //         new InstantCommand(() -> yHeld = true))
+    //     .onFalse(
+    //         new InstantCommand(() -> yHeld = false));
 
     targetingSupplier = () -> {
       Translation2d robotPosition = driveSubsystem.getPose().getTranslation();

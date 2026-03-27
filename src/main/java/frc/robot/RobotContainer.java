@@ -281,13 +281,8 @@ public class RobotContainer {
 
     Trigger intakeTrigger = new Trigger(() -> driverController.getRightBumperButton());
 
-    Trigger solverValid = new Trigger(() -> TurretSolver.solve(driveSubsystem.getPose(), driveSubsystem.getVelocity(),
-        targetingSupplier.get(), Constants.Turret.SOLVER_CONFIG).isValid());
-
-    solverValid.onTrue(
-        Commands.runOnce(() -> SmartDashboard.putBoolean("Turret/SolverValid", true)).ignoringDisable(true)).onFalse(
-            Commands.runOnce(() -> SmartDashboard.putBoolean("Turret/SolverValid", false)).ignoringDisable(true));
     Trigger reverseTransferTrigger = new Trigger(() -> driverController.getXButton());
+    
     // Driver X button: hold to lock robot pose (X-lock)
     Trigger xLockTrigger = new Trigger(() -> operatorController.getXButton());
     xLockTrigger.whileTrue(driveSubsystem.getLockPoseCommand());

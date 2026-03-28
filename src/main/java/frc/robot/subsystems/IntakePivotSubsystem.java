@@ -15,7 +15,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Configs;
 import frc.robot.Constants;
 
-// Test
 public class IntakePivotSubsystem extends SubsystemBase {
     public TalonFX intake;
     private final PositionVoltage angleRequest = new PositionVoltage(0);

@@ -141,7 +141,7 @@
               "topic": "/SmartDashboard/ErrorSettings/ShooterPercent",
               "period": 0.06,
               "data_type": "double",
-              "show_submit_button": false
+              "show_submit_button": true
             }
           },
           {
@@ -425,7 +425,7 @@
               "topic": "/SmartDashboard/Auto/StartDelay",
               "period": 0.06,
               "data_type": "double",
-              "show_submit_button": false
+              "show_submit_button": true
             }
           }
         ]

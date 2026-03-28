@@ -21,7 +21,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -94,8 +96,6 @@ public class RobotContainer {
     turretSubsystem = new TurretSubsystem();
     shooterSubsystem = new ShooterSubsystem();
     transferSubsystem = new TransferSubsystem();
-
-    shooterSubsystem.setYawPitchSuppliers(() -> turretSubsystem.getAngle(), () -> turretSubsystem.getHoodAngle());
 
     setupSmartDashboard();
     configureBindings();
@@ -197,6 +197,17 @@ public class RobotContainer {
     shooterSubsystem
         .setSpeedMultiplierSupplier(() -> shooterPercent.get() / 100.0);
 
+    Command floatCommand = new ConditionalCommand(
+      Commands.parallel(
+        turretSubsystem.getFloatCommand(),
+        intakePivot.getFloatCommand()
+      )
+        .withTimeout(Constants.Operator.Misc.FLOAT_TIME),
+      Commands.none(),
+      () -> !FieldUtil.isEnabled()
+    ).ignoringDisable(true);
+
+    SmartDashboard.putData("FloatCommand", floatCommand);
     SmartDashboard.putNumber("Auto/StartDelay", Constants.Operator.Auto.DEFAULT_START_DELAY);
     SmartDashboard.putNumber("Auto/PreloadShootTime", Constants.Operator.Auto.DEFAULT_PRELOAD_SHOOT_TIME);
     SmartDashboard.putNumber("Auto/IntakeShootTime", Constants.Operator.Auto.DEFAULT_INTAKE_SHOOT_TIME);
@@ -270,12 +281,11 @@ public class RobotContainer {
 
     Trigger intakeTrigger = new Trigger(() -> driverController.getRightBumperButton());
 
-    Trigger solverValid = new Trigger(() -> TurretSolver.solve(driveSubsystem.getPose(), driveSubsystem.getVelocity(),
-        targetingSupplier.get(), Constants.Turret.SOLVER_CONFIG).isValid());
-
-    solverValid.onTrue(
-        Commands.runOnce(() -> SmartDashboard.putBoolean("Turret/SolverValid", true)).ignoringDisable(true)).onFalse(
-            Commands.runOnce(() -> SmartDashboard.putBoolean("Turret/SolverValid", false)).ignoringDisable(true));
+    Trigger reverseTransferTrigger = new Trigger(() -> driverController.getXButton());
+    
+    // Driver X button: hold to lock robot pose (X-lock)
+    Trigger xLockTrigger = new Trigger(() -> operatorController.getXButton());
+    xLockTrigger.whileTrue(driveSubsystem.getLockPoseCommand());
 
     /* Shooter runs while button held */
     shootTrigger.whileTrue(
@@ -283,6 +293,8 @@ public class RobotContainer {
             targetingSupplier,
             driveSubsystem::getPose,
             driveSubsystem::getVelocity));
+    
+    
 
     /* Transfer runs ONLY while button AND solver valid */
     shootTrigger
@@ -309,7 +321,10 @@ public class RobotContainer {
             intakePivot.raiseIntakeCommand(),
             intakeRoller.getStopCommand()));
 
-    // ==============================
+    reverseTransferTrigger.whileTrue(
+      transferSubsystem.getSetPowerCommand(-1)).onFalse(transferSubsystem.getSetPowerCommand(0));
+
+    // =========================
     // Turret Offset Adjustment (POV Left / Right)
     // ==============================
 
@@ -387,11 +402,11 @@ public class RobotContainer {
         .onFalse(
             new InstantCommand(() -> xHeld = false));
 
-    new Trigger(
-        () -> operatorController.getYButton()).onTrue(
-            new InstantCommand(() -> yHeld = true))
-        .onFalse(
-            new InstantCommand(() -> yHeld = false));
+    // new Trigger(
+    //     () -> operatorController.getYButton()).onTrue(
+    //         new InstantCommand(() -> yHeld = true))
+    //     .onFalse(
+    //         new InstantCommand(() -> yHeld = false));
 
     targetingSupplier = () -> {
       Translation2d robotPosition = driveSubsystem.getPose().getTranslation();
@@ -537,6 +552,8 @@ public class RobotContainer {
             shooterSubsystem,
             turretSubsystem,
             transferSubsystem,
+            intakePivot,
+            intakeRoller,
             () -> FieldUtil.flipIfRed(Constants.Field.BLUE_HUB_TRANSLATION),
             driveSubsystem::getPose,
             driveSubsystem::getVelocity,

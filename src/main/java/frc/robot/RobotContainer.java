@@ -404,14 +404,10 @@ public class RobotContainer {
     // Shooter Percent Reset (Left Trigger / Right Trigger)
     // ==============================
 
-    // Left Trigger : Reset shooter percent to default
-    new Trigger(() -> operatorController.getLeftTriggerAxis() > 0.5)
+    // Either Trigger : Reset shooter percent to default
+    new Trigger(() -> operatorController.getLeftTriggerAxis() > 0.5
+        || operatorController.getRightTriggerAxis() > 0.5)
         .onTrue(new InstantCommand(() -> shooterPercent.set(Constants.Operator.ErrorSettings.SHOOTER_PERCENT_DEFAULT)));
-
-    // Right Trigger : Reset shooter percent to default
-    new Trigger(() -> operatorController.getRightTriggerAxis() > 0.5)
-        .onTrue(new InstantCommand(() -> shooterPercent.set(Constants.Operator.ErrorSettings.SHOOTER_PERCENT_DEFAULT)));
-
     new Trigger(
         () -> operatorController.getAButton()).onTrue(
             new InstantCommand(() -> selectedFixedTarget = FixedTarget.A));

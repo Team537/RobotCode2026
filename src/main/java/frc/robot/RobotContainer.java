@@ -388,6 +388,30 @@ public class RobotContainer {
             shooterPercent.getHeldIntervalCommand(Constants.Operator.ErrorSettings.SHOOTER_PERCENT_INCREASE,
                 Constants.Operator.ErrorSettings.SETTINGS_DELAY_TIME));
 
+    // ==============================
+    // Turret / Hood Offset Reset (Left Stick Click / Right Stick Click)
+    // ==============================
+
+    // Left Stick Click : Reset turret offset to zero
+    new Trigger(() -> operatorController.getLeftStickButton())
+        .onTrue(new InstantCommand(() -> turretOffsetDegrees.set(0.0)));
+
+    // Right Stick Click : Reset hood offset to zero
+    new Trigger(() -> operatorController.getRightStickButton())
+        .onTrue(new InstantCommand(() -> hoodOffsetDegrees.set(0.0)));
+
+    // ==============================
+    // Shooter Percent Reset (Left Trigger / Right Trigger)
+    // ==============================
+
+    // Left Trigger : Reset shooter percent to default
+    new Trigger(() -> operatorController.getLeftTriggerAxis() > 0.5)
+        .onTrue(new InstantCommand(() -> shooterPercent.set(Constants.Operator.ErrorSettings.SHOOTER_PERCENT_DEFAULT)));
+
+    // Right Trigger : Reset shooter percent to default
+    new Trigger(() -> operatorController.getRightTriggerAxis() > 0.5)
+        .onTrue(new InstantCommand(() -> shooterPercent.set(Constants.Operator.ErrorSettings.SHOOTER_PERCENT_DEFAULT)));
+
     new Trigger(
         () -> operatorController.getAButton()).onTrue(
             new InstantCommand(() -> selectedFixedTarget = FixedTarget.A));

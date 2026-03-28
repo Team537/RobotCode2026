@@ -587,8 +587,8 @@ public class RobotContainer {
             turretSubsystem,
             transferSubsystem,
             () -> FieldUtil.flipIfRed(Constants.Field.BLUE_HUB_TRANSLATION),
-            Constants.Operator.Auto.DEPOT_READY_INTAKE_POSE,
-            Constants.Operator.Auto.DEPOT_INTAKE_POSE,
+            FieldUtil.flipIfRed(Constants.Operator.Auto.DEPOT_READY_INTAKE_POSE),
+            FieldUtil.flipIfRed(Constants.Operator.Auto.DEPOT_INTAKE_POSE),
             false,
             Constants.Operator.Auto.AUTO_INTAKE_MAX_SPEED,
             SmartDashboard.getNumber("Auto/IntakeShootTime", Constants.Operator.Auto.DEFAULT_INTAKE_SHOOT_TIME));
@@ -602,8 +602,8 @@ public class RobotContainer {
             turretSubsystem,
             transferSubsystem,
             () -> FieldUtil.flipIfRed(Constants.Field.BLUE_HUB_TRANSLATION),
-            Constants.Operator.Auto.OUTPOST_READY_INTAKE_POSE,
-            Constants.Operator.Auto.OUTPOST_INTAKE_POSE,
+            FieldUtil.flipIfRed(Constants.Operator.Auto.OUTPOST_READY_INTAKE_POSE),
+            FieldUtil.flipIfRed(Constants.Operator.Auto.OUTPOST_INTAKE_POSE),
             false,
             Constants.Operator.Auto.AUTO_INTAKE_MAX_SPEED,
             SmartDashboard.getNumber("Auto/IntakeShootTime", Constants.Operator.Auto.DEFAULT_INTAKE_SHOOT_TIME));

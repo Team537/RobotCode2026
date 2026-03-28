@@ -34,10 +34,10 @@ public class ShootPreloadCommand extends SequentialCommandGroup {
                 Commands.waitSeconds(shootPreloadTime + 2),
                 turret.getTargetCommand(targetSupplier, robotPoseSupplier, robotVelocitySupplier),
                 shooter.getTargetCommand(targetSupplier, robotPoseSupplier, robotVelocitySupplier),
-                new WaitCommand(2), // 
-                transfer.getLoadCommand(),
+                intakeRoller.getIntakeCommand(),
                 intakePivot.deployIntakeCommand(),
-                intakeRoller.getIntakeCommand()
+                new WaitCommand(2), // 
+                transfer.getLoadCommand()
             ),
 
             Commands.parallel(

@@ -322,7 +322,7 @@ public class RobotContainer {
             intakeRoller.getStopCommand()));
 
     reverseTransferTrigger.whileTrue(
-      transferSubsystem.getSetPowerCommand(-1));
+      transferSubsystem.getSetPowerCommand(-1)).onFalse(transferSubsystem.getSetPowerCommand(0));
 
     // =========================
     // Turret Offset Adjustment (POV Left / Right)

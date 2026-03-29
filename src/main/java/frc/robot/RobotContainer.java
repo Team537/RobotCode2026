@@ -281,10 +281,10 @@ public class RobotContainer {
 
     Trigger intakeTrigger = new Trigger(() -> driverController.getRightBumperButton());
 
-    Trigger reverseTransferTrigger = new Trigger(() -> driverController.getXButton());
+    //Trigger reverseTransferTrigger = new Trigger(() -> driverController.getXButton());
     
     // Driver X button: hold to lock robot pose (X-lock)
-    Trigger xLockTrigger = new Trigger(() -> operatorController.getXButton());
+    Trigger xLockTrigger = new Trigger(() -> driverController.getXButton());
     xLockTrigger.whileTrue(driveSubsystem.getLockPoseCommand());
 
     /* Shooter runs while button held */
@@ -321,8 +321,8 @@ public class RobotContainer {
             intakePivot.raiseIntakeCommand(),
             intakeRoller.getStopCommand()));
 
-    reverseTransferTrigger.whileTrue(
-      transferSubsystem.getSetPowerCommand(-1)).onFalse(transferSubsystem.getSetPowerCommand(0));
+    // reverseTransferTrigger.whileTrue(
+    //   transferSubsystem.getSetPowerCommand(-1)).onFalse(transferSubsystem.getSetPowerCommand(0));
 
     // =========================
     // Turret Offset Adjustment (POV Left / Right)
@@ -682,6 +682,16 @@ public class RobotContainer {
             .map(FieldUtil::flipIfRed)
             .toList());
 
+      case RAM_SS_L:
+        return new DriveToSequenceCommand(driveSubsystem, Constants.Operator.Auto.RAM_SS_LEFT_SEQUENCE.stream()
+            .map(FieldUtil::flipIfRed)
+            .toList());
+
+      case RAM_SS_R:
+        return new DriveToSequenceCommand(driveSubsystem, Constants.Operator.Auto.RAM_SS_RIGHT_SEQUENCE.stream()
+            .map(FieldUtil::flipIfRed)
+            .toList());
+
       case CUSTOM:
 
         Pose2d ready = getDashboardPose("Auto/CustomReadyPose");
@@ -704,6 +714,14 @@ public class RobotContainer {
             Constants.Operator.Auto.AUTO_INTAKE_MAX_SPEED,
             SmartDashboard.getNumber("Auto/IntakeShootTime", Constants.Operator.Auto.DEFAULT_INTAKE_SHOOT_TIME));
 
+      case B_N_F_R:
+        return new DriveToSequenceCommand(driveSubsystem, Constants.Operator.Auto.BACK_N_FORTH_RIGHT_SEQUENCE.stream()
+              .map(FieldUtil::flipIfRed)
+              .toList());
+        case B_N_F_L:
+        return new DriveToSequenceCommand(driveSubsystem, Constants.Operator.Auto.BACK_N_FORTH_LEFT_SEQUENCE.stream()
+              .map(FieldUtil::flipIfRed)
+              .toList());
       default:
         return Commands.none();
     }

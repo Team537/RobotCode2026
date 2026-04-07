@@ -99,16 +99,16 @@ public class Constants {
             );
 
             public static final List<Pose2d> BACK_N_FORTH_RIGHT_SEQUENCE = List.of(
-                new Pose2d(8.500, 2.1, Rotation2d.fromDegrees(-160)),
-                new Pose2d(8.306, 6.707, Rotation2d.fromDegrees(-160)),
-                new Pose2d(8.154, 1.349, Rotation2d.fromDegrees(-160))
+                new Pose2d(8.500, 2.1, Rotation2d.fromDegrees(-45)),
+                new Pose2d(8.306, 6.707, Rotation2d.fromDegrees(-45)),
+                new Pose2d(8.154, 1.349, Rotation2d.fromDegrees(-45))
             );
 
             
             public static final List<Pose2d> BACK_N_FORTH_LEFT_SEQUENCE = List.of(
-                new Pose2d(8.500, 6.000, Rotation2d.fromDegrees(-160)),
-                new Pose2d(8.154, 1.349, Rotation2d.fromDegrees(-160)),
-                new Pose2d(8.306, 6.707, Rotation2d.fromDegrees(-160))
+                new Pose2d(8.500, 6.000, Rotation2d.fromDegrees(-45)),
+                new Pose2d(8.154, 1.349, Rotation2d.fromDegrees(-45)),
+                new Pose2d(8.306, 6.707, Rotation2d.fromDegrees(-45))
             );
 
             public static final Translation2d NEUTRAL_RIGHT_SPIN_TRANSLATION = new Translation2d(

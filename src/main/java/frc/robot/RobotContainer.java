@@ -281,7 +281,7 @@ public class RobotContainer {
 
     Trigger intakeTrigger = new Trigger(() -> driverController.getRightBumperButton());
 
-    //Trigger reverseTransferTrigger = new Trigger(() -> driverController.getXButton());
+    Trigger reverseTransferTrigger = new Trigger(() -> driverController.getXButton());
     
     // Driver X button: hold to lock robot pose (X-lock)
     Trigger xLockTrigger = new Trigger(() -> driverController.getXButton());
@@ -321,8 +321,8 @@ public class RobotContainer {
             intakePivot.raiseIntakeCommand(),
             intakeRoller.getStopCommand()));
 
-    // reverseTransferTrigger.whileTrue(
-    //   transferSubsystem.getSetPowerCommand(-1)).onFalse(transferSubsystem.getSetPowerCommand(0));
+    reverseTransferTrigger.whileTrue(
+       transferSubsystem.getSetPowerCommand(-1)).onFalse(transferSubsystem.getSetPowerCommand(0));
 
     // =========================
     // Turret Offset Adjustment (POV Left / Right)

@@ -58,7 +58,7 @@ public class Constants {
             public static final int TURRET_OFFSET_DECIMAL_PLACE = 1;
             public static final double HOOD_OFFSET_INCREASE = 0.1;
             public static final int HOOD_OFFSET_DECIMAL_PLACE = 1;
-            public static final double SHOOTER_PERCENT_INCREASE = 0.2; // Percent to increase per tick
+            public static final double SHOOTER_PERCENT_INCREASE = .5; // Percent to increase per tick
             public static final int SHOOTER_PERCENT_DECIMAL_PLACE = 1;
 
             public static final double SHOOTER_PERCENT_DEFAULT = 100.0;
@@ -98,6 +98,19 @@ public class Constants {
                 new Pose2d(7.730, 6.457, Rotation2d.fromDegrees(-160))
             );
 
+            public static final List<Pose2d> BACK_N_FORTH_RIGHT_SEQUENCE = List.of(
+                new Pose2d(8.500, 2.1, Rotation2d.fromDegrees(-45)),
+                new Pose2d(8.306, 6.707, Rotation2d.fromDegrees(-45)),
+                new Pose2d(8.154, 1.349, Rotation2d.fromDegrees(-45))
+            );
+
+            
+            public static final List<Pose2d> BACK_N_FORTH_LEFT_SEQUENCE = List.of(
+                new Pose2d(8.500, 6.000, Rotation2d.fromDegrees(-45)),
+                new Pose2d(8.154, 1.349, Rotation2d.fromDegrees(-45)),
+                new Pose2d(8.306, 6.707, Rotation2d.fromDegrees(-45))
+            );
+
             public static final Translation2d NEUTRAL_RIGHT_SPIN_TRANSLATION = new Translation2d(
                 7.730,
                 7.457
@@ -118,6 +131,16 @@ public class Constants {
             public static final List<Pose2d> RAM_RIGHT_SEQUENCE = List.of(
                 new Pose2d(7.797,2.168,Rotation2d.kCW_90deg),
                 new Pose2d(7.829,4.051,Rotation2d.kCW_90deg)
+            );
+
+            public static final List<Pose2d> RAM_SS_LEFT_SEQUENCE = List.of(
+                new Pose2d(7.797,5.902,Rotation2d.kCW_90deg),
+                new Pose2d(7.829,4.400,Rotation2d.kCW_90deg)
+            );
+
+            public static final List<Pose2d> RAM_SS_RIGHT_SEQUENCE = List.of(
+                new Pose2d(7.797,2.168,Rotation2d.kCW_90deg),
+                new Pose2d(7.829,3.650,Rotation2d.kCW_90deg)
             );
 
 

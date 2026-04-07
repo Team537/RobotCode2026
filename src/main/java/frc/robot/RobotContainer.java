@@ -284,7 +284,7 @@ public class RobotContainer {
     Trigger reverseTransferTrigger = new Trigger(() -> driverController.getXButton());
     
     // Driver X button: hold to lock robot pose (X-lock)
-    Trigger xLockTrigger = new Trigger(() -> operatorController.getXButton());
+    Trigger xLockTrigger = new Trigger(() -> driverController.getXButton());
     xLockTrigger.whileTrue(driveSubsystem.getLockPoseCommand());
 
     /* Shooter runs while button held */
@@ -322,7 +322,7 @@ public class RobotContainer {
             intakeRoller.getStopCommand()));
 
     reverseTransferTrigger.whileTrue(
-      transferSubsystem.getSetPowerCommand(-1)).onFalse(transferSubsystem.getSetPowerCommand(0));
+       transferSubsystem.getSetPowerCommand(-1)).onFalse(transferSubsystem.getSetPowerCommand(0));
 
     // =========================
     // Turret Offset Adjustment (POV Left / Right)
@@ -388,6 +388,26 @@ public class RobotContainer {
             shooterPercent.getHeldIntervalCommand(Constants.Operator.ErrorSettings.SHOOTER_PERCENT_INCREASE,
                 Constants.Operator.ErrorSettings.SETTINGS_DELAY_TIME));
 
+    // ==============================
+    // Turret / Hood Offset Reset (Left Stick Click / Right Stick Click)
+    // ==============================
+
+    // Left Stick Click : Reset turret offset to zero
+    new Trigger(() -> operatorController.getLeftStickButton())
+        .onTrue(new InstantCommand(() -> turretOffsetDegrees.set(0.0)));
+
+    // Right Stick Click : Reset hood offset to zero
+    new Trigger(() -> operatorController.getRightStickButton())
+        .onTrue(new InstantCommand(() -> hoodOffsetDegrees.set(0.0)));
+
+    // ==============================
+    // Shooter Percent Reset (Left Trigger / Right Trigger)
+    // ==============================
+
+    // Either Trigger : Reset shooter percent to default
+    new Trigger(() -> operatorController.getLeftTriggerAxis() > 0.5
+        || operatorController.getRightTriggerAxis() > 0.5)
+        .onTrue(new InstantCommand(() -> shooterPercent.set(Constants.Operator.ErrorSettings.SHOOTER_PERCENT_DEFAULT)));
     new Trigger(
         () -> operatorController.getAButton()).onTrue(
             new InstantCommand(() -> selectedFixedTarget = FixedTarget.A));
@@ -587,8 +607,8 @@ public class RobotContainer {
             turretSubsystem,
             transferSubsystem,
             () -> FieldUtil.flipIfRed(Constants.Field.BLUE_HUB_TRANSLATION),
-            Constants.Operator.Auto.DEPOT_READY_INTAKE_POSE,
-            Constants.Operator.Auto.DEPOT_INTAKE_POSE,
+            FieldUtil.flipIfRed(Constants.Operator.Auto.DEPOT_READY_INTAKE_POSE),
+            FieldUtil.flipIfRed(Constants.Operator.Auto.DEPOT_INTAKE_POSE),
             false,
             Constants.Operator.Auto.AUTO_INTAKE_MAX_SPEED,
             SmartDashboard.getNumber("Auto/IntakeShootTime", Constants.Operator.Auto.DEFAULT_INTAKE_SHOOT_TIME));
@@ -602,8 +622,8 @@ public class RobotContainer {
             turretSubsystem,
             transferSubsystem,
             () -> FieldUtil.flipIfRed(Constants.Field.BLUE_HUB_TRANSLATION),
-            Constants.Operator.Auto.OUTPOST_READY_INTAKE_POSE,
-            Constants.Operator.Auto.OUTPOST_INTAKE_POSE,
+            FieldUtil.flipIfRed(Constants.Operator.Auto.OUTPOST_READY_INTAKE_POSE),
+            FieldUtil.flipIfRed(Constants.Operator.Auto.OUTPOST_INTAKE_POSE),
             false,
             Constants.Operator.Auto.AUTO_INTAKE_MAX_SPEED,
             SmartDashboard.getNumber("Auto/IntakeShootTime", Constants.Operator.Auto.DEFAULT_INTAKE_SHOOT_TIME));
@@ -662,6 +682,16 @@ public class RobotContainer {
             .map(FieldUtil::flipIfRed)
             .toList());
 
+      case RAM_SS_L:
+        return new DriveToSequenceCommand(driveSubsystem, Constants.Operator.Auto.RAM_SS_LEFT_SEQUENCE.stream()
+            .map(FieldUtil::flipIfRed)
+            .toList());
+
+      case RAM_SS_R:
+        return new DriveToSequenceCommand(driveSubsystem, Constants.Operator.Auto.RAM_SS_RIGHT_SEQUENCE.stream()
+            .map(FieldUtil::flipIfRed)
+            .toList());
+
       case CUSTOM:
 
         Pose2d ready = getDashboardPose("Auto/CustomReadyPose");
@@ -684,6 +714,14 @@ public class RobotContainer {
             Constants.Operator.Auto.AUTO_INTAKE_MAX_SPEED,
             SmartDashboard.getNumber("Auto/IntakeShootTime", Constants.Operator.Auto.DEFAULT_INTAKE_SHOOT_TIME));
 
+      case B_N_F_R:
+        return new DriveToSequenceCommand(driveSubsystem, Constants.Operator.Auto.BACK_N_FORTH_RIGHT_SEQUENCE.stream()
+              .map(FieldUtil::flipIfRed)
+              .toList());
+      case B_N_F_L:
+        return new DriveToSequenceCommand(driveSubsystem, Constants.Operator.Auto.BACK_N_FORTH_LEFT_SEQUENCE.stream()
+              .map(FieldUtil::flipIfRed)
+              .toList());
       default:
         return Commands.none();
     }

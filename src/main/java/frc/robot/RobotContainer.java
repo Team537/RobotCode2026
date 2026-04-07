@@ -718,7 +718,7 @@ public class RobotContainer {
         return new DriveToSequenceCommand(driveSubsystem, Constants.Operator.Auto.BACK_N_FORTH_RIGHT_SEQUENCE.stream()
               .map(FieldUtil::flipIfRed)
               .toList());
-        case B_N_F_L:
+      case B_N_F_L:
         return new DriveToSequenceCommand(driveSubsystem, Constants.Operator.Auto.BACK_N_FORTH_LEFT_SEQUENCE.stream()
               .map(FieldUtil::flipIfRed)
               .toList());

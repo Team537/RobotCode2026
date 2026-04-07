@@ -14,6 +14,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -287,7 +288,10 @@ public class RobotContainer {
     /* Transfer runs ONLY while button AND solver valid */
     shootTrigger
         .whileTrue(
-            transferSubsystem.getLoadCommand());
+          new WaitCommand(Constants.Transfer.LOAD_DELAY).andThen(
+            transferSubsystem.getLoadCommand()
+          ));
+
 
     /* Intake pivot runs while button held */
     intakeTrigger.whileTrue(
@@ -515,10 +519,7 @@ public class RobotContainer {
         manualRotationVelocityDirective, null, null);
     driveSubsystem.setDefaultCommand(manualDriveCommand);
 
-    turretSubsystem.setDefaultCommand(turretSubsystem.getTargetCommand(
-        targetingSupplier,
-        driveSubsystem::getPose,
-        driveSubsystem::getVelocity));
+    turretSubsystem.setDefaultCommand(turretSubsystem.getStowCommand());
 
   }
 

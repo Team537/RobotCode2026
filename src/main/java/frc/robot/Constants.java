@@ -460,6 +460,8 @@ public class Constants {
         public static final boolean MOTOR_INVERTED = true;
 
         public static final double LOAD_POWER = 0.25;
+        
+        public static final double LOAD_DELAY = 0.1; //Time between shooter and transfer being triggered, shooter should always activate first
     }
 
     public static class VisionOdometryConstants {

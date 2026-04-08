@@ -390,6 +390,8 @@ public class Constants {
         public static final Rotation2d HOOD_START_POSITION = Rotation2d.fromDegrees(5.00);
         public static final Rotation2d HOOD_STOW_POSITION = Rotation2d.fromDegrees(3.00);
 
+        public static final double HOOD_FINISH_VELOCITY = 0.0;
+
         public static final double OUTPUT_RANGE_MAX = 1;
         public static final double OUTPUT_RANGE_MIN = -1;
 

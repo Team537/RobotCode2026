@@ -285,6 +285,14 @@ public class RobotContainer {
             driveSubsystem::getPose,
             driveSubsystem::getVelocity));
 
+    shootTrigger.whileTrue(
+      turretSubsystem.getTargetCommand(
+        targetingSupplier,
+        driveSubsystem::getPose,
+        driveSubsystem::getVelocity
+      )
+    );
+    
     /* Transfer runs ONLY while button AND solver valid */
     shootTrigger
         .whileTrue(

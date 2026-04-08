@@ -168,6 +168,10 @@ public class TurretSubsystem extends SubsystemBase {
                         - hoodOffsetSupplier.get().getRadians());
     }
 
+    public double getHoodVelocity() {
+        return pitchEncoder.getVelocity().getValueAsDouble() * Constants.Turret.PITCH_ENCODER_FACTOR;
+    }
+
     /**
      * @return the current turret yaw in the field frame
      */
@@ -269,32 +273,26 @@ public class TurretSubsystem extends SubsystemBase {
 
     public Command getStowCommand() {
 
-        Command moveToTarget = new FunctionalCommand(
-                () -> SmartDashboard.putBoolean("Turret/IsStowing", true),
 
-                () -> {
-                    setHoodAngle(Constants.Turret.HOOD_STOW_POSITION);
-                },
 
-                interrupted -> {
-                },
+        double stopThreshold = Math.max(1e-3, Math.abs(Constants.Turret.HOOD_FINISH_VELOCITY)); // rad/s
+        double maxSettleTime = Constants.Turret.STOW_PUSH_DOWN_TIME; // seconds, or a separate constant
 
-                () -> Math.abs(
-                        getHoodAngle()
-                                .minus(Constants.Turret.HOOD_STOW_POSITION)
-                                .getRadians()) < Constants.Turret.HOOD_TOLERANCE.getRadians(),
-
-                this);
-
-        Command settleDown = new RunCommand(
-                () -> pitchServo.setSpeed((Constants.Turret.PITCH_INVERTED ? -1.0 : 1.0) * -Constants.Turret.STOW_PUSH_DOWN_SPEED), // small constant downward speed
-                this).withTimeout(Constants.Turret.STOW_PUSH_DOWN_TIME); // enough to seat the gear
+        Command settleDown = Commands.run(
+                () -> pitchServo.setSpeed((Constants.Turret.PITCH_INVERTED ? -1.0 : 1.0) * -Constants.Turret.STOW_PUSH_DOWN_SPEED),
+                this)
+            // stop when encoder velocity magnitude <= threshold
+            .until(() -> Math.abs(getHoodVelocity()) <= stopThreshold)
+            // but no longer than maxSettleTime
+            .withTimeout(maxSettleTime)
+            // ensure the servo is stopped when this command completes
+            .andThen(() -> pitchServo.setSpeed(0.0), this);
 
         Command finish = new InstantCommand(() -> {
             pitchServo.setSpeed(0.0);
         });
 
-        return Commands.sequence(moveToTarget, settleDown, finish, Commands.idle())
+        return Commands.sequence(settleDown, finish, Commands.idle())
                 .withName("StowHood");
     }
 

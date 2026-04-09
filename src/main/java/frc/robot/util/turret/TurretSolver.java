@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public final class TurretSolver {
 
@@ -58,21 +59,17 @@ public final class TurretSolver {
         public final InterpolatingDoubleTreeMap shooterVelocityMap;
         public final InterpolatingDoubleTreeMap timeMap;
 
-        public final double calibrationHeight;
-
         public Config(
                 double poseLatency,
                 Translation3d turretOffset,
                 InterpolatingDoubleTreeMap hoodAngleMap,
                 InterpolatingDoubleTreeMap shooterVelocityMap,
-                InterpolatingDoubleTreeMap timeMap,
-                double calibrationHeight) {
+                InterpolatingDoubleTreeMap timeMap) {
             this.poseLatency = poseLatency;
             this.turretOffset = turretOffset;
             this.hoodAngleMap = hoodAngleMap;
             this.shooterVelocityMap = shooterVelocityMap;
             this.timeMap = timeMap;
-            this.calibrationHeight = calibrationHeight;
         }
     }
 
@@ -85,7 +82,6 @@ public final class TurretSolver {
             Config config) {
 
         Pose2d correctedPose = robotPose.exp(robotVelocity.toTwist2d(config.poseLatency));
-        double heightDifference = targetTranslation.getZ() - config.calibrationHeight;
 
         double lastTime = 0.0;
         Rotation2d lastHoodAngle = Rotation2d.fromDegrees(45.0);
@@ -101,15 +97,12 @@ public final class TurretSolver {
                     correctedPose.getTranslation().plus(linearOffset),
                     correctedPose.getRotation() // keep original rotation, do not integrate angular velocity
             );
-            ;
 
             Translation2d rotatedOffset = config.turretOffset.toTranslation2d().rotateBy(estimatedPose.getRotation());
 
             Translation2d muzzle = estimatedPose.getTranslation().plus(rotatedOffset);
 
             double horizontalDistance = targetTranslation.toTranslation2d().minus(muzzle).getNorm();
-
-            horizontalDistance += (heightDifference * lastHoodAngle.getTan());
 
             lastTime = config.timeMap.get(horizontalDistance);
             lastHoodAngle = Rotation2d.fromDegrees(config.hoodAngleMap.get(horizontalDistance));

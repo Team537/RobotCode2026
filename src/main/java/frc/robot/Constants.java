@@ -415,10 +415,10 @@ public class Constants {
 
         public static final boolean PITCH_INVERTED = true;
 
-        public static final Rotation2d MAX_PITCH = Rotation2d.fromDegrees(45.0);
-        public static final Rotation2d MIN_PITCH = Rotation2d.fromDegrees(3.00);
-        public static final Rotation2d HOOD_START_POSITION = Rotation2d.fromDegrees(5.00);
-        public static final Rotation2d HOOD_STOW_POSITION = Rotation2d.fromDegrees(3.00);
+        public static final Rotation2d MAX_PITCH = Rotation2d.fromDegrees(40.0);
+        public static final Rotation2d MIN_PITCH = Rotation2d.fromDegrees(0.00);
+        public static final Rotation2d HOOD_START_POSITION = Rotation2d.fromDegrees(0.00);
+        public static final Rotation2d HOOD_STOW_POSITION = Rotation2d.fromDegrees(0.00);
 
         public static final double OUTPUT_RANGE_MAX = 1;
         public static final double OUTPUT_RANGE_MIN = -1;
@@ -443,13 +443,8 @@ public class Constants {
 
         public static final InterpolatingDoubleTreeMap HOOD_ANGLE_MAP = new InterpolatingDoubleTreeMap();
         static {
-            HOOD_ANGLE_MAP.put(3.23,14.8);
-            HOOD_ANGLE_MAP.put(4.19,16.8);
-            HOOD_ANGLE_MAP.put(4.72,18.8);
-            HOOD_ANGLE_MAP.put(5.38,19.5);
-            HOOD_ANGLE_MAP.put(4.44,16.7);
-            HOOD_ANGLE_MAP.put(2.71,12.7);
-            HOOD_ANGLE_MAP.put(1.71,10.3);
+            HOOD_ANGLE_MAP.put(0.0,9.0);
+            HOOD_ANGLE_MAP.put(100.0,9.0);
         }
 
         public static final TurretSolver.Config SOLVER_CONFIG = new TurretSolver.Config(
@@ -457,8 +452,7 @@ public class Constants {
             TURRET_TRANSLATION,
             HOOD_ANGLE_MAP,
             Shooter.SHOOTER_VELOCITY_MAP,
-            Shooter.TIME_MAP,
-            1.829
+            Shooter.TIME_MAP
         );
 
     }
@@ -491,21 +485,25 @@ public class Constants {
         public static final InterpolatingDoubleTreeMap TIME_MAP = new InterpolatingDoubleTreeMap();
 
         static {
-            SHOOTER_VELOCITY_MAP.put(3.23,23.0);
-            SHOOTER_VELOCITY_MAP.put(4.19,25.0);
-            SHOOTER_VELOCITY_MAP.put(4.72,26.0);
-            SHOOTER_VELOCITY_MAP.put(5.38,27.0);
-            SHOOTER_VELOCITY_MAP.put(4.44,25.0);
-            SHOOTER_VELOCITY_MAP.put(2.71,21.0);
-            SHOOTER_VELOCITY_MAP.put(1.71,19.0);
+            SHOOTER_VELOCITY_MAP.put(2.65,22.0);
+            SHOOTER_VELOCITY_MAP.put(3.29,24.0);
+            SHOOTER_VELOCITY_MAP.put(3.82,26.0);
+            SHOOTER_VELOCITY_MAP.put(4.14,27.5);
+            SHOOTER_VELOCITY_MAP.put(4.34,28.5);
+            SHOOTER_VELOCITY_MAP.put(4.70,30.0);
+            SHOOTER_VELOCITY_MAP.put(5.14,35.0);
+            SHOOTER_VELOCITY_MAP.put(2.04,19.0);
+            SHOOTER_VELOCITY_MAP.put(1.74,18.0);
 
-            TIME_MAP.put(3.23,1.41);
-            TIME_MAP.put(4.19,1.47);
-            TIME_MAP.put(4.72,1.57);
-            TIME_MAP.put(5.38,1.61);
-            TIME_MAP.put(4.44,1.45);
-            TIME_MAP.put(2.71,1.30);
-            TIME_MAP.put(1.71,1.23);
+            TIME_MAP.put(2.65,1.35);
+            TIME_MAP.put(3.29,1.40);
+            TIME_MAP.put(3.82,1.59);
+            TIME_MAP.put(4.14,1.52);
+            TIME_MAP.put(4.34,1.67);
+            TIME_MAP.put(4.70,1.69);
+            TIME_MAP.put(5.14,2.02);
+            TIME_MAP.put(2.04,1.13);
+            TIME_MAP.put(1.74,1.06);
         }
 
     }

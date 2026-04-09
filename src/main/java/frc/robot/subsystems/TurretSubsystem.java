@@ -21,6 +21,7 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PWM;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -28,6 +29,7 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Configs;
 import frc.robot.Constants;
 import frc.robot.util.turret.TurretSolver;
@@ -274,20 +276,38 @@ public class TurretSubsystem extends SubsystemBase {
     public Command getStowCommand() {
 
 
-
+        final Timer settleTimer = new Timer();
         double stopThreshold = Math.max(1e-3, Math.abs(Constants.Turret.HOOD_FINISH_VELOCITY)); // rad/s
-        double maxSettleTime = Constants.Turret.STOW_PUSH_DOWN_TIME; // seconds, or a separate constant
+        double maxSettleTime = Constants.Turret.HOOD_STABLE_TIME; // seconds, or a separate constant
 
         Command settleDown = Commands.run(
                 () -> pitchServo.setSpeed((Constants.Turret.PITCH_INVERTED ? -1.0 : 1.0) * -Constants.Turret.STOW_PUSH_DOWN_SPEED),
                 this)
             // stop when encoder velocity magnitude <= threshold
-            .until(() -> Math.abs(getHoodVelocity()) <= stopThreshold)
-            // but no longer than maxSettleTime
-            .withTimeout(maxSettleTime)
-            // ensure the servo is stopped when this command completes
-            .andThen(() -> pitchServo.setSpeed(0.0), this);
+            .until(() -> {
+                boolean within = Math.abs(getHoodVelocity()) <= stopThreshold;
 
+                if (within) {
+                    if (!settleTimer.isRunning()) {
+                        settleTimer.reset();
+                        settleTimer.start();
+                    }
+                    //Finish when considered stable
+                    return settleTimer.hasElapsed(maxSettleTime);
+                } else {
+                    settleTimer.stop();
+                    settleTimer.reset();
+                    return false;
+                }
+            }
+            )
+            // ensure the servo is stopped when this command completes
+            .andThen(() -> {
+                pitchServo.setSpeed(0.0);
+                settleTimer.stop();
+                settleTimer.reset();
+            }
+            );
         Command finish = new InstantCommand(() -> {
             pitchServo.setSpeed(0.0);
         });

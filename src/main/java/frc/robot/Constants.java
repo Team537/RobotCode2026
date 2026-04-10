@@ -43,6 +43,8 @@ public class Constants {
 
             public static final double TARGET_TRANSLATION_RADIUS = 2.0;
 
+            public static final double SHOOTING_SPEED_SCALE = 0.5; // Scale factor applied to drive speed while shooting
+
         }
 
         public static class ErrorSettings {

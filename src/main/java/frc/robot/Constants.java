@@ -495,6 +495,10 @@ public class Constants {
             SHOOTER_VELOCITY_MAP.put(2.04,19.0);
             SHOOTER_VELOCITY_MAP.put(1.74,18.0);
 
+            //Additional predicted points
+            SHOOTER_VELOCITY_MAP.put(5.50,40.0);
+            SHOOTER_VELOCITY_MAP.put(0.0,10.0);
+
             TIME_MAP.put(2.65,1.35);
             TIME_MAP.put(3.29,1.40);
             TIME_MAP.put(3.82,1.59);

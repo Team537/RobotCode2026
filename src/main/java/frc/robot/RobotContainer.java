@@ -21,7 +21,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -94,8 +96,6 @@ public class RobotContainer {
     turretSubsystem = new TurretSubsystem();
     shooterSubsystem = new ShooterSubsystem();
     transferSubsystem = new TransferSubsystem();
-
-    shooterSubsystem.setYawPitchSuppliers(() -> turretSubsystem.getAngle(), () -> turretSubsystem.getHoodAngle());
 
     setupSmartDashboard();
     configureBindings();
@@ -197,6 +197,17 @@ public class RobotContainer {
     shooterSubsystem
         .setSpeedMultiplierSupplier(() -> shooterPercent.get() / 100.0);
 
+    Command floatCommand = new ConditionalCommand(
+      Commands.parallel(
+        turretSubsystem.getFloatCommand(),
+        intakePivot.getFloatCommand()
+      )
+        .withTimeout(Constants.Operator.Misc.FLOAT_TIME),
+      Commands.none(),
+      () -> !FieldUtil.isEnabled()
+    ).ignoringDisable(true);
+
+    SmartDashboard.putData("FloatCommand", floatCommand);
     SmartDashboard.putNumber("Auto/StartDelay", Constants.Operator.Auto.DEFAULT_START_DELAY);
     SmartDashboard.putNumber("Auto/PreloadShootTime", Constants.Operator.Auto.DEFAULT_PRELOAD_SHOOT_TIME);
     SmartDashboard.putNumber("Auto/IntakeShootTime", Constants.Operator.Auto.DEFAULT_INTAKE_SHOOT_TIME);
@@ -494,6 +505,165 @@ public class RobotContainer {
 
     };
 
+    // Driver controls
+
+    Trigger stowTrigger = new Trigger(
+        () -> driverController.getBButton() || SwerveUtil.willRobotEnterRegion(driveSubsystem.getPose(),
+            driveSubsystem.getVelocity(), Constants.Field.TRENCH_REGION, Constants.Drive.HOOD_STOW_LOOKAHEAD_TIME));
+    stowTrigger.and(() -> !FieldUtil.isAutonomous()).whileTrue(
+        turretSubsystem.getStowCommand());
+
+    Trigger shootTrigger = new Trigger(() -> driverController.getAButton());
+
+    Trigger intakeTrigger = new Trigger(() -> driverController.getRightBumperButton());
+
+    Trigger reverseTransferTrigger = new Trigger(() -> driverController.getXButton());
+    
+    // Driver X button: hold to lock robot pose (X-lock)
+    Trigger xLockTrigger = new Trigger(() -> driverController.getXButton());
+    xLockTrigger.whileTrue(driveSubsystem.getLockPoseCommand());
+
+    /* Shooter runs while button held */
+    shootTrigger.whileTrue(
+        shooterSubsystem.getTargetCommand(
+            targetingSupplier,
+            driveSubsystem::getPose,
+            driveSubsystem::getVelocity));
+    
+    
+
+    /* Transfer runs ONLY while button AND solver valid */
+    shootTrigger
+        .whileTrue(
+            transferSubsystem.getLoadCommand());
+
+    /* Intake pivot runs while button held */
+    intakeTrigger.whileTrue(
+        intakePivot.deployIntakeCommand());
+
+    /* Intake roller runs while button held */
+    intakeTrigger.whileTrue(
+        intakeRoller.getIntakeCommand());
+
+    /* Stop shooter on button release */
+    shootTrigger.onFalse(
+        Commands.parallel(
+            transferSubsystem.getStopCommand(),
+            shooterSubsystem.getStopCommand()));
+
+    /* Stop intake on button release */
+    intakeTrigger.onFalse(
+        Commands.parallel(
+            intakePivot.raiseIntakeCommand(),
+            intakeRoller.getStopCommand()));
+
+    reverseTransferTrigger.whileTrue(
+       transferSubsystem.getSetPowerCommand(-1)).onFalse(transferSubsystem.getSetPowerCommand(0));
+
+    // =========================
+    // Turret Offset Adjustment (POV Left / Right)
+    // ==============================
+
+    // POV Left (225°–315°) : Decrease turret offset
+    new Trigger(() -> {
+      int pov = operatorController.getPOV();
+      return pov >= 225 && pov <= 315;
+    })
+        .whileTrue(
+            turretOffsetDegrees.getHeldIntervalCommand(-Constants.Operator.ErrorSettings.TURRET_OFFSET_INCREASE,
+                Constants.Operator.ErrorSettings.SETTINGS_DELAY_TIME));
+
+    // POV Right (45°–135°) : Increase turret offset
+    new Trigger(() -> {
+      int pov = operatorController.getPOV();
+      return pov >= 45 && pov <= 135;
+    })
+        .whileTrue(
+            turretOffsetDegrees.getHeldIntervalCommand(Constants.Operator.ErrorSettings.TURRET_OFFSET_INCREASE,
+                Constants.Operator.ErrorSettings.SETTINGS_DELAY_TIME));
+
+    // ==============================
+    // Hood Offset Adjustment (D-Pad Up / D-Pad Down)
+    // ==============================
+
+    // D-Pad Up : Increase hood offset
+    new Trigger(() -> {
+      int pov = operatorController.getPOV();
+      return pov >= 315 || (pov >= 0 && pov <= 45);
+    })
+        .whileTrue(
+            hoodOffsetDegrees.getHeldIntervalCommand(Constants.Operator.ErrorSettings.HOOD_OFFSET_INCREASE,
+                Constants.Operator.ErrorSettings.SETTINGS_DELAY_TIME));
+
+    // D-Pad Down : Decrease hood offset
+    new Trigger(() -> {
+      int pov = operatorController.getPOV();
+      return pov >= 135 && pov <= 225;
+    })
+        .whileTrue(
+            hoodOffsetDegrees.getHeldIntervalCommand(-Constants.Operator.ErrorSettings.HOOD_OFFSET_INCREASE,
+                Constants.Operator.ErrorSettings.SETTINGS_DELAY_TIME));
+
+    // ==============================
+    // Shooter Percent Adjustment (Left Bumper / Right Bumper)
+    // ==============================
+
+    // Left Bumper : Decrease shooter percent
+    new Trigger(() -> {
+      return operatorController.getLeftBumperButton();
+    })
+        .whileTrue(
+            shooterPercent.getHeldIntervalCommand(-Constants.Operator.ErrorSettings.SHOOTER_PERCENT_INCREASE,
+                Constants.Operator.ErrorSettings.SETTINGS_DELAY_TIME));
+
+    // Right Bumper : Increase shooter percent
+    new Trigger(() -> {
+      return operatorController.getRightBumperButton();
+    })
+        .whileTrue(
+            shooterPercent.getHeldIntervalCommand(Constants.Operator.ErrorSettings.SHOOTER_PERCENT_INCREASE,
+                Constants.Operator.ErrorSettings.SETTINGS_DELAY_TIME));
+
+    // ==============================
+    // Turret / Hood Offset Reset (Left Stick Click / Right Stick Click)
+    // ==============================
+
+    // Left Stick Click : Reset turret offset to zero
+    new Trigger(() -> operatorController.getLeftStickButton())
+        .onTrue(new InstantCommand(() -> turretOffsetDegrees.set(0.0)));
+
+    // Right Stick Click : Reset hood offset to zero
+    new Trigger(() -> operatorController.getRightStickButton())
+        .onTrue(new InstantCommand(() -> hoodOffsetDegrees.set(0.0)));
+
+    // ==============================
+    // Shooter Percent Reset (Left Trigger / Right Trigger)
+    // ==============================
+
+    // Either Trigger : Reset shooter percent to default
+    new Trigger(() -> operatorController.getLeftTriggerAxis() > 0.5
+        || operatorController.getRightTriggerAxis() > 0.5)
+        .onTrue(new InstantCommand(() -> shooterPercent.set(Constants.Operator.ErrorSettings.SHOOTER_PERCENT_DEFAULT)));
+    new Trigger(
+        () -> operatorController.getAButton()).onTrue(
+            new InstantCommand(() -> selectedFixedTarget = FixedTarget.A));
+
+    new Trigger(
+        () -> operatorController.getBButton()).onTrue(
+            new InstantCommand(() -> selectedFixedTarget = FixedTarget.B));
+
+    new Trigger(
+        () -> operatorController.getXButton()).onTrue(
+            new InstantCommand(() -> xHeld = true))
+        .onFalse(
+            new InstantCommand(() -> xHeld = false));
+
+    // new Trigger(
+    //     () -> operatorController.getYButton()).onTrue(
+    //         new InstantCommand(() -> yHeld = true))
+    //     .onFalse(
+    //         new InstantCommand(() -> yHeld = false));
+
   }
 
   public void scheduleTeleOp() {
@@ -511,7 +681,7 @@ public class RobotContainer {
         Constants.Operator.Drive.THROTTLE_TRANSLATION_MAX_SPEED,
         Constants.Operator.Drive.SLOW_TRANSLATION_MAX_SPEED,
         FieldUtil.getAlliance().orElse(Alliance.BLUE).driverRotation,
-        Rotation2d.kPi);
+        Rotation2d.kZero);
 
     // Setup the rotational directive for drive subsystem
     RotationDirective manualRotationVelocityDirective = new ManualRotationVelocityDirective(
@@ -548,6 +718,8 @@ public class RobotContainer {
             shooterSubsystem,
             turretSubsystem,
             transferSubsystem,
+            intakePivot,
+            intakeRoller,
             () -> FieldUtil.flipIfRed(Constants.Field.BLUE_HUB_TRANSLATION),
             driveSubsystem::getPose,
             driveSubsystem::getVelocity,
@@ -581,8 +753,8 @@ public class RobotContainer {
             turretSubsystem,
             transferSubsystem,
             () -> FieldUtil.flipIfRed(Constants.Field.BLUE_HUB_TRANSLATION),
-            Constants.Operator.Auto.DEPOT_READY_INTAKE_POSE,
-            Constants.Operator.Auto.DEPOT_INTAKE_POSE,
+            FieldUtil.flipIfRed(Constants.Operator.Auto.DEPOT_READY_INTAKE_POSE),
+            FieldUtil.flipIfRed(Constants.Operator.Auto.DEPOT_INTAKE_POSE),
             false,
             Constants.Operator.Auto.AUTO_INTAKE_MAX_SPEED,
             SmartDashboard.getNumber("Auto/IntakeShootTime", Constants.Operator.Auto.DEFAULT_INTAKE_SHOOT_TIME));
@@ -596,8 +768,8 @@ public class RobotContainer {
             turretSubsystem,
             transferSubsystem,
             () -> FieldUtil.flipIfRed(Constants.Field.BLUE_HUB_TRANSLATION),
-            Constants.Operator.Auto.OUTPOST_READY_INTAKE_POSE,
-            Constants.Operator.Auto.OUTPOST_INTAKE_POSE,
+            FieldUtil.flipIfRed(Constants.Operator.Auto.OUTPOST_READY_INTAKE_POSE),
+            FieldUtil.flipIfRed(Constants.Operator.Auto.OUTPOST_INTAKE_POSE),
             false,
             Constants.Operator.Auto.AUTO_INTAKE_MAX_SPEED,
             SmartDashboard.getNumber("Auto/IntakeShootTime", Constants.Operator.Auto.DEFAULT_INTAKE_SHOOT_TIME));
@@ -656,6 +828,16 @@ public class RobotContainer {
             .map(FieldUtil::flipIfRed)
             .toList());
 
+      case RAM_SS_L:
+        return new DriveToSequenceCommand(driveSubsystem, Constants.Operator.Auto.RAM_SS_LEFT_SEQUENCE.stream()
+            .map(FieldUtil::flipIfRed)
+            .toList());
+
+      case RAM_SS_R:
+        return new DriveToSequenceCommand(driveSubsystem, Constants.Operator.Auto.RAM_SS_RIGHT_SEQUENCE.stream()
+            .map(FieldUtil::flipIfRed)
+            .toList());
+
       case CUSTOM:
 
         Pose2d ready = getDashboardPose("Auto/CustomReadyPose");
@@ -678,6 +860,14 @@ public class RobotContainer {
             Constants.Operator.Auto.AUTO_INTAKE_MAX_SPEED,
             SmartDashboard.getNumber("Auto/IntakeShootTime", Constants.Operator.Auto.DEFAULT_INTAKE_SHOOT_TIME));
 
+      case B_N_F_R:
+        return new DriveToSequenceCommand(driveSubsystem, Constants.Operator.Auto.BACK_N_FORTH_RIGHT_SEQUENCE.stream()
+              .map(FieldUtil::flipIfRed)
+              .toList());
+      case B_N_F_L:
+        return new DriveToSequenceCommand(driveSubsystem, Constants.Operator.Auto.BACK_N_FORTH_LEFT_SEQUENCE.stream()
+              .map(FieldUtil::flipIfRed)
+              .toList());
       default:
         return Commands.none();
     }

@@ -274,10 +274,18 @@ public class TurretSubsystem extends SubsystemBase {
 
     public Command getStowCommand() {
 
-
         final Timer settleTimer = new Timer();
         double stopThreshold = Math.max(1e-3, Math.abs(Constants.Turret.HOOD_FINISH_VELOCITY)); // rad/s
         double maxSettleTime = Constants.Turret.HOOD_STABLE_TIME; // seconds, or a separate constant
+
+        Command moveToStow = Commands.run(
+                () -> setHoodAngle(Constants.Turret.HOOD_STOW_POSITION),
+                this)
+                .until(() -> Math.abs(
+                        getHoodAngle()
+                                .minus(Constants.Turret.HOOD_STOW_POSITION)
+                                .getRadians()) < Constants.Turret.HOOD_TOLERANCE.getRadians())
+                .finallyDo(interrupted -> stopHoodServo());
 
         Command settleDown = Commands.run(
                 () -> pitchServo.setSpeed((Constants.Turret.PITCH_INVERTED ? -1.0 : 1.0) * -Constants.Turret.STOW_PUSH_DOWN_SPEED),
@@ -311,7 +319,7 @@ public class TurretSubsystem extends SubsystemBase {
             pitchServo.setSpeed(0.0);
         });
 
-        return Commands.sequence(settleDown, finish, Commands.idle())
+        return Commands.sequence(moveToStow, settleDown, finish, Commands.idle())
                 .withName("StowHood");
     }
 

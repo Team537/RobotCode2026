@@ -172,7 +172,7 @@ public class Configs {
 
         FEEDER_CONFIG
             .MotorOutput
-                .NeutralMode = NeutralModeValue.Brake;
+                .NeutralMode = NeutralModeValue.Coast;
 
     }
 

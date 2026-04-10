@@ -126,29 +126,54 @@ public class Configs {
         }
     }
 
-    public static final TalonFXConfiguration TRANSFER_CONFIG = new TalonFXConfiguration();
+    public static final TalonFXConfiguration KICKER_CONFIG = new TalonFXConfiguration();
 
     static {
 
-        TRANSFER_CONFIG
+        KICKER_CONFIG
             .CurrentLimits
                 .SupplyCurrentLimit = Constants.Transfer.CURRENT_LIMIT;
         
-        TRANSFER_CONFIG
+        KICKER_CONFIG
             .CurrentLimits
                 .SupplyCurrentLowerLimit = Constants.Transfer.CURRENT_LOWER_LIMIT;
 
-        TRANSFER_CONFIG
+        KICKER_CONFIG
             .CurrentLimits
                 .SupplyCurrentLowerTime = Constants.Transfer.CURRENT_LOWER_TIME;
 
-        TRANSFER_CONFIG
+        KICKER_CONFIG
             .MotorOutput
-                .Inverted = Constants.Transfer.MOTOR_INVERTED ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
+                .Inverted = Constants.Transfer.KICKER_INVERTED ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
         
-        TRANSFER_CONFIG
+        KICKER_CONFIG
             .MotorOutput
                 .NeutralMode = NeutralModeValue.Brake;
+    }
+
+    public static final TalonFXConfiguration FEEDER_CONFIG = new TalonFXConfiguration();
+
+    static {
+        FEEDER_CONFIG
+            .CurrentLimits
+                .SupplyCurrentLimit = Constants.Transfer.CURRENT_LIMIT;
+
+        FEEDER_CONFIG
+            .CurrentLimits
+                .SupplyCurrentLimit = Constants.Transfer.CURRENT_LOWER_LIMIT;
+
+        FEEDER_CONFIG
+            .CurrentLimits
+                .SupplyCurrentLimit = Constants.Transfer.CURRENT_LOWER_TIME;
+
+        FEEDER_CONFIG
+            .MotorOutput
+                .Inverted = Constants.Transfer.FEEDER_INVERTED ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
+
+        FEEDER_CONFIG
+            .MotorOutput
+                .NeutralMode = NeutralModeValue.Brake;
+
     }
 
     public static class Intake {

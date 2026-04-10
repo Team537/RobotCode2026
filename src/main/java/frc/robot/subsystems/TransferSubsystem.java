@@ -31,7 +31,8 @@ public class TransferSubsystem extends SubsystemBase {
     // --------------------------------------------------------------------
 
     /** Motor driving the transfer mechanism. */   
-    private final TalonFX transferMotor;
+    private final TalonFX kickerMotor;
+    private final TalonFX feederMotor;
 
     // --------------------------------------------------------------------
     // Construction / Configuration
@@ -41,8 +42,11 @@ public class TransferSubsystem extends SubsystemBase {
      * Creates and configures the transfer subsystem.
      */
     public TransferSubsystem() {
-        transferMotor = new TalonFX(Constants.Transfer.TRANSFER_MOTOR_ID, Constants.CANIVORE_LOOP_NAME);
-        transferMotor.getConfigurator().apply(Configs.TRANSFER_CONFIG);
+        kickerMotor = new TalonFX(Constants.Transfer.TRANSFER_KICKER_ID, Constants.CANIVORE_LOOP_NAME);
+        kickerMotor.getConfigurator().apply(Configs.KICKER_CONFIG);
+
+        feederMotor = new TalonFX(Constants.Transfer.TRANSFER_FEEDER_ID, Constants.CANIVORE_LOOP_NAME);
+        feederMotor.getConfigurator().apply(Configs.FEEDER_CONFIG);
     }
 
     // --------------------------------------------------------------------
@@ -55,7 +59,11 @@ public class TransferSubsystem extends SubsystemBase {
      * @param power desired power
      */
     public void setPower(double power) {
-        transferMotor.set(power);
+        kickerMotor.set(power);
+    }
+
+    public void setFeederPower(double power) {
+        feederMotor.set(power);
     }
 
     // --------------------------------------------------------------------
@@ -73,22 +81,32 @@ public class TransferSubsystem extends SubsystemBase {
      */
     public Command getSetPowerCommand(double power) {
         return new InstantCommand(
-            () -> setPower(power),
-            this
+            () -> {
+                setPower(power);
+                setFeederPower(power);
+            }
         );
     }
-
     /**
      * @return a command that runs the transfer at the load speed
      */
     public Command getLoadCommand() {
-        return getSetPowerCommand(Constants.Transfer.LOAD_POWER).withName("TransferLoad");
+        return getSetPowerCommand(Constants.Transfer.KICKER_LOAD_POWER).withName("TransferLoad");
+    }
+
+    public Command getFeederLoadCommand() {
+        return getSetPowerCommand(Constants.Transfer.FEEDER_LOAD_POWER).withName("FeederLoad");
     }
 
     /**
      * @return a command that stops the transfer motor
      */
     public Command getStopCommand() {
-        return new InstantCommand(() -> transferMotor.stopMotor());
+        return new InstantCommand(
+            () -> {
+                setPower(0.0);
+                setFeederPower(0.0);
+            }
+        );
     }
 }

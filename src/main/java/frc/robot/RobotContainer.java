@@ -297,10 +297,11 @@ public class RobotContainer {
     
 
     /* Transfer runs ONLY while button AND solver valid */
-    shootTrigger
-        .whileTrue(
-            transferSubsystem.getLoadCommand());
-
+    shootTrigger.whileTrue(
+        Commands.parallel(
+            transferSubsystem.getLoadCommand(),
+            transferSubsystem.getFeederLoadCommand()));
+      
     /* Intake pivot runs while button held */
     intakeTrigger.whileTrue(
         intakePivot.deployIntakeCommand());

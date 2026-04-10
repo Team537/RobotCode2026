@@ -532,7 +532,7 @@ public class RobotContainer {
         Constants.Operator.Drive.THROTTLE_TRANSLATION_MAX_SPEED,
         Constants.Operator.Drive.SLOW_TRANSLATION_MAX_SPEED,
         FieldUtil.getAlliance().orElse(Alliance.BLUE).driverRotation,
-        Rotation2d.kPi);
+        Rotation2d.kZero);
 
     // Setup the rotational directive for drive subsystem
     RotationDirective manualRotationVelocityDirective = new ManualRotationVelocityDirective(

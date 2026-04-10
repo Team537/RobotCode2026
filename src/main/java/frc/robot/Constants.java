@@ -485,7 +485,7 @@ public class Constants {
 
         public static final double TOLERANCE = 0.1; // Meters per second
 
-        public static final boolean MOTOR_INVERTED = false;
+        public static final boolean MOTOR_INVERTED = true;
 
         public static final InterpolatingDoubleTreeMap SHOOTER_VELOCITY_MAP = new InterpolatingDoubleTreeMap();
         public static final InterpolatingDoubleTreeMap TIME_MAP = new InterpolatingDoubleTreeMap();

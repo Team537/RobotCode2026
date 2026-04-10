@@ -45,7 +45,7 @@ public class TransferSubsystem extends SubsystemBase {
         kickerMotor = new TalonFX(Constants.Transfer.TRANSFER_KICKER_ID, Constants.CANIVORE_LOOP_NAME);
         kickerMotor.getConfigurator().apply(Configs.KICKER_CONFIG);
 
-        feederMotor = new TalonFX(Constants.Transfer.TRANSFER_FEEDER_ID, Constants.CANIVORE_LOOP_NAME);
+        feederMotor = new TalonFX(Constants.Transfer.TRANSFER_FEEDER_ID);
         feederMotor.getConfigurator().apply(Configs.FEEDER_CONFIG);
     }
 

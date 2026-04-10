@@ -308,6 +308,7 @@ public class TurretSubsystem extends SubsystemBase {
             );
         Command finish = new InstantCommand(() -> {
             pitchServo.setSpeed(0.0);
+            resetHoodAngle(Constants.Turret.HOOD_START_POSITION);
         });
 
         return Commands.sequence(settleDown, finish, Commands.idle())

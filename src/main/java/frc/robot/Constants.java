@@ -388,9 +388,8 @@ public class Constants {
         public static final boolean PITCH_INVERTED = true;
 
         public static final Rotation2d MAX_PITCH = Rotation2d.fromDegrees(45.0);
-        public static final Rotation2d MIN_PITCH = Rotation2d.fromDegrees(3.00);
+        public static final Rotation2d MIN_PITCH = Rotation2d.fromDegrees(5.00);
         public static final Rotation2d HOOD_START_POSITION = Rotation2d.fromDegrees(5.00);
-        public static final Rotation2d HOOD_STOW_POSITION = Rotation2d.fromDegrees(3.00);
 
         public static final double HOOD_STABLE_TIME = 0.1;
         public static final double HOOD_STABLE = 5;

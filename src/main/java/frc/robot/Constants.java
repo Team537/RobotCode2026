@@ -394,7 +394,7 @@ public class Constants {
         public static final double HOOD_STABLE_TIME = 0.1;
         public static final double HOOD_STABLE = 5;
 
-        public static final double HOOD_FINISH_VELOCITY = 0.0;
+        public static final double HOOD_FINISH_VELOCITY = 0.01;
 
         public static final double OUTPUT_RANGE_MAX = 1;
         public static final double OUTPUT_RANGE_MIN = -1;

@@ -276,7 +276,7 @@ public class TurretSubsystem extends SubsystemBase {
 
         final Timer settleTimer = new Timer();
         double stopThreshold = Math.max(1e-3, Math.abs(Constants.Turret.HOOD_FINISH_VELOCITY)); // rad/s
-        double maxSettleTime = Constants.Turret.HOOD_STABLE_TIME; // seconds, or a separate constant
+        double stableTime = Constants.Turret.HOOD_STABLE_TIME; // seconds, or a separate constant
 
         Command settleDown = Commands.run(
                 () -> pitchServo.setSpeed((Constants.Turret.PITCH_INVERTED ? -1.0 : 1.0) * -Constants.Turret.STOW_PUSH_DOWN_SPEED),
@@ -291,7 +291,7 @@ public class TurretSubsystem extends SubsystemBase {
                         settleTimer.start();
                     }
                     //Finish when considered stable
-                    return settleTimer.hasElapsed(maxSettleTime);
+                    return settleTimer.hasElapsed(stableTime);
                 } else {
                     settleTimer.stop();
                     settleTimer.reset();

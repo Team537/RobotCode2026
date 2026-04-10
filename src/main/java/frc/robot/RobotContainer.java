@@ -269,6 +269,93 @@ public class RobotContainer {
 
   public void configureBindings() {
 
+    targetingSupplier = () -> {
+      Translation2d robotPosition = driveSubsystem.getPose().getTranslation();
+
+      // 1 - Alliance hub targeting
+      Optional<Alliance> alliance = FieldUtil.getAlliance();
+      if (alliance.isPresent()) {
+        if (FieldUtil.flipIfRed(Constants.Field.BLUE_ALLIANCE_ZONE).contains(robotPosition)) {
+          return FieldUtil.flipIfRed(Constants.Field.BLUE_HUB_TRANSLATION);
+        }
+      }
+
+      // 2 - Vision robot targeting
+      if (xHeld || yHeld) {
+        String targetKey = xHeld ? "X" : "Y";
+        String basePath = "Targeting/RobotTargets/" + targetKey + "/";
+
+        // Parse team number from string safely
+        int teamNumber;
+        try {
+          teamNumber = Integer.parseInt(SmartDashboard.getString(basePath + "TeamNumber", "-1"));
+        } catch (NumberFormatException e) {
+          teamNumber = -1;
+        }
+
+        // Get the robot using the alliance if possible. We will never want to target a
+        // robot of the opposing alliance.
+        Optional<RobotDetection> detectedRobot;
+        if (alliance.isPresent()) {
+          detectedRobot = raycast.getRobot(teamNumber, alliance.get(), 1);
+        } else {
+          detectedRobot = raycast.getRobot(teamNumber, 1);
+        }
+
+        if (teamNumber > 0) {
+          detectedRobot = Optional.empty();
+        }
+
+        // Fallback info
+        boolean useFallback = SmartDashboard.getBoolean(basePath + "UseFallback", false);
+        double fallbackX = SmartDashboard.getNumber(basePath + "FallbackX", 0.0);
+        double fallbackY = SmartDashboard.getNumber(basePath + "FallbackY", 0.0);
+        double targetHeight = SmartDashboard.getNumber(basePath + "TargetHeight", 0.25);
+
+        if (detectedRobot.isPresent()) {
+          return detectedRobot.get().getPoseTranslation3d();
+        } else if (useFallback) {
+          Translation3d fallbackTarget = new Translation3d(fallbackX, fallbackY, targetHeight);
+          return FieldUtil.flipIfRed(fallbackTarget);
+        }
+      }
+
+      // 3 - Fixed target fallback (A/B)
+      switch (selectedFixedTarget) {
+
+        case A: {
+          String basePath = "Targeting/FixedTargets/A/";
+
+          double x = SmartDashboard.getNumber(basePath + "X", 0.0);
+          double y = SmartDashboard.getNumber(basePath + "Y", 0.0);
+          double z = SmartDashboard.getNumber(basePath + "Z", 0.0);
+          return FieldUtil.flipIfRed(new Translation3d(x, y, z));
+        }
+
+        case B: {
+          String basePath = "Targeting/FixedTargets/B/";
+
+          double x = SmartDashboard.getNumber(basePath + "X", 0.0);
+          double y = SmartDashboard.getNumber(basePath + "Y", 0.0);
+          double z = SmartDashboard.getNumber(basePath + "Z", 0.0);
+
+          return FieldUtil.flipIfRed(new Translation3d(x, y, z));
+        }
+
+        default: {
+          // Default safely to A if somehow null
+          String basePath = "Targeting/FixedTargets/A/";
+
+          double x = SmartDashboard.getNumber(basePath + "X", 0.0);
+          double y = SmartDashboard.getNumber(basePath + "Y", 0.0);
+          double z = SmartDashboard.getNumber(basePath + "Z", 0.0);
+
+          return FieldUtil.flipIfRed(new Translation3d(x, y, z));
+        }
+      }
+
+    };
+
     // Driver controls
 
     Trigger stowTrigger = new Trigger(
@@ -427,93 +514,6 @@ public class RobotContainer {
     //         new InstantCommand(() -> yHeld = true))
     //     .onFalse(
     //         new InstantCommand(() -> yHeld = false));
-
-    targetingSupplier = () -> {
-      Translation2d robotPosition = driveSubsystem.getPose().getTranslation();
-
-      // 1 - Alliance hub targeting
-      Optional<Alliance> alliance = FieldUtil.getAlliance();
-      if (alliance.isPresent()) {
-        if (FieldUtil.flipIfRed(Constants.Field.BLUE_ALLIANCE_ZONE).contains(robotPosition)) {
-          return FieldUtil.flipIfRed(Constants.Field.BLUE_HUB_TRANSLATION);
-        }
-      }
-
-      // 2 - Vision robot targeting
-      if (xHeld || yHeld) {
-        String targetKey = xHeld ? "X" : "Y";
-        String basePath = "Targeting/RobotTargets/" + targetKey + "/";
-
-        // Parse team number from string safely
-        int teamNumber;
-        try {
-          teamNumber = Integer.parseInt(SmartDashboard.getString(basePath + "TeamNumber", "-1"));
-        } catch (NumberFormatException e) {
-          teamNumber = -1;
-        }
-
-        // Get the robot using the alliance if possible. We will never want to target a
-        // robot of the opposing alliance.
-        Optional<RobotDetection> detectedRobot;
-        if (alliance.isPresent()) {
-          detectedRobot = raycast.getRobot(teamNumber, alliance.get(), 1);
-        } else {
-          detectedRobot = raycast.getRobot(teamNumber, 1);
-        }
-
-        if (teamNumber > 0) {
-          detectedRobot = Optional.empty();
-        }
-
-        // Fallback info
-        boolean useFallback = SmartDashboard.getBoolean(basePath + "UseFallback", false);
-        double fallbackX = SmartDashboard.getNumber(basePath + "FallbackX", 0.0);
-        double fallbackY = SmartDashboard.getNumber(basePath + "FallbackY", 0.0);
-        double targetHeight = SmartDashboard.getNumber(basePath + "TargetHeight", 0.25);
-
-        if (detectedRobot.isPresent()) {
-          return detectedRobot.get().getPoseTranslation3d();
-        } else if (useFallback) {
-          Translation3d fallbackTarget = new Translation3d(fallbackX, fallbackY, targetHeight);
-          return FieldUtil.flipIfRed(fallbackTarget);
-        }
-      }
-
-      // 3 - Fixed target fallback (A/B)
-      switch (selectedFixedTarget) {
-
-        case A: {
-          String basePath = "Targeting/FixedTargets/A/";
-
-          double x = SmartDashboard.getNumber(basePath + "X", 0.0);
-          double y = SmartDashboard.getNumber(basePath + "Y", 0.0);
-          double z = SmartDashboard.getNumber(basePath + "Z", 0.0);
-          return FieldUtil.flipIfRed(new Translation3d(x, y, z));
-        }
-
-        case B: {
-          String basePath = "Targeting/FixedTargets/B/";
-
-          double x = SmartDashboard.getNumber(basePath + "X", 0.0);
-          double y = SmartDashboard.getNumber(basePath + "Y", 0.0);
-          double z = SmartDashboard.getNumber(basePath + "Z", 0.0);
-
-          return FieldUtil.flipIfRed(new Translation3d(x, y, z));
-        }
-
-        default: {
-          // Default safely to A if somehow null
-          String basePath = "Targeting/FixedTargets/A/";
-
-          double x = SmartDashboard.getNumber(basePath + "X", 0.0);
-          double y = SmartDashboard.getNumber(basePath + "Y", 0.0);
-          double z = SmartDashboard.getNumber(basePath + "Z", 0.0);
-
-          return FieldUtil.flipIfRed(new Translation3d(x, y, z));
-        }
-      }
-
-    };
 
   }
 

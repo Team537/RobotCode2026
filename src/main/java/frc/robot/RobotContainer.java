@@ -517,19 +517,6 @@ public class RobotContainer {
     new Trigger(() -> operatorController.getLeftTriggerAxis() > 0.5
         || operatorController.getRightTriggerAxis() > 0.5)
         .onTrue(new InstantCommand(() -> shooterPercent.set(Constants.Operator.ErrorSettings.SHOOTER_PERCENT_DEFAULT)));
-    new Trigger(
-        () -> operatorController.getAButton()).onTrue(
-            new InstantCommand(() -> selectedFixedTarget = FixedTarget.A));
-
-    new Trigger(
-        () -> operatorController.getBButton()).onTrue(
-            new InstantCommand(() -> selectedFixedTarget = FixedTarget.B));
-
-    new Trigger(
-        () -> operatorController.getXButton()).onTrue(
-            new InstantCommand(() -> xHeld = true))
-        .onFalse(
-            new InstantCommand(() -> xHeld = false));
 
   }
 

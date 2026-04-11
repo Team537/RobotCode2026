@@ -30,7 +30,7 @@ public class TransferSubsystem extends SubsystemBase {
     // Hardware
     // --------------------------------------------------------------------
 
-    /** Motor driving the transfer mechanism. */   
+    /** Motors driving the transfer mechanism (kicker and feeder). */
     private final TalonFX kickerMotor;
     private final TalonFX feederMotor;
 
@@ -54,14 +54,19 @@ public class TransferSubsystem extends SubsystemBase {
     // --------------------------------------------------------------------
 
     /**
-     * Commands the transfer motor to a target power.
+     * Commands the kicker motor to a target power.
      *
-     * @param power desired power
+     * @param power desired kicker motor power
      */
     public void setKickerPower(double power) {
         kickerMotor.set(power);
     }
 
+    /**
+     * Commands the feeder motor to a target power.
+     *
+     * @param power desired feeder motor power
+     */
     public void setFeederPower(double power) {
         feederMotor.set(power);
     }
@@ -73,18 +78,20 @@ public class TransferSubsystem extends SubsystemBase {
     /**
      * Creates a command that immediately sets the transfer power.
      *
-     * <p>This command finishes instantly and leaves the motor
-     * running at the requested speed.</p>
+     * <p>This command finishes instantly and leaves the motors
+     * running at the requested speeds.</p>
      *
-     * @param power desired transfer power
-     * @return an instant command that sets motor power
+     * @param kickerPower desired kicker motor power
+     * @param feederPower desired feeder motor power
+     * @return an instant command that sets both motor powers
      */
     public Command getPowerCommand(double kickerPower, double feederPower) {
         return new InstantCommand(
             () -> {
                 setKickerPower(kickerPower);
                 setFeederPower(feederPower);
-            }
+            },
+            this
         );
     }
 
@@ -93,7 +100,8 @@ public class TransferSubsystem extends SubsystemBase {
             () -> {
                 setKickerPower(Constants.Transfer.KICKER_LOAD_POWER);
                 setFeederPower(Constants.Transfer.FEEDER_LOAD_POWER);
-            }
+            },
+            this
         );
     }
 
@@ -105,7 +113,8 @@ public class TransferSubsystem extends SubsystemBase {
             () -> {
                 kickerMotor.stopMotor();
                 feederMotor.stopMotor();
-            }
+            },
+            this
         );
     }
 }

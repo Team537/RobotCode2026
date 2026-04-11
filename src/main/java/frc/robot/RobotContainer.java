@@ -366,7 +366,7 @@ public class RobotContainer {
 
     Trigger intakeTrigger = new Trigger(() -> driverController.getRightBumperButton());
 
-    Trigger reverseTransferTrigger = new Trigger(() -> driverController.getXButton());
+    Trigger reverseTransferTrigger = new Trigger(() -> driverController.getYButton());
 
     // Driver X button: hold to lock robot pose (X-lock)
     Trigger xLockTrigger = new Trigger(() -> driverController.getXButton());

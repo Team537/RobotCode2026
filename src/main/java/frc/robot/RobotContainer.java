@@ -504,12 +504,6 @@ public class RobotContainer {
         .onFalse(
             new InstantCommand(() -> xHeld = false));
 
-    // new Trigger(
-    // () -> operatorController.getYButton()).onTrue(
-    // new InstantCommand(() -> yHeld = true))
-    // .onFalse(
-    // new InstantCommand(() -> yHeld = false));
-
   }
 
   public void scheduleTeleOp() {

@@ -269,135 +269,6 @@ public class RobotContainer {
 
   public void configureBindings() {
 
-    // Driver controls
-
-    Trigger stowTrigger = new Trigger(
-        () -> driverController.getBButton() || SwerveUtil.willRobotEnterRegion(driveSubsystem.getPose(),
-            driveSubsystem.getVelocity(), Constants.Field.TRENCH_REGION, Constants.Drive.HOOD_STOW_LOOKAHEAD_TIME));
-    stowTrigger.and(() -> !FieldUtil.isAutonomous()).whileTrue(
-        turretSubsystem.getStowCommand());
-
-    Trigger shootTrigger = new Trigger(() -> driverController.getAButton());
-
-    // Limit drive speed to 50% while the shooting button is held
-    driveSubsystem.setSpeedScaleSupplier(() -> driverController.getAButton() ? Constants.Operator.Drive.SHOOTING_SPEED_SCALE : 1.0);
-
-    Trigger intakeTrigger = new Trigger(() -> driverController.getRightBumperButton());
-
-    Trigger solverValid = new Trigger(() -> TurretSolver.solve(driveSubsystem.getPose(), driveSubsystem.getVelocity(),
-        targetingSupplier.get(), Constants.Turret.SOLVER_CONFIG).isValid());
-
-    solverValid.onTrue(
-        Commands.runOnce(() -> SmartDashboard.putBoolean("Turret/SolverValid", true)).ignoringDisable(true)).onFalse(
-            Commands.runOnce(() -> SmartDashboard.putBoolean("Turret/SolverValid", false)).ignoringDisable(true));
-
-    /* Shooter runs while button held */
-    shootTrigger.whileTrue(
-        shooterSubsystem.getTargetCommand(
-            targetingSupplier,
-            driveSubsystem::getPose,
-            driveSubsystem::getVelocity));
-
-    shootTrigger.whileTrue(
-      turretSubsystem.getTargetCommand(
-        targetingSupplier,
-        driveSubsystem::getPose,
-        driveSubsystem::getVelocity
-      )
-    );
-    
-    /* Transfer runs ONLY while button AND solver valid */
-    shootTrigger
-        .whileTrue(
-          new WaitCommand(Constants.Transfer.LOAD_DELAY).andThen(
-            transferSubsystem.getLoadCommand()
-          ));
-
-
-    /* Intake pivot runs while button held */
-    intakeTrigger.whileTrue(
-        intakePivot.deployIntakeCommand());
-
-    /* Intake roller runs while button held */
-    intakeTrigger.whileTrue(
-        intakeRoller.getIntakeCommand());
-
-    /* Stop shooter on button release */
-    shootTrigger.onFalse(
-        Commands.parallel(
-            transferSubsystem.getStopCommand(),
-            shooterSubsystem.getStopCommand()));
-
-    /* Stop intake on button release */
-    intakeTrigger.onFalse(
-        Commands.parallel(
-            intakePivot.raiseIntakeCommand(),
-            intakeRoller.getStopCommand()));
-
-    // ==============================
-    // Turret Offset Adjustment (POV Left / Right)
-    // ==============================
-
-    // POV Left (225°–315°) : Decrease turret offset
-    new Trigger(() -> {
-      int pov = operatorController.getPOV();
-      return pov >= 225 && pov <= 315;
-    })
-        .whileTrue(
-            turretOffsetDegrees.getHeldIntervalCommand(-Constants.Operator.ErrorSettings.TURRET_OFFSET_INCREASE,
-                Constants.Operator.ErrorSettings.SETTINGS_DELAY_TIME));
-
-    // POV Right (45°–135°) : Increase turret offset
-    new Trigger(() -> {
-      int pov = operatorController.getPOV();
-      return pov >= 45 && pov <= 135;
-    })
-        .whileTrue(
-            turretOffsetDegrees.getHeldIntervalCommand(Constants.Operator.ErrorSettings.TURRET_OFFSET_INCREASE,
-                Constants.Operator.ErrorSettings.SETTINGS_DELAY_TIME));
-
-    // ==============================
-    // Hood Offset Adjustment (D-Pad Up / D-Pad Down)
-    // ==============================
-
-    // D-Pad Up : Increase hood offset
-    new Trigger(() -> {
-      int pov = operatorController.getPOV();
-      return pov >= 315 || (pov >= 0 && pov <= 45);
-    })
-        .whileTrue(
-            hoodOffsetDegrees.getHeldIntervalCommand(Constants.Operator.ErrorSettings.HOOD_OFFSET_INCREASE,
-                Constants.Operator.ErrorSettings.SETTINGS_DELAY_TIME));
-
-    // D-Pad Down : Decrease hood offset
-    new Trigger(() -> {
-      int pov = operatorController.getPOV();
-      return pov >= 135 && pov <= 225;
-    })
-        .whileTrue(
-            hoodOffsetDegrees.getHeldIntervalCommand(-Constants.Operator.ErrorSettings.HOOD_OFFSET_INCREASE,
-                Constants.Operator.ErrorSettings.SETTINGS_DELAY_TIME));
-
-    // ==============================
-    // Shooter Percent Adjustment (Left Bumper / Right Bumper)
-    // ==============================
-
-    // Left Bumper : Decrease shooter percent
-    new Trigger(() -> {
-      return operatorController.getLeftBumperButton();
-    })
-        .whileTrue(
-            shooterPercent.getHeldIntervalCommand(-Constants.Operator.ErrorSettings.SHOOTER_PERCENT_INCREASE,
-                Constants.Operator.ErrorSettings.SETTINGS_DELAY_TIME));
-
-    // Right Bumper : Increase shooter percent
-    new Trigger(() -> {
-      return operatorController.getRightBumperButton();
-    })
-        .whileTrue(
-            shooterPercent.getHeldIntervalCommand(Constants.Operator.ErrorSettings.SHOOTER_PERCENT_INCREASE,
-                Constants.Operator.ErrorSettings.SETTINGS_DELAY_TIME));
-
     new Trigger(
         () -> operatorController.getAButton()).onTrue(
             new InstantCommand(() -> selectedFixedTarget = FixedTarget.A));
@@ -526,6 +397,13 @@ public class RobotContainer {
     /* Shooter runs while button held */
     shootTrigger.whileTrue(
         shooterSubsystem.getTargetCommand(
+            targetingSupplier,
+            driveSubsystem::getPose,
+            driveSubsystem::getVelocity));
+
+    /* Turret runs while button held */
+    shootTrigger.whileTrue(
+        turretSubsystem.getTargetCommand(
             targetingSupplier,
             driveSubsystem::getPose,
             driveSubsystem::getVelocity));

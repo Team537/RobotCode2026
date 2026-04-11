@@ -346,7 +346,10 @@ public class TurretSubsystem extends SubsystemBase {
         double stableTime = Constants.Turret.HOOD_STABLE_TIME; // seconds, or a separate constant
 
         Command settleDown = Commands.run(
-                () -> pitchServo.setSpeed((Constants.Turret.PITCH_INVERTED ? -1.0 : 1.0) * -Constants.Turret.STOW_PUSH_DOWN_SPEED),
+                () -> {
+                    pitchServo.setSpeed((Constants.Turret.PITCH_INVERTED ? -1.0 : 1.0) * -Constants.Turret.STOW_PUSH_DOWN_SPEED);
+                    SmartDashboard.putBoolean("Hood Pushing", true);
+                },
                 this)
             // stop when encoder velocity magnitude <= threshold
             .until(() -> {
@@ -365,6 +368,8 @@ public class TurretSubsystem extends SubsystemBase {
                     return false;
                 }
             }
+            ).until(
+                () -> getHoodAngle().getRadians() < Constants.Turret.HOOD_FAR_ANGLE.getRadians()
             )
             // ensure the servo is stopped when this command completes
             .andThen(() -> {
@@ -374,6 +379,7 @@ public class TurretSubsystem extends SubsystemBase {
             }
             );
         Command finish = new InstantCommand(() -> {
+            SmartDashboard.putBoolean("Hood Pushing", false);
             pitchServo.setSpeed(0.0);
             resetHoodAngle(Constants.Turret.HOOD_START_POSITION);
         });

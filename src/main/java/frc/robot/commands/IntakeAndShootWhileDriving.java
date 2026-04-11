@@ -38,6 +38,17 @@ public class IntakeAndShootWhileDriving extends SequentialCommandGroup {
             // Drive to ready pose
             pathToReady,
 
+            Commands.parallel(
+                intakePivot.deployIntakeCommand(),
+                intakeRoller.getIntakeCommand(),
+
+                shooter.getTargetCommand(
+                        targetingSupplier,
+                        drive::getPose,
+                        drive::getVelocity),
+                turret.getTargetCommand(targetingSupplier, drive::getPose, drive::getVelocity)
+            ).withTimeout(1.0),
+
             // Intake + shoot while slowly driving
             Commands.deadline(
                 drive.getDriveToPoseCommand(

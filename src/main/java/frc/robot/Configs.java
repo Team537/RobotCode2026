@@ -160,11 +160,11 @@ public class Configs {
 
         FEEDER_CONFIG
             .CurrentLimits
-                .SupplyCurrentLimit = Constants.Transfer.CURRENT_LOWER_LIMIT;
+                .SupplyCurrentLowerLimit = Constants.Transfer.CURRENT_LOWER_LIMIT;
 
         FEEDER_CONFIG
             .CurrentLimits
-                .SupplyCurrentLimit = Constants.Transfer.CURRENT_LOWER_TIME;
+                .SupplyCurrentLowerTime = Constants.Transfer.CURRENT_LOWER_TIME;
 
         FEEDER_CONFIG
             .MotorOutput

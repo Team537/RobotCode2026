@@ -518,10 +518,11 @@ public class Constants {
         public static final double CURRENT_LOWER_TIME = 0.5;
 
         public static final boolean KICKER_INVERTED = true;
-        public static final boolean FEEDER_INVERTED = false;
+        public static final boolean FEEDER_INVERTED = true;
+
 
         public static final double KICKER_LOAD_POWER = 0.25;
-        public static final double FEEDER_LOAD_POWER = 0.1;
+        public static final double FEEDER_LOAD_POWER = 0.5;
     }
 
     public static class VisionOdometryConstants {

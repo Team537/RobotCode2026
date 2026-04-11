@@ -58,7 +58,7 @@ public class TransferSubsystem extends SubsystemBase {
      *
      * @param power desired power
      */
-    public void setPower(double power) {
+    public void setKickerPower(double power) {
         kickerMotor.set(power);
     }
 
@@ -79,23 +79,22 @@ public class TransferSubsystem extends SubsystemBase {
      * @param power desired transfer power
      * @return an instant command that sets motor power
      */
-    public Command getSetPowerCommand(double power) {
+    public Command getPowerCommand(double kickerPower, double feederPower) {
         return new InstantCommand(
             () -> {
-                setPower(power);
-                setFeederPower(power);
+                setKickerPower(kickerPower);
+                setFeederPower(feederPower);
             }
         );
     }
-    /**
-     * @return a command that runs the transfer at the load speed
-     */
-    public Command getLoadCommand() {
-        return getSetPowerCommand(Constants.Transfer.KICKER_LOAD_POWER).withName("TransferLoad");
-    }
 
-    public Command getFeederLoadCommand() {
-        return getSetPowerCommand(Constants.Transfer.FEEDER_LOAD_POWER).withName("FeederLoad");
+    public Command getLoadCommand() {
+        return new InstantCommand(
+            () -> {
+                setKickerPower(Constants.Transfer.KICKER_LOAD_POWER);
+                setFeederPower(Constants.Transfer.FEEDER_LOAD_POWER);
+            }
+        );
     }
 
     /**
@@ -104,8 +103,8 @@ public class TransferSubsystem extends SubsystemBase {
     public Command getStopCommand() {
         return new InstantCommand(
             () -> {
-                setPower(0.0);
-                setFeederPower(0.0);
+                kickerMotor.stopMotor();
+                feederMotor.stopMotor();
             }
         );
     }

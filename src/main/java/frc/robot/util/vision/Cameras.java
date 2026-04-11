@@ -97,16 +97,16 @@ public enum Cameras {
     public Optional<EstimatedRobotPose> estimatedRobotPose = Optional.empty();
 
     /**
-     * Total number of periodic updates processed since the last reset.
+     * Total number of camera frames received since the last reset.
      */
-    private int periodicCount = 0;
+    private long totalFrames = 0;
     /**
-     * Number of periodic updates where at least one AprilTag was detected since the last reset.
+     * Number of camera frames in which at least one AprilTag was detected since the last reset.
      */
-    private int tagDetectedCount = 0;
+    private long framesWithTags = 0;
     /**
-     * Percentage (0–100) of periodic updates in which at least one AprilTag was detected.
-     * Updated every periodic cycle. Reset to 0 when {@link #resetStats()} is called.
+     * Percentage (0–100) of camera frames in which at least one AprilTag was detected.
+     * Updated each time new frames are processed. Reset to 0 when {@link #resetStats()} is called.
      */
     public double tagDetectionPercentage = 0.0;
 
@@ -115,8 +115,8 @@ public enum Cameras {
      * percentages reflect only the current run.
      */
     public void resetStats() {
-        periodicCount = 0;
-        tagDetectedCount = 0;
+        totalFrames = 0;
+        framesWithTags = 0;
         tagDetectionPercentage = 0.0;
     }
 
@@ -262,14 +262,15 @@ public enum Cameras {
             return a.getTimestampSeconds() >= b.getTimestampSeconds() ? 1 : -1;
         });
 
-        // Track what % of periodic runs have at least one visible AprilTag.
-        periodicCount++;
-        boolean sawTag = resultsList.stream().anyMatch(PhotonPipelineResult::hasTargets);
-        if (sawTag) {
-            tagDetectedCount++;
+        // Track tag detection at the per-frame level.
+        for (PhotonPipelineResult frame : resultsList) {
+            totalFrames++;
+            if (frame.hasTargets()) {
+                framesWithTags++;
+            }
         }
-        tagDetectionPercentage = (periodicCount > 0)
-                ? (tagDetectedCount * 100.0 / periodicCount)
+        tagDetectionPercentage = (totalFrames > 0)
+                ? (framesWithTags * 100.0 / totalFrames)
                 : 0.0;
 
         if (!resultsList.isEmpty()) {

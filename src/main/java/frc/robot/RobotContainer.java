@@ -267,6 +267,26 @@ public class RobotContainer {
 
   public void configureBindings() {
 
+    new Trigger(
+        () -> operatorController.getAButton()).onTrue(
+            new InstantCommand(() -> selectedFixedTarget = FixedTarget.A));
+
+    new Trigger(
+        () -> operatorController.getBButton()).onTrue(
+            new InstantCommand(() -> selectedFixedTarget = FixedTarget.B));
+
+    new Trigger(
+        () -> operatorController.getXButton()).onTrue(
+            new InstantCommand(() -> xHeld = true))
+        .onFalse(
+            new InstantCommand(() -> xHeld = false));
+
+    new Trigger(
+        () -> operatorController.getYButton()).onTrue(
+            new InstantCommand(() -> yHeld = true))
+        .onFalse(
+            new InstantCommand(() -> yHeld = false));
+
     targetingSupplier = () -> {
       Translation2d robotPosition = driveSubsystem.getPose().getTranslation();
 
@@ -375,6 +395,13 @@ public class RobotContainer {
     /* Shooter runs while button held */
     shootTrigger.whileTrue(
         shooterSubsystem.getTargetCommand(
+            targetingSupplier,
+            driveSubsystem::getPose,
+            driveSubsystem::getVelocity));
+
+    /* Turret runs while button held */
+    shootTrigger.whileTrue(
+        turretSubsystem.getTargetCommand(
             targetingSupplier,
             driveSubsystem::getPose,
             driveSubsystem::getVelocity));
@@ -539,10 +566,7 @@ public class RobotContainer {
         manualRotationVelocityDirective, null, null);
     driveSubsystem.setDefaultCommand(manualDriveCommand);
 
-    turretSubsystem.setDefaultCommand(turretSubsystem.getTargetCommand(
-        targetingSupplier,
-        driveSubsystem::getPose,
-        driveSubsystem::getVelocity));
+    turretSubsystem.setDefaultCommand(turretSubsystem.getStowCommand());
 
   }
 

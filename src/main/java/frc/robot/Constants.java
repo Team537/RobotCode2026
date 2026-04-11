@@ -45,6 +45,8 @@ public class Constants {
 
             public static final double TARGET_TRANSLATION_RADIUS = 2.0;
 
+            public static final double SHOOTING_SPEED_SCALE = 0.5; // Scale factor applied to drive speed while shooting
+
         }
 
         public static class Misc {
@@ -407,8 +409,8 @@ public class Constants {
         public static final double TURN_TABLE_RATIO = 24.0 / 200.0;
         public static final double ENCODER_FACTOR = (TURRET_GEAR_REDUCTION) / (2.0 * Math.PI * TURN_TABLE_RATIO);
 
-        public static final double STOW_PUSH_DOWN_SPEED = -0.3; // percent of max speed
-        public static final double STOW_PUSH_DOWN_TIME = 0.5; // seconds
+        public static final double STOW_PUSH_DOWN_SPEED = 0.6; // percent of max speed
+        public static final double STOW_PUSH_DOWN_TIME = 0.1; // seconds
 
         public static final double PITCH_GEAR_RATIO = (26.0 / 447.2);
         public static final double PITCH_ENCODER_FACTOR = PITCH_GEAR_RATIO * (2.0 * Math.PI);
@@ -416,9 +418,14 @@ public class Constants {
         public static final boolean PITCH_INVERTED = true;
 
         public static final Rotation2d MAX_PITCH = Rotation2d.fromDegrees(45.0);
-        public static final Rotation2d MIN_PITCH = Rotation2d.fromDegrees(3.00);
-        public static final Rotation2d HOOD_START_POSITION = Rotation2d.fromDegrees(5.00);
-        public static final Rotation2d HOOD_STOW_POSITION = Rotation2d.fromDegrees(3.00);
+        public static final Rotation2d MIN_PITCH = Rotation2d.fromDegrees(8.00);
+        public static final Rotation2d HOOD_START_POSITION = Rotation2d.fromDegrees(8.00);
+
+        public static final double HOOD_STABLE_TIME = 0.1;
+        public static final double HOOD_STABLE = 5;
+
+        public static final double HOOD_FINISH_VELOCITY = 0.1;
+        public static final Rotation2d HOOD_FAR_ANGLE = Rotation2d.fromDegrees(-50.0);
 
         public static final double OUTPUT_RANGE_MAX = 1;
         public static final double OUTPUT_RANGE_MIN = -1;
@@ -521,6 +528,7 @@ public class Constants {
         public static final boolean FEEDER_INVERTED = true;
 
 
+        public static final double LOAD_DELAY = 0.1; //Time between shooter and transfer being triggered, shooter should always activate first
         public static final double KICKER_LOAD_POWER = 0.25;
         public static final double FEEDER_LOAD_POWER = 0.5;
     }

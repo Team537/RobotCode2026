@@ -58,6 +58,9 @@ public class DriveSubsystem extends SubsystemBase {
     // Feature Flags 
     private boolean useVisionOdometry = true;
 
+    // Speed scaling (e.g. 0.5 to limit to 50% while shooting)
+    private Supplier<Double> speedScaleSupplier = () -> 1.0;
+
     public DriveSubsystem() {
 
         SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
@@ -190,6 +193,16 @@ public class DriveSubsystem extends SubsystemBase {
         obstaclesSuppliers.remove(supplier);
     }
 
+    /**
+     * Sets a supplier that returns a speed scale factor applied to all drive output.
+     * A value of 1.0 is full speed; 0.5 limits the robot to 50% of normal speed.
+     *
+     * @param supplier Supplier returning a scale factor in the range [0.0, 1.0].
+     */
+    public void setSpeedScaleSupplier(Supplier<Double> supplier) {
+        this.speedScaleSupplier = (supplier != null) ? supplier : () -> 1.0;
+    }
+
     // ------------------------------
     // POSE ACCESS
     // ------------------------------
@@ -299,6 +312,12 @@ public class DriveSubsystem extends SubsystemBase {
                 chassisSpeeds.omegaRadiansPerSecond
             );
         }
+
+        // Apply speed scale (e.g. 50% while shooting)
+        double scale = MathUtil.clamp(speedScaleSupplier.get(), 0.0, 1.0);
+        chassisSpeeds.vxMetersPerSecond *= scale;
+        chassisSpeeds.vyMetersPerSecond *= scale;
+        chassisSpeeds.omegaRadiansPerSecond *= scale;
 
         // --- Drive: field-oriented unless robot-relative velocity ---
         if (tReq instanceof TranslationRequest.Velocity vel && !vel.fieldRelative()) {

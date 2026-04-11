@@ -22,6 +22,7 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PWM;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -194,6 +195,10 @@ public class TurretSubsystem extends SubsystemBase {
                         - hoodOffsetSupplier.get().getRadians());
     }
 
+    public double getHoodVelocity() {
+        return pitchEncoder.getVelocity().getValueAsDouble() * Constants.Turret.PITCH_ENCODER_FACTOR;
+    }
+
     /**
      * @return the current turret yaw in the field frame
      */
@@ -336,36 +341,50 @@ public class TurretSubsystem extends SubsystemBase {
 
     public Command getStowCommand() {
 
-        Command moveToTarget = new FunctionalCommand(
-                () -> SmartDashboard.putBoolean("Turret/IsStowing", true),
+        final Timer settleTimer = new Timer();
+        double stopThreshold = Math.max(1e-3, Math.abs(Constants.Turret.HOOD_FINISH_VELOCITY)); // rad/s
+        double stableTime = Constants.Turret.HOOD_STABLE_TIME; // seconds, or a separate constant
 
+        Command settleDown = Commands.run(
                 () -> {
-                    setHoodAngle(Constants.Turret.HOOD_STOW_POSITION);
+                    pitchServo.setSpeed((Constants.Turret.PITCH_INVERTED ? -1.0 : 1.0) * -Constants.Turret.STOW_PUSH_DOWN_SPEED);
+                    SmartDashboard.putBoolean("Hood Pushing", true);
                 },
+                this)
+            // stop when encoder velocity magnitude <= threshold
+            .until(() -> {
+                boolean within = Math.abs(getHoodVelocity()) <= stopThreshold;
 
-                interrupted -> {
-                },
-
-                () -> Math.abs(
-                        getHoodAngle()
-                                .minus(Constants.Turret.HOOD_STOW_POSITION)
-                                .getRadians()) < Constants.Turret.HOOD_TOLERANCE.getRadians(),
-
-                this);
-
-        Command settleDown = new RunCommand(
-                () -> pitchServo.setSpeed(
-                        (Constants.Turret.PITCH_INVERTED ? -1.0 : 1.0) * Constants.Turret.STOW_PUSH_DOWN_SPEED), // small
-                                                                                                                  // constant
-                                                                                                                  // downward
-                                                                                                                  // speed
-                this).withTimeout(Constants.Turret.STOW_PUSH_DOWN_TIME); // enough to seat the gear
-
+                if (within) {
+                    if (!settleTimer.isRunning()) {
+                        settleTimer.reset();
+                        settleTimer.start();
+                    }
+                    //Finish when considered stable
+                    return settleTimer.hasElapsed(stableTime);
+                } else {
+                    settleTimer.stop();
+                    settleTimer.reset();
+                    return false;
+                }
+            }
+            ).until(
+                () -> getHoodAngle().getRadians() < Constants.Turret.HOOD_FAR_ANGLE.getRadians()
+            )
+            // ensure the servo is stopped when this command completes
+            .andThen(() -> {
+                pitchServo.setSpeed(0.0);
+                settleTimer.stop();
+                settleTimer.reset();
+            }
+            );
         Command finish = new InstantCommand(() -> {
+            SmartDashboard.putBoolean("Hood Pushing", false);
             pitchServo.setSpeed(0.0);
+            resetHoodAngle(Constants.Turret.HOOD_START_POSITION);
         });
 
-        return Commands.sequence(moveToTarget, settleDown, finish, Commands.idle())
+        return Commands.sequence(settleDown, finish, Commands.idle())
                 .withName("StowHood");
     }
 

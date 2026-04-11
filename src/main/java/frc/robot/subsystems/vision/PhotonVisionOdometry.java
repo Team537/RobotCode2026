@@ -210,7 +210,9 @@ public class PhotonVisionOdometry {
       Files.writeString(logFile, sb.toString(),
           StandardOpenOption.CREATE, StandardOpenOption.APPEND);
     } catch (IOException e) {
-      System.err.println("[VisionStats] Failed to write log: " + e.getMessage());
+      edu.wpi.first.wpilibj.DriverStation.reportError(
+          "[VisionStats] Failed to write log to " + logFile + ": " + e.getMessage(),
+          e.getStackTrace());
     }
   }
 

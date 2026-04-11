@@ -198,14 +198,12 @@ public class RobotContainer {
         .setSpeedMultiplierSupplier(() -> shooterPercent.get() / 100.0);
 
     Command floatCommand = new ConditionalCommand(
-      Commands.parallel(
-        turretSubsystem.getFloatCommand(),
-        intakePivot.getFloatCommand()
-      )
-        .withTimeout(Constants.Operator.Misc.FLOAT_TIME),
-      Commands.none(),
-      () -> !FieldUtil.isEnabled()
-    ).ignoringDisable(true);
+        Commands.parallel(
+            turretSubsystem.getFloatCommand(),
+            intakePivot.getFloatCommand())
+            .withTimeout(Constants.Operator.Misc.FLOAT_TIME),
+        Commands.none(),
+        () -> !FieldUtil.isEnabled()).ignoringDisable(true);
 
     SmartDashboard.putData("FloatCommand", floatCommand);
     SmartDashboard.putNumber("Auto/StartDelay", Constants.Operator.Auto.DEFAULT_START_DELAY);
@@ -368,8 +366,8 @@ public class RobotContainer {
 
     Trigger intakeTrigger = new Trigger(() -> driverController.getRightBumperButton());
 
-    Trigger reverseTransferTrigger = new Trigger(() -> driverController.getXButton());
-    
+    Trigger reverseTransferTrigger = new Trigger(() -> driverController.getYButton());
+
     // Driver X button: hold to lock robot pose (X-lock)
     Trigger xLockTrigger = new Trigger(() -> driverController.getXButton());
     xLockTrigger.whileTrue(driveSubsystem.getLockPoseCommand());
@@ -414,7 +412,7 @@ public class RobotContainer {
             intakeRoller.getStopCommand()));
 
     reverseTransferTrigger.whileTrue(
-       transferSubsystem.getSetPowerCommand(-1)).onFalse(transferSubsystem.getSetPowerCommand(0));
+        transferSubsystem.getPowerCommand(-1.0, -1.0)).onFalse(transferSubsystem.getStopCommand());
 
     // =========================
     // Turret Offset Adjustment (POV Left / Right)
@@ -513,12 +511,6 @@ public class RobotContainer {
             new InstantCommand(() -> xHeld = true))
         .onFalse(
             new InstantCommand(() -> xHeld = false));
-
-    // new Trigger(
-    //     () -> operatorController.getYButton()).onTrue(
-    //         new InstantCommand(() -> yHeld = true))
-    //     .onFalse(
-    //         new InstantCommand(() -> yHeld = false));
 
   }
 
@@ -718,12 +710,12 @@ public class RobotContainer {
 
       case B_N_F_R:
         return new DriveToSequenceCommand(driveSubsystem, Constants.Operator.Auto.BACK_N_FORTH_RIGHT_SEQUENCE.stream()
-              .map(FieldUtil::flipIfRed)
-              .toList());
+            .map(FieldUtil::flipIfRed)
+            .toList());
       case B_N_F_L:
         return new DriveToSequenceCommand(driveSubsystem, Constants.Operator.Auto.BACK_N_FORTH_LEFT_SEQUENCE.stream()
-              .map(FieldUtil::flipIfRed)
-              .toList());
+            .map(FieldUtil::flipIfRed)
+            .toList());
       default:
         return Commands.none();
     }

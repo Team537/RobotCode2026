@@ -366,14 +366,14 @@ double stopThreshold = Math.max(1e-3, Math.abs(Constants.Turret.HOOD_FINISH_VELO
                             settleTimer.start();
                         }
 
-                        return settleTimer.hasElapsed(Constants.Turret.HOOD_STABLE);
+                        return settleTimer.hasElapsed(Constants.Turret.HOOD_STABLE_TIME);
                     } else {
                         settleTimer.stop();
                         settleTimer.reset();
                         return false;
                     }
                 }
-        );
+        ).withTimeout(Constants.Turret.STOW_PUSH_DOWN_TIME);
                 
         Command finish = new InstantCommand(() -> {
             pitchServo.setSpeed(0.0);

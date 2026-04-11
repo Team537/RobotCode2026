@@ -30,7 +30,7 @@ public class TransferSubsystem extends SubsystemBase {
     // Hardware
     // --------------------------------------------------------------------
 
-    /** Motor driving the transfer mechanism. */   
+    /** Motors driving the transfer mechanism (kicker and feeder). */
     private final TalonFX kickerMotor;
     private final TalonFX feederMotor;
 

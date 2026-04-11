@@ -320,7 +320,7 @@ public class RobotContainer {
           detectedRobot = raycast.getRobot(teamNumber, 1);
         }
 
-        if (teamNumber > 0) {
+        if (teamNumber <= 0) {
           detectedRobot = Optional.empty();
         }
 
@@ -388,8 +388,8 @@ public class RobotContainer {
 
     Trigger reverseTransferTrigger = new Trigger(() -> driverController.getYButton());
 
-    // Driver X button: hold to lock robot pose (X-lock)
-    Trigger xLockTrigger = new Trigger(() -> driverController.getXButton());
+    // Operator Start button: hold to lock robot pose (X-lock)
+    Trigger xLockTrigger = new Trigger(() -> operatorController.getStartButton());
     xLockTrigger.whileTrue(driveSubsystem.getLockPoseCommand());
 
     /* Shooter runs while button held */
@@ -517,19 +517,6 @@ public class RobotContainer {
     new Trigger(() -> operatorController.getLeftTriggerAxis() > 0.5
         || operatorController.getRightTriggerAxis() > 0.5)
         .onTrue(new InstantCommand(() -> shooterPercent.set(Constants.Operator.ErrorSettings.SHOOTER_PERCENT_DEFAULT)));
-    new Trigger(
-        () -> operatorController.getAButton()).onTrue(
-            new InstantCommand(() -> selectedFixedTarget = FixedTarget.A));
-
-    new Trigger(
-        () -> operatorController.getBButton()).onTrue(
-            new InstantCommand(() -> selectedFixedTarget = FixedTarget.B));
-
-    new Trigger(
-        () -> operatorController.getXButton()).onTrue(
-            new InstantCommand(() -> xHeld = true))
-        .onFalse(
-            new InstantCommand(() -> xHeld = false));
 
   }
 

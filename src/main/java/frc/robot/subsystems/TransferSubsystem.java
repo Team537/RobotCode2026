@@ -54,14 +54,19 @@ public class TransferSubsystem extends SubsystemBase {
     // --------------------------------------------------------------------
 
     /**
-     * Commands the transfer motor to a target power.
+     * Commands the kicker motor to a target power.
      *
-     * @param power desired power
+     * @param power desired kicker motor power
      */
     public void setKickerPower(double power) {
         kickerMotor.set(power);
     }
 
+    /**
+     * Commands the feeder motor to a target power.
+     *
+     * @param power desired feeder motor power
+     */
     public void setFeederPower(double power) {
         feederMotor.set(power);
     }

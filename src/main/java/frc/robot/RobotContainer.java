@@ -198,14 +198,12 @@ public class RobotContainer {
         .setSpeedMultiplierSupplier(() -> shooterPercent.get() / 100.0);
 
     Command floatCommand = new ConditionalCommand(
-      Commands.parallel(
-        turretSubsystem.getFloatCommand(),
-        intakePivot.getFloatCommand()
-      )
-        .withTimeout(Constants.Operator.Misc.FLOAT_TIME),
-      Commands.none(),
-      () -> !FieldUtil.isEnabled()
-    ).ignoringDisable(true);
+        Commands.parallel(
+            turretSubsystem.getFloatCommand(),
+            intakePivot.getFloatCommand())
+            .withTimeout(Constants.Operator.Misc.FLOAT_TIME),
+        Commands.none(),
+        () -> !FieldUtil.isEnabled()).ignoringDisable(true);
 
     SmartDashboard.putData("FloatCommand", floatCommand);
     SmartDashboard.putNumber("Auto/StartDelay", Constants.Operator.Auto.DEFAULT_START_DELAY);
@@ -269,6 +267,113 @@ public class RobotContainer {
 
   public void configureBindings() {
 
+    new Trigger(
+        () -> operatorController.getAButton()).onTrue(
+            new InstantCommand(() -> selectedFixedTarget = FixedTarget.A));
+
+    new Trigger(
+        () -> operatorController.getBButton()).onTrue(
+            new InstantCommand(() -> selectedFixedTarget = FixedTarget.B));
+
+    new Trigger(
+        () -> operatorController.getXButton()).onTrue(
+            new InstantCommand(() -> xHeld = true))
+        .onFalse(
+            new InstantCommand(() -> xHeld = false));
+
+    new Trigger(
+        () -> operatorController.getYButton()).onTrue(
+            new InstantCommand(() -> yHeld = true))
+        .onFalse(
+            new InstantCommand(() -> yHeld = false));
+
+    targetingSupplier = () -> {
+      Translation2d robotPosition = driveSubsystem.getPose().getTranslation();
+
+      // 1 - Alliance hub targeting
+      Optional<Alliance> alliance = FieldUtil.getAlliance();
+      if (alliance.isPresent()) {
+        if (FieldUtil.flipIfRed(Constants.Field.BLUE_ALLIANCE_ZONE).contains(robotPosition)) {
+          return FieldUtil.flipIfRed(Constants.Field.BLUE_HUB_TRANSLATION);
+        }
+      }
+
+      // 2 - Vision robot targeting
+      if (xHeld || yHeld) {
+        String targetKey = xHeld ? "X" : "Y";
+        String basePath = "Targeting/RobotTargets/" + targetKey + "/";
+
+        // Parse team number from string safely
+        int teamNumber;
+        try {
+          teamNumber = Integer.parseInt(SmartDashboard.getString(basePath + "TeamNumber", "-1"));
+        } catch (NumberFormatException e) {
+          teamNumber = -1;
+        }
+
+        // Get the robot using the alliance if possible. We will never want to target a
+        // robot of the opposing alliance.
+        Optional<RobotDetection> detectedRobot;
+        if (alliance.isPresent()) {
+          detectedRobot = raycast.getRobot(teamNumber, alliance.get(), 1);
+        } else {
+          detectedRobot = raycast.getRobot(teamNumber, 1);
+        }
+
+        if (teamNumber <= 0) {
+          detectedRobot = Optional.empty();
+        }
+
+        // Fallback info
+        boolean useFallback = SmartDashboard.getBoolean(basePath + "UseFallback", false);
+        double fallbackX = SmartDashboard.getNumber(basePath + "FallbackX", 0.0);
+        double fallbackY = SmartDashboard.getNumber(basePath + "FallbackY", 0.0);
+        double targetHeight = SmartDashboard.getNumber(basePath + "TargetHeight", 0.25);
+
+        if (detectedRobot.isPresent()) {
+          return detectedRobot.get().getPoseTranslation3d();
+        } else if (useFallback) {
+          Translation3d fallbackTarget = new Translation3d(fallbackX, fallbackY, targetHeight);
+          return FieldUtil.flipIfRed(fallbackTarget);
+        }
+      }
+
+      // 3 - Fixed target fallback (A/B)
+      switch (selectedFixedTarget) {
+
+        case A: {
+          String basePath = "Targeting/FixedTargets/A/";
+
+          double x = SmartDashboard.getNumber(basePath + "X", 0.0);
+          double y = SmartDashboard.getNumber(basePath + "Y", 0.0);
+          double z = SmartDashboard.getNumber(basePath + "Z", 0.0);
+          return FieldUtil.flipIfRed(new Translation3d(x, y, z));
+        }
+
+        case B: {
+          String basePath = "Targeting/FixedTargets/B/";
+
+          double x = SmartDashboard.getNumber(basePath + "X", 0.0);
+          double y = SmartDashboard.getNumber(basePath + "Y", 0.0);
+          double z = SmartDashboard.getNumber(basePath + "Z", 0.0);
+
+          return FieldUtil.flipIfRed(new Translation3d(x, y, z));
+        }
+
+        default: {
+          // Default safely to A if somehow null
+          String basePath = "Targeting/FixedTargets/A/";
+
+          double x = SmartDashboard.getNumber(basePath + "X", 0.0);
+          double y = SmartDashboard.getNumber(basePath + "Y", 0.0);
+          double z = SmartDashboard.getNumber(basePath + "Z", 0.0);
+
+          return FieldUtil.flipIfRed(new Translation3d(x, y, z));
+        }
+      }
+
+    };
+
     // Driver controls
 
     Trigger stowTrigger = new Trigger(
@@ -281,10 +386,10 @@ public class RobotContainer {
 
     Trigger intakeTrigger = new Trigger(() -> driverController.getRightBumperButton());
 
-    Trigger reverseTransferTrigger = new Trigger(() -> driverController.getXButton());
-    
-    // Driver X button: hold to lock robot pose (X-lock)
-    Trigger xLockTrigger = new Trigger(() -> operatorController.getXButton());
+    Trigger reverseTransferTrigger = new Trigger(() -> driverController.getYButton());
+
+    // Operator Start button: hold to lock robot pose (X-lock)
+    Trigger xLockTrigger = new Trigger(() -> operatorController.getStartButton());
     xLockTrigger.whileTrue(driveSubsystem.getLockPoseCommand());
 
     /* Shooter runs while button held */
@@ -293,13 +398,17 @@ public class RobotContainer {
             targetingSupplier,
             driveSubsystem::getPose,
             driveSubsystem::getVelocity));
-    
-    
+
+    /* Turret runs while button held */
+    shootTrigger.whileTrue(
+        turretSubsystem.getTargetCommand(
+            targetingSupplier,
+            driveSubsystem::getPose,
+            driveSubsystem::getVelocity));
 
     /* Transfer runs ONLY while button AND solver valid */
-    shootTrigger
-        .whileTrue(
-            transferSubsystem.getLoadCommand());
+    shootTrigger.whileTrue(
+        transferSubsystem.getLoadCommand());
 
     /* Intake pivot runs while button held */
     intakeTrigger.whileTrue(
@@ -322,7 +431,7 @@ public class RobotContainer {
             intakeRoller.getStopCommand()));
 
     reverseTransferTrigger.whileTrue(
-      transferSubsystem.getSetPowerCommand(-1)).onFalse(transferSubsystem.getSetPowerCommand(0));
+        transferSubsystem.getPowerCommand(-1.0, -1.0)).onFalse(transferSubsystem.getStopCommand());
 
     // =========================
     // Turret Offset Adjustment (POV Left / Right)
@@ -388,112 +497,26 @@ public class RobotContainer {
             shooterPercent.getHeldIntervalCommand(Constants.Operator.ErrorSettings.SHOOTER_PERCENT_INCREASE,
                 Constants.Operator.ErrorSettings.SETTINGS_DELAY_TIME));
 
-    new Trigger(
-        () -> operatorController.getAButton()).onTrue(
-            new InstantCommand(() -> selectedFixedTarget = FixedTarget.A));
+    // ==============================
+    // Turret / Hood Offset Reset (Left Stick Click / Right Stick Click)
+    // ==============================
 
-    new Trigger(
-        () -> operatorController.getBButton()).onTrue(
-            new InstantCommand(() -> selectedFixedTarget = FixedTarget.B));
+    // Left Stick Click : Reset turret offset to zero
+    new Trigger(() -> operatorController.getLeftStickButton())
+        .onTrue(new InstantCommand(() -> turretOffsetDegrees.set(0.0)));
 
-    new Trigger(
-        () -> operatorController.getXButton()).onTrue(
-            new InstantCommand(() -> xHeld = true))
-        .onFalse(
-            new InstantCommand(() -> xHeld = false));
+    // Right Stick Click : Reset hood offset to zero
+    new Trigger(() -> operatorController.getRightStickButton())
+        .onTrue(new InstantCommand(() -> hoodOffsetDegrees.set(0.0)));
 
-    // new Trigger(
-    //     () -> operatorController.getYButton()).onTrue(
-    //         new InstantCommand(() -> yHeld = true))
-    //     .onFalse(
-    //         new InstantCommand(() -> yHeld = false));
+    // ==============================
+    // Shooter Percent Reset (Left Trigger / Right Trigger)
+    // ==============================
 
-    targetingSupplier = () -> {
-      Translation2d robotPosition = driveSubsystem.getPose().getTranslation();
-
-      // 1 - Alliance hub targeting
-      Optional<Alliance> alliance = FieldUtil.getAlliance();
-      if (alliance.isPresent()) {
-        if (FieldUtil.flipIfRed(Constants.Field.BLUE_ALLIANCE_ZONE).contains(robotPosition)) {
-          return FieldUtil.flipIfRed(Constants.Field.BLUE_HUB_TRANSLATION);
-        }
-      }
-
-      // 2 - Vision robot targeting
-      if (xHeld || yHeld) {
-        String targetKey = xHeld ? "X" : "Y";
-        String basePath = "Targeting/RobotTargets/" + targetKey + "/";
-
-        // Parse team number from string safely
-        int teamNumber;
-        try {
-          teamNumber = Integer.parseInt(SmartDashboard.getString(basePath + "TeamNumber", "-1"));
-        } catch (NumberFormatException e) {
-          teamNumber = -1;
-        }
-
-        // Get the robot using the alliance if possible. We will never want to target a
-        // robot of the opposing alliance.
-        Optional<RobotDetection> detectedRobot;
-        if (alliance.isPresent()) {
-          detectedRobot = raycast.getRobot(teamNumber, alliance.get(), 1);
-        } else {
-          detectedRobot = raycast.getRobot(teamNumber, 1);
-        }
-
-        if (teamNumber > 0) {
-          detectedRobot = Optional.empty();
-        }
-
-        // Fallback info
-        boolean useFallback = SmartDashboard.getBoolean(basePath + "UseFallback", false);
-        double fallbackX = SmartDashboard.getNumber(basePath + "FallbackX", 0.0);
-        double fallbackY = SmartDashboard.getNumber(basePath + "FallbackY", 0.0);
-        double targetHeight = SmartDashboard.getNumber(basePath + "TargetHeight", 0.25);
-
-        if (detectedRobot.isPresent()) {
-          return detectedRobot.get().getPoseTranslation3d();
-        } else if (useFallback) {
-          Translation3d fallbackTarget = new Translation3d(fallbackX, fallbackY, targetHeight);
-          return FieldUtil.flipIfRed(fallbackTarget);
-        }
-      }
-
-      // 3 - Fixed target fallback (A/B)
-      switch (selectedFixedTarget) {
-
-        case A: {
-          String basePath = "Targeting/FixedTargets/A/";
-
-          double x = SmartDashboard.getNumber(basePath + "X", 0.0);
-          double y = SmartDashboard.getNumber(basePath + "Y", 0.0);
-          double z = SmartDashboard.getNumber(basePath + "Z", 0.0);
-          return FieldUtil.flipIfRed(new Translation3d(x, y, z));
-        }
-
-        case B: {
-          String basePath = "Targeting/FixedTargets/B/";
-
-          double x = SmartDashboard.getNumber(basePath + "X", 0.0);
-          double y = SmartDashboard.getNumber(basePath + "Y", 0.0);
-          double z = SmartDashboard.getNumber(basePath + "Z", 0.0);
-
-          return FieldUtil.flipIfRed(new Translation3d(x, y, z));
-        }
-
-        default: {
-          // Default safely to A if somehow null
-          String basePath = "Targeting/FixedTargets/A/";
-
-          double x = SmartDashboard.getNumber(basePath + "X", 0.0);
-          double y = SmartDashboard.getNumber(basePath + "Y", 0.0);
-          double z = SmartDashboard.getNumber(basePath + "Z", 0.0);
-
-          return FieldUtil.flipIfRed(new Translation3d(x, y, z));
-        }
-      }
-
-    };
+    // Either Trigger : Reset shooter percent to default
+    new Trigger(() -> operatorController.getLeftTriggerAxis() > 0.5
+        || operatorController.getRightTriggerAxis() > 0.5)
+        .onTrue(new InstantCommand(() -> shooterPercent.set(Constants.Operator.ErrorSettings.SHOOTER_PERCENT_DEFAULT)));
 
   }
 
@@ -512,7 +535,7 @@ public class RobotContainer {
         Constants.Operator.Drive.THROTTLE_TRANSLATION_MAX_SPEED,
         Constants.Operator.Drive.SLOW_TRANSLATION_MAX_SPEED,
         FieldUtil.getAlliance().orElse(Alliance.BLUE).driverRotation,
-        Rotation2d.kPi);
+        Rotation2d.kZero);
 
     // Setup the rotational directive for drive subsystem
     RotationDirective manualRotationVelocityDirective = new ManualRotationVelocityDirective(
@@ -530,10 +553,7 @@ public class RobotContainer {
         manualRotationVelocityDirective, null, null);
     driveSubsystem.setDefaultCommand(manualDriveCommand);
 
-    turretSubsystem.setDefaultCommand(turretSubsystem.getTargetCommand(
-        targetingSupplier,
-        driveSubsystem::getPose,
-        driveSubsystem::getVelocity));
+    turretSubsystem.setDefaultCommand(turretSubsystem.getStowCommand());
 
   }
 
@@ -587,8 +607,8 @@ public class RobotContainer {
             turretSubsystem,
             transferSubsystem,
             () -> FieldUtil.flipIfRed(Constants.Field.BLUE_HUB_TRANSLATION),
-            Constants.Operator.Auto.DEPOT_READY_INTAKE_POSE,
-            Constants.Operator.Auto.DEPOT_INTAKE_POSE,
+            FieldUtil.flipIfRed(Constants.Operator.Auto.DEPOT_READY_INTAKE_POSE),
+            FieldUtil.flipIfRed(Constants.Operator.Auto.DEPOT_INTAKE_POSE),
             false,
             Constants.Operator.Auto.AUTO_INTAKE_MAX_SPEED,
             SmartDashboard.getNumber("Auto/IntakeShootTime", Constants.Operator.Auto.DEFAULT_INTAKE_SHOOT_TIME));
@@ -602,8 +622,8 @@ public class RobotContainer {
             turretSubsystem,
             transferSubsystem,
             () -> FieldUtil.flipIfRed(Constants.Field.BLUE_HUB_TRANSLATION),
-            Constants.Operator.Auto.OUTPOST_READY_INTAKE_POSE,
-            Constants.Operator.Auto.OUTPOST_INTAKE_POSE,
+            FieldUtil.flipIfRed(Constants.Operator.Auto.OUTPOST_READY_INTAKE_POSE),
+            FieldUtil.flipIfRed(Constants.Operator.Auto.OUTPOST_INTAKE_POSE),
             false,
             Constants.Operator.Auto.AUTO_INTAKE_MAX_SPEED,
             SmartDashboard.getNumber("Auto/IntakeShootTime", Constants.Operator.Auto.DEFAULT_INTAKE_SHOOT_TIME));
@@ -662,6 +682,16 @@ public class RobotContainer {
             .map(FieldUtil::flipIfRed)
             .toList());
 
+      case RAM_SS_L:
+        return new DriveToSequenceCommand(driveSubsystem, Constants.Operator.Auto.RAM_SS_LEFT_SEQUENCE.stream()
+            .map(FieldUtil::flipIfRed)
+            .toList());
+
+      case RAM_SS_R:
+        return new DriveToSequenceCommand(driveSubsystem, Constants.Operator.Auto.RAM_SS_RIGHT_SEQUENCE.stream()
+            .map(FieldUtil::flipIfRed)
+            .toList());
+
       case CUSTOM:
 
         Pose2d ready = getDashboardPose("Auto/CustomReadyPose");
@@ -684,6 +714,14 @@ public class RobotContainer {
             Constants.Operator.Auto.AUTO_INTAKE_MAX_SPEED,
             SmartDashboard.getNumber("Auto/IntakeShootTime", Constants.Operator.Auto.DEFAULT_INTAKE_SHOOT_TIME));
 
+      case B_N_F_R:
+        return new DriveToSequenceCommand(driveSubsystem, Constants.Operator.Auto.BACK_N_FORTH_RIGHT_SEQUENCE.stream()
+            .map(FieldUtil::flipIfRed)
+            .toList());
+      case B_N_F_L:
+        return new DriveToSequenceCommand(driveSubsystem, Constants.Operator.Auto.BACK_N_FORTH_LEFT_SEQUENCE.stream()
+            .map(FieldUtil::flipIfRed)
+            .toList());
       default:
         return Commands.none();
     }

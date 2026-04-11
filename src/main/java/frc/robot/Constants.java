@@ -45,6 +45,8 @@ public class Constants {
 
             public static final double TARGET_TRANSLATION_RADIUS = 2.0;
 
+            public static final double SHOOTING_SPEED_SCALE = 0.5; // Scale factor applied to drive speed while shooting
+
         }
 
         public static class Misc {
@@ -58,7 +60,7 @@ public class Constants {
             public static final int TURRET_OFFSET_DECIMAL_PLACE = 1;
             public static final double HOOD_OFFSET_INCREASE = 0.1;
             public static final int HOOD_OFFSET_DECIMAL_PLACE = 1;
-            public static final double SHOOTER_PERCENT_INCREASE = 0.2; // Percent to increase per tick
+            public static final double SHOOTER_PERCENT_INCREASE = .5; // Percent to increase per tick
             public static final int SHOOTER_PERCENT_DECIMAL_PLACE = 1;
 
             public static final double SHOOTER_PERCENT_DEFAULT = 100.0;
@@ -98,6 +100,19 @@ public class Constants {
                 new Pose2d(7.730, 6.457, Rotation2d.fromDegrees(-160))
             );
 
+            public static final List<Pose2d> BACK_N_FORTH_RIGHT_SEQUENCE = List.of(
+                new Pose2d(8.500, 2.1, Rotation2d.fromDegrees(-45)),
+                new Pose2d(8.306, 6.707, Rotation2d.fromDegrees(-45)),
+                new Pose2d(8.154, 1.349, Rotation2d.fromDegrees(-45))
+            );
+
+            
+            public static final List<Pose2d> BACK_N_FORTH_LEFT_SEQUENCE = List.of(
+                new Pose2d(8.500, 6.000, Rotation2d.fromDegrees(-45)),
+                new Pose2d(8.154, 1.349, Rotation2d.fromDegrees(-45)),
+                new Pose2d(8.306, 6.707, Rotation2d.fromDegrees(-45))
+            );
+
             public static final Translation2d NEUTRAL_RIGHT_SPIN_TRANSLATION = new Translation2d(
                 7.730,
                 7.457
@@ -118,6 +133,16 @@ public class Constants {
             public static final List<Pose2d> RAM_RIGHT_SEQUENCE = List.of(
                 new Pose2d(7.797,2.168,Rotation2d.kCW_90deg),
                 new Pose2d(7.829,4.051,Rotation2d.kCW_90deg)
+            );
+
+            public static final List<Pose2d> RAM_SS_LEFT_SEQUENCE = List.of(
+                new Pose2d(7.797,5.902,Rotation2d.kCW_90deg),
+                new Pose2d(7.829,4.400,Rotation2d.kCW_90deg)
+            );
+
+            public static final List<Pose2d> RAM_SS_RIGHT_SEQUENCE = List.of(
+                new Pose2d(7.797,2.168,Rotation2d.kCW_90deg),
+                new Pose2d(7.829,3.650,Rotation2d.kCW_90deg)
             );
 
 
@@ -384,8 +409,8 @@ public class Constants {
         public static final double TURN_TABLE_RATIO = 24.0 / 200.0;
         public static final double ENCODER_FACTOR = (TURRET_GEAR_REDUCTION) / (2.0 * Math.PI * TURN_TABLE_RATIO);
 
-        public static final double STOW_PUSH_DOWN_SPEED = -0.3; // percent of max speed
-        public static final double STOW_PUSH_DOWN_TIME = 0.5; // seconds
+        public static final double STOW_PUSH_DOWN_SPEED = 0.6; // percent of max speed
+        public static final double STOW_PUSH_DOWN_TIME = 0.1; // seconds
 
         public static final double PITCH_GEAR_RATIO = (26.0 / 447.2);
         public static final double PITCH_ENCODER_FACTOR = PITCH_GEAR_RATIO * (2.0 * Math.PI);
@@ -393,9 +418,14 @@ public class Constants {
         public static final boolean PITCH_INVERTED = true;
 
         public static final Rotation2d MAX_PITCH = Rotation2d.fromDegrees(45.0);
-        public static final Rotation2d MIN_PITCH = Rotation2d.fromDegrees(3.00);
-        public static final Rotation2d HOOD_START_POSITION = Rotation2d.fromDegrees(5.00);
-        public static final Rotation2d HOOD_STOW_POSITION = Rotation2d.fromDegrees(3.00);
+        public static final Rotation2d MIN_PITCH = Rotation2d.fromDegrees(8.00);
+        public static final Rotation2d HOOD_START_POSITION = Rotation2d.fromDegrees(8.00);
+
+        public static final double HOOD_STABLE_TIME = 0.1;
+        public static final double HOOD_STABLE = 5;
+
+        public static final double HOOD_FINISH_VELOCITY = 0.1;
+        public static final Rotation2d HOOD_FAR_ANGLE = Rotation2d.fromDegrees(-50.0);
 
         public static final double OUTPUT_RANGE_MAX = 1;
         public static final double OUTPUT_RANGE_MIN = -1;
@@ -462,7 +492,7 @@ public class Constants {
 
         public static final double TOLERANCE = 0.1; // Meters per second
 
-        public static final boolean MOTOR_INVERTED = false;
+        public static final boolean MOTOR_INVERTED = true;
 
         public static final InterpolatingDoubleTreeMap SHOOTER_VELOCITY_MAP = new InterpolatingDoubleTreeMap();
         public static final InterpolatingDoubleTreeMap TIME_MAP = new InterpolatingDoubleTreeMap();
@@ -487,15 +517,20 @@ public class Constants {
 
     }
     public static class Transfer {
-        public static final int TRANSFER_MOTOR_ID = 58;
+        public static final int TRANSFER_KICKER_ID = 58;
+        public static final int TRANSFER_FEEDER_ID = 57;
 
         public static final int CURRENT_LIMIT = 75; //Amps
         public static final int CURRENT_LOWER_LIMIT = 25;
         public static final double CURRENT_LOWER_TIME = 0.5;
 
-        public static final boolean MOTOR_INVERTED = true;
+        public static final boolean KICKER_INVERTED = true;
+        public static final boolean FEEDER_INVERTED = true;
 
-        public static final double LOAD_POWER = 0.25;
+
+        public static final double LOAD_DELAY = 0.1; //Time between shooter and transfer being triggered, shooter should always activate first
+        public static final double KICKER_LOAD_POWER = 0.25;
+        public static final double FEEDER_LOAD_POWER = 0.5;
     }
 
     public static class VisionOdometryConstants {
@@ -519,6 +554,7 @@ public class Constants {
                 Units.inchesToMeters(9.725),
                 Units.inchesToMeters(20.25));
 
+        long num = 999_999_999;
         public static final Vector<N3> LEFT_SINGLE_TAG_STANDARD_DEVIATION = VecBuilder.fill(4, 4, 8);
         public static final Vector<N3> LEFT_MULTI_TAG_STANDARD_DEVIATION = VecBuilder.fill(0.5, 0.5, 1);
 

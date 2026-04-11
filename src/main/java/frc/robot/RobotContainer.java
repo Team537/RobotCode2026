@@ -384,6 +384,9 @@ public class RobotContainer {
 
     Trigger shootTrigger = new Trigger(() -> driverController.getAButton());
 
+    // Limit drive speed to 50% while the shooting button is held
+    driveSubsystem.setSpeedScaleSupplier(() -> driverController.getAButton() ? Constants.Operator.Drive.SHOOTING_SPEED_SCALE : 1.0);
+
     Trigger intakeTrigger = new Trigger(() -> driverController.getRightBumperButton());
 
     Trigger reverseTransferTrigger = new Trigger(() -> driverController.getYButton());

@@ -73,11 +73,12 @@ public class TransferSubsystem extends SubsystemBase {
     /**
      * Creates a command that immediately sets the transfer power.
      *
-     * <p>This command finishes instantly and leaves the motor
-     * running at the requested speed.</p>
+     * <p>This command finishes instantly and leaves the motors
+     * running at the requested speeds.</p>
      *
-     * @param power desired transfer power
-     * @return an instant command that sets motor power
+     * @param kickerPower desired kicker motor power
+     * @param feederPower desired feeder motor power
+     * @return an instant command that sets both motor powers
      */
     public Command getPowerCommand(double kickerPower, double feederPower) {
         return new InstantCommand(

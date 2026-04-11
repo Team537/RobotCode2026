@@ -142,7 +142,7 @@ public class PhotonVisionOdometry {
       }
 
       // Publish per-camera tag detection percentage (0–100).
-      SmartDashboard.putNumber("Vision/TagDetectionPct" + camera.name(),
+      SmartDashboard.putNumber("Vision/TagDetectionPct/" + camera.name(),
           camera.getTagDetectionPercentage());
     }
 

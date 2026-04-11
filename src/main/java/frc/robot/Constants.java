@@ -510,15 +510,19 @@ public class Constants {
 
     }
     public static class Transfer {
-        public static final int TRANSFER_MOTOR_ID = 58;
+        public static final int TRANSFER_KICKER_ID = 58;
+        public static final int TRANSFER_FEEDER_ID = 57;
 
         public static final int CURRENT_LIMIT = 75; //Amps
         public static final int CURRENT_LOWER_LIMIT = 25;
         public static final double CURRENT_LOWER_TIME = 0.5;
 
-        public static final boolean MOTOR_INVERTED = true;
+        public static final boolean KICKER_INVERTED = true;
+        public static final boolean FEEDER_INVERTED = true;
 
-        public static final double LOAD_POWER = 0.25;
+
+        public static final double KICKER_LOAD_POWER = 0.25;
+        public static final double FEEDER_LOAD_POWER = 0.5;
     }
 
     public static class VisionOdometryConstants {

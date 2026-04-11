@@ -135,6 +135,10 @@ public class PhotonVisionOdometry {
         SmartDashboard.putNumber("VisionX", pose.estimatedPose.getX());
         SmartDashboard.putNumber("VisionY", pose.estimatedPose.getY());
       }
+
+      // Publish per-camera tag detection percentage (0–100).
+      SmartDashboard.putNumber("Vision/TagDetectionPct" + camera.name(),
+          camera.tagDetectionPercentage);
     }
 
   }
@@ -163,6 +167,17 @@ public class PhotonVisionOdometry {
           });
     }
     return poseEst;
+  }
+
+  /**
+   * Resets tag-detection statistics for all cameras. Should be called whenever
+   * the robot is enabled (teleop or autonomous) so percentages reflect only the
+   * current run.
+   */
+  public void resetAllCameraStats() {
+    for (Cameras camera : Cameras.values()) {
+      camera.resetStats();
+    }
   }
 
   /**

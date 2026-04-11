@@ -194,6 +194,17 @@ public class DriveSubsystem extends SubsystemBase {
     }
 
     /**
+     * Resets vision tag-detection statistics for all cameras.
+     * Should be called at the start of each enabled period (teleop/auto) so the
+     * reported percentages only cover the current run.
+     */
+    public void resetVisionStats() {
+        if (useVisionOdometry && visionOdometry != null) {
+            visionOdometry.resetAllCameraStats();
+        }
+    }
+
+    /**
      * Sets a supplier that returns a speed scale factor applied to all drive output.
      * A value of 1.0 is full speed; 0.5 limits the robot to 50% of normal speed.
      *

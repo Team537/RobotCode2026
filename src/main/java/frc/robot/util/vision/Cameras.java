@@ -97,6 +97,30 @@ public enum Cameras {
     public Optional<EstimatedRobotPose> estimatedRobotPose = Optional.empty();
 
     /**
+     * Total number of periodic updates processed since the last reset.
+     */
+    private int periodicCount = 0;
+    /**
+     * Number of periodic updates where at least one AprilTag was detected since the last reset.
+     */
+    private int tagDetectedCount = 0;
+    /**
+     * Percentage (0–100) of periodic updates in which at least one AprilTag was detected.
+     * Updated every periodic cycle. Reset to 0 when {@link #resetStats()} is called.
+     */
+    public double tagDetectionPercentage = 0.0;
+
+    /**
+     * Resets tag-detection statistics. Call this when the robot is enabled so
+     * percentages reflect only the current run.
+     */
+    public void resetStats() {
+        periodicCount = 0;
+        tagDetectedCount = 0;
+        tagDetectionPercentage = 0.0;
+    }
+
+    /**
      * Simulated camera instance which only exists during simulations.
      */
     public PhotonCameraSim cameraSim;
@@ -237,6 +261,17 @@ public enum Cameras {
         resultsList.sort((PhotonPipelineResult a, PhotonPipelineResult b) -> {
             return a.getTimestampSeconds() >= b.getTimestampSeconds() ? 1 : -1;
         });
+
+        // Track what % of periodic runs have at least one visible AprilTag.
+        periodicCount++;
+        boolean sawTag = resultsList.stream().anyMatch(PhotonPipelineResult::hasTargets);
+        if (sawTag) {
+            tagDetectedCount++;
+        }
+        tagDetectionPercentage = (periodicCount > 0)
+                ? (tagDetectedCount * 100.0 / periodicCount)
+                : 0.0;
+
         if (!resultsList.isEmpty()) {
             updateEstimatedGlobalPose();
         }

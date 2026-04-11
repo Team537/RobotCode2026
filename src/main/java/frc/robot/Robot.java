@@ -47,6 +47,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
+    robotContainer.driveSubsystem.resetVisionStats();
     CommandScheduler.getInstance().cancelAll();
     CommandTimeline.cancelAll();
     FieldStatePublisher.setupElasticNotifications();
@@ -61,6 +62,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
+    robotContainer.driveSubsystem.resetVisionStats();
     CommandScheduler.getInstance().cancelAll();
     robotContainer.scheduleTeleOp();
   }

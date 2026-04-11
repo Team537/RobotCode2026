@@ -381,12 +381,17 @@ public class RobotContainer {
             driveSubsystem::getPose,
             driveSubsystem::getVelocity));
     
-    
+    shootTrigger.whileTrue(
+      turretSubsystem.getTargetCommand(
+      targetingSupplier,
+      driveSubsystem::getPose,
+      driveSubsystem::getVelocity));
 
     /* Transfer runs ONLY while button AND solver valid */
     shootTrigger
         .whileTrue(
-            transferSubsystem.getLoadCommand());
+            new WaitCommand(Constants.Transfer.LOAD_DELAY)
+            .andThen(transferSubsystem.getLoadCommand()));
 
     /* Intake pivot runs while button held */
     intakeTrigger.whileTrue(
@@ -550,10 +555,7 @@ public class RobotContainer {
         manualRotationVelocityDirective, null, null);
     driveSubsystem.setDefaultCommand(manualDriveCommand);
 
-    turretSubsystem.setDefaultCommand(turretSubsystem.getTargetCommand(
-        targetingSupplier,
-        driveSubsystem::getPose,
-        driveSubsystem::getVelocity));
+    turretSubsystem.setDefaultCommand(turretSubsystem.getStowCommand());
 
   }
 

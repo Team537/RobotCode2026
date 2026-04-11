@@ -420,6 +420,11 @@ public class Constants {
         public static final Rotation2d HOOD_START_POSITION = Rotation2d.fromDegrees(5.00);
         public static final Rotation2d HOOD_STOW_POSITION = Rotation2d.fromDegrees(3.00);
 
+        public static final double HOOD_FINISH_VELOCITY = 0.01;
+        public static final double HOOD_STABLE = 5;
+
+        public static final double HOOD_STABLE_TIME = 0.1;
+
         public static final double OUTPUT_RANGE_MAX = 1;
         public static final double OUTPUT_RANGE_MIN = -1;
 
@@ -519,6 +524,8 @@ public class Constants {
         public static final boolean MOTOR_INVERTED = true;
 
         public static final double LOAD_POWER = 0.25;
+
+        public static final double LOAD_DELAY = 0.1;
     }
 
     public static class VisionOdometryConstants {

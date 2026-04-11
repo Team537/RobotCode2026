@@ -2,18 +2,10 @@ package frc.robot.subsystems;
 
 import java.util.function.Supplier;
 
-import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.revrobotics.PersistMode;
-import com.revrobotics.ResetMode;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.FeedForwardConfig;
-import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -22,6 +14,7 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.PWM;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -194,6 +187,10 @@ public class TurretSubsystem extends SubsystemBase {
                         - hoodOffsetSupplier.get().getRadians());
     }
 
+    public double getHoodVelocity() {
+        return pitchEncoder.getVelocity().getValueAsDouble() * Constants.Turret.PITCH_ENCODER_FACTOR;
+    }
+
     /**
      * @return the current turret yaw in the field frame
      */
@@ -353,16 +350,34 @@ public class TurretSubsystem extends SubsystemBase {
 
                 this);
 
-        Command settleDown = new RunCommand(
-                () -> pitchServo.setSpeed(
-                        (Constants.Turret.PITCH_INVERTED ? -1.0 : 1.0) * Constants.Turret.STOW_PUSH_DOWN_SPEED), // small
-                                                                                                                  // constant
-                                                                                                                  // downward
-                                                                                                                  // speed
-                this).withTimeout(Constants.Turret.STOW_PUSH_DOWN_TIME); // enough to seat the gear
+ final Timer settleTimer = new Timer();
+double stopThreshold = Math.max(1e-3, Math.abs(Constants.Turret.HOOD_FINISH_VELOCITY));
 
+        Command settleDown = new RunCommand(
+               
+
+                () -> pitchServo.setSpeed((Constants.Turret.PITCH_INVERTED ? -1.0 : 1.0) * -Constants.Turret.STOW_PUSH_DOWN_SPEED),
+                this)
+
+                .until(() -> {
+                    boolean within = Math.abs(getHoodVelocity()) <= stopThreshold;
+                    if (within) {
+                        if (!settleTimer.isRunning()) {
+                            settleTimer.start();
+                        }
+
+                        return settleTimer.hasElapsed(Constants.Turret.HOOD_STABLE);
+                    } else {
+                        settleTimer.stop();
+                        settleTimer.reset();
+                        return false;
+                    }
+                }
+        );
+                
         Command finish = new InstantCommand(() -> {
             pitchServo.setSpeed(0.0);
+            resetHoodAngle(Constants.Turret.HOOD_STOW_POSITION);
         });
 
         return Commands.sequence(moveToTarget, settleDown, finish, Commands.idle())

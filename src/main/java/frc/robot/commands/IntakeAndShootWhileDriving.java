@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants;
 import frc.robot.subsystems.*;
+import frc.robot.util.turret.TargetingData;
 
 public class IntakeAndShootWhileDriving extends SequentialCommandGroup {
 
@@ -19,7 +20,7 @@ public class IntakeAndShootWhileDriving extends SequentialCommandGroup {
             ShooterSubsystem shooter,
             TurretSubsystem turret,
             TransferSubsystem transfer,
-            Supplier<Translation3d> targetingSupplier,
+            Supplier<TargetingData> targetingSupplier,
             Pose2d readyPose,
             Pose2d intakePose,
             boolean stowTurret,

@@ -14,6 +14,7 @@ import frc.robot.subsystems.IntakeRollerSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 import frc.robot.subsystems.TransferSubsystem;
 import frc.robot.subsystems.TurretSubsystem;
+import frc.robot.util.turret.TargetingData;
 
 public class ShootPreloadCommand extends SequentialCommandGroup {
 
@@ -23,7 +24,7 @@ public class ShootPreloadCommand extends SequentialCommandGroup {
         TransferSubsystem transfer,
         IntakePivotSubsystem intakePivot,
         IntakeRollerSubsystem intakeRoller,
-        Supplier<Translation3d> targetSupplier,
+        Supplier<TargetingData> targetSupplier,
         Supplier<Pose2d> robotPoseSupplier,
         Supplier<ChassisSpeeds> robotVelocitySupplier,
         double shootPreloadTime

@@ -187,8 +187,9 @@ public class PhotonVisionOdometry {
 
   /**
    * Appends a summary of each camera's tag-detection percentage to
-   * {@code /home/lvuser/vision-stats.log} on the roboRIO. Each entry is
-   * timestamped and labelled with the run type (e.g. "teleop" or "auto").
+   * {@code vision-stats.log} in the WPILib operating directory returned by
+   * {@code edu.wpi.first.wpilibj.Filesystem.getOperatingDirectory()}. Each entry
+   * is timestamped and labelled with the run type (e.g. "teleop" or "auto").
    *
    * @param runLabel Short label describing the mode that just ended.
    */

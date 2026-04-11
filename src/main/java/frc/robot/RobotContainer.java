@@ -320,7 +320,7 @@ public class RobotContainer {
           detectedRobot = raycast.getRobot(teamNumber, 1);
         }
 
-        if (teamNumber > 0) {
+        if (teamNumber <= 0) {
           detectedRobot = Optional.empty();
         }
 

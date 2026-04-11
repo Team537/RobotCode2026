@@ -85,7 +85,8 @@ public class TransferSubsystem extends SubsystemBase {
             () -> {
                 setKickerPower(kickerPower);
                 setFeederPower(feederPower);
-            }
+            },
+            this
         );
     }
 
@@ -94,7 +95,8 @@ public class TransferSubsystem extends SubsystemBase {
             () -> {
                 setKickerPower(Constants.Transfer.KICKER_LOAD_POWER);
                 setFeederPower(Constants.Transfer.FEEDER_LOAD_POWER);
-            }
+            },
+            this
         );
     }
 
@@ -106,7 +108,8 @@ public class TransferSubsystem extends SubsystemBase {
             () -> {
                 kickerMotor.stopMotor();
                 feederMotor.stopMotor();
-            }
+            },
+            this
         );
     }
 }

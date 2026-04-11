@@ -12,6 +12,11 @@ import frc.robot.Robot;
 import frc.robot.util.vision.Cameras;
 
 import java.awt.Desktop;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -138,7 +143,7 @@ public class PhotonVisionOdometry {
 
       // Publish per-camera tag detection percentage (0–100).
       SmartDashboard.putNumber("Vision/TagDetectionPct" + camera.name(),
-          camera.tagDetectionPercentage);
+          camera.getTagDetectionPercentage());
     }
 
   }
@@ -177,6 +182,35 @@ public class PhotonVisionOdometry {
   public void resetAllCameraStats() {
     for (Cameras camera : Cameras.values()) {
       camera.resetStats();
+    }
+  }
+
+  /**
+   * Appends a summary of each camera's tag-detection percentage to
+   * {@code /home/lvuser/vision-stats.log} on the roboRIO. Each entry is
+   * timestamped and labelled with the run type (e.g. "teleop" or "auto").
+   *
+   * @param runLabel Short label describing the mode that just ended.
+   */
+  public void logVisionStats(String runLabel) {
+    StringBuilder sb = new StringBuilder();
+    sb.append(OffsetDateTime.now()).append(" [").append(runLabel).append("]\n");
+    for (Cameras camera : Cameras.values()) {
+      sb.append(String.format("  %-15s %5.1f%%  (%d / %d frames)%n",
+          camera.name(),
+          camera.getTagDetectionPercentage(),
+          camera.getFramesWithTags(),
+          camera.getTotalFrames()));
+    }
+    sb.append("\n");
+
+    Path logFile = edu.wpi.first.wpilibj.Filesystem.getOperatingDirectory()
+        .toPath().resolve("vision-stats.log");
+    try {
+      Files.writeString(logFile, sb.toString(),
+          StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+    } catch (IOException e) {
+      System.err.println("[VisionStats] Failed to write log: " + e.getMessage());
     }
   }
 

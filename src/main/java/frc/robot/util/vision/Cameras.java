@@ -108,7 +108,7 @@ public enum Cameras {
      * Percentage (0–100) of camera frames in which at least one AprilTag was detected.
      * Updated each time new frames are processed. Reset to 0 when {@link #resetStats()} is called.
      */
-    public double tagDetectionPercentage = 0.0;
+    private double tagDetectionPercentage = 0.0;
 
     /**
      * Resets tag-detection statistics. Call this when the robot is enabled so
@@ -118,6 +118,21 @@ public enum Cameras {
         totalFrames = 0;
         framesWithTags = 0;
         tagDetectionPercentage = 0.0;
+    }
+
+    /** @return Percentage (0–100) of frames in which at least one AprilTag was detected. */
+    public double getTagDetectionPercentage() {
+        return tagDetectionPercentage;
+    }
+
+    /** @return Total camera frames received since the last reset. */
+    public long getTotalFrames() {
+        return totalFrames;
+    }
+
+    /** @return Camera frames in which at least one AprilTag was detected since the last reset. */
+    public long getFramesWithTags() {
+        return framesWithTags;
     }
 
     /**

@@ -205,6 +205,18 @@ public class DriveSubsystem extends SubsystemBase {
     }
 
     /**
+     * Appends each camera's tag-detection percentage to the on-robot log file.
+     * Should be called at the end of each enabled period (teleop/auto).
+     *
+     * @param runLabel Short label describing the mode that just ended (e.g. "teleop").
+     */
+    public void logVisionStats(String runLabel) {
+        if (useVisionOdometry && visionOdometry != null) {
+            visionOdometry.logVisionStats(runLabel);
+        }
+    }
+
+    /**
      * Sets a supplier that returns a speed scale factor applied to all drive output.
      * A value of 1.0 is full speed; 0.5 limits the robot to 50% of normal speed.
      *

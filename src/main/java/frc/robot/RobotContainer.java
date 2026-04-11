@@ -388,8 +388,8 @@ public class RobotContainer {
 
     Trigger reverseTransferTrigger = new Trigger(() -> driverController.getYButton());
 
-    // Driver X button: hold to lock robot pose (X-lock)
-    Trigger xLockTrigger = new Trigger(() -> driverController.getXButton());
+    // Operator Start button: hold to lock robot pose (X-lock)
+    Trigger xLockTrigger = new Trigger(() -> operatorController.getStartButton());
     xLockTrigger.whileTrue(driveSubsystem.getLockPoseCommand());
 
     /* Shooter runs while button held */

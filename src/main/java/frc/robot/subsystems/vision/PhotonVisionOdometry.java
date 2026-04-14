@@ -52,6 +52,14 @@ public class PhotonVisionOdometry {
    */
   public VisionSystemSim visionSim;
   /**
+   * Total loop cycles processed since the last reset (any-camera aggregate).
+   */
+  private long anyCamTotalCycles = 0;
+  /**
+   * Loop cycles in which at least one camera had a tag since the last reset.
+   */
+  private long anyCamCyclesWithTag = 0;
+  /**
    * Count of times that the odom thinks we're more than 10meters away from the
    * april tag.
    */
@@ -127,6 +135,7 @@ public class PhotonVisionOdometry {
        */
       visionSim.update(swerveDrive.getSimulationDriveTrainPose().get());
     }
+    boolean anyCameraHasTag = false;
     for (Cameras camera : Cameras.values()) {
       Optional<EstimatedRobotPose> poseEst = getEstimatedGlobalPose(camera);
       if (poseEst.isPresent()) {
@@ -144,7 +153,23 @@ public class PhotonVisionOdometry {
       // Publish per-camera tag detection percentage (0–100).
       SmartDashboard.putNumber("Vision/TagDetectionPct/" + camera.name(),
           camera.getTagDetectionPercentage());
+
+      // Check whether this camera saw a tag in its latest result.
+      if (!camera.resultsList.isEmpty() && camera.resultsList.get(camera.resultsList.size() - 1).hasTargets()) {
+        anyCameraHasTag = true;
+      }
     }
+
+    // Aggregate: track cycles where at least one camera had a tag.
+    anyCamTotalCycles++;
+    if (anyCameraHasTag) {
+      anyCamCyclesWithTag++;
+    }
+    double anyCamPct = anyCamTotalCycles > 0
+        ? (anyCamCyclesWithTag * 100.0 / anyCamTotalCycles)
+        : 0.0;
+    SmartDashboard.putNumber("Vision/TagDetectionPct/ANY_CAMERA", anyCamPct);
+    SmartDashboard.putBoolean("Vision/AnyCameraHasTag", anyCameraHasTag);
 
   }
 
@@ -175,14 +200,24 @@ public class PhotonVisionOdometry {
   }
 
   /**
-   * Resets tag-detection statistics for all cameras. Should be called whenever
-   * the robot is enabled (teleop or autonomous) so percentages reflect only the
-   * current run.
+   * Resets tag-detection statistics for all cameras and the any-camera aggregate.
+   * Should be called whenever the robot is enabled (teleop or autonomous) so
+   * percentages reflect only the current run.
    */
   public void resetAllCameraStats() {
     for (Cameras camera : Cameras.values()) {
       camera.resetStats();
     }
+    anyCamTotalCycles = 0;
+    anyCamCyclesWithTag = 0;
+  }
+
+  /**
+   * @return Percentage (0–100) of loop cycles in which at least one camera had an
+   *         AprilTag visible, since the last {@link #resetAllCameraStats()} call.
+   */
+  public double getAnyCameraTagDetectionPercentage() {
+    return anyCamTotalCycles > 0 ? (anyCamCyclesWithTag * 100.0 / anyCamTotalCycles) : 0.0;
   }
 
   /**

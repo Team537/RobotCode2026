@@ -379,8 +379,7 @@ public class RobotContainer {
     // Driver controls
 
     Trigger stowTrigger = new Trigger(
-        () -> driverController.getBButton() || SwerveUtil.willRobotEnterRegion(driveSubsystem.getPose(),
-            driveSubsystem.getVelocity(), Constants.Field.TRENCH_REGION, Constants.Drive.HOOD_STOW_LOOKAHEAD_TIME));
+        () -> driverController.getBButton());
     stowTrigger.and(() -> !FieldUtil.isAutonomous()).whileTrue(
         turretSubsystem.getStowCommand());
 

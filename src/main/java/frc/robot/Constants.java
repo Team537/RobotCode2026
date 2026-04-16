@@ -70,7 +70,7 @@ public class Constants {
         public static class Auto {
 
             public static final double DEFAULT_START_DELAY = 0.0;
-            public static final double DEFAULT_PRELOAD_SHOOT_TIME = 0.0;
+            public static final double DEFAULT_PRELOAD_SHOOT_TIME = 4.0;
             public static final double DEFAULT_INTAKE_SHOOT_TIME = 4.0;
 
             public static final double AUTO_INTAKE_MAX_SPEED = 1.0;
@@ -210,7 +210,7 @@ public class Constants {
                 0.000);
 
         public static final Translation2d BLUE_ALLIANCE_ZONE_C2 = new Translation2d(
-                4.028,
+                4.647,
                 flipY(BLUE_ALLIANCE_ZONE_C1.getY()));
 
         public static final Translation2d RED_ALLIANCE_ZONE_C1 = flipTranslation(BLUE_ALLIANCE_ZONE_C1);

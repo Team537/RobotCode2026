@@ -459,6 +459,14 @@ public class Constants {
             SHOOTING_HOOD_ANGLE_MAP.put(1.71,10.3);
         }
 
+        public static final InterpolatingDoubleTreeMap PASSING_HOOD_ANGLE_MAP = new InterpolatingDoubleTreeMap();
+        static {
+            PASSING_HOOD_ANGLE_MAP.put(6.05,22.8);
+            PASSING_HOOD_ANGLE_MAP.put(8.05,24.9);
+            PASSING_HOOD_ANGLE_MAP.put(9.85,26.8);
+            PASSING_HOOD_ANGLE_MAP.put(13.85,29.8);
+        }
+
         public static final TurretSolver.Config SHOOTING_SOLVER_CONFIG = new TurretSolver.Config(
             0.0,
             TURRET_TRANSLATION,
@@ -513,6 +521,20 @@ public class Constants {
             SHOOTING_TIME_MAP.put(4.44,1.45);
             SHOOTING_TIME_MAP.put(2.71,1.30);
             SHOOTING_TIME_MAP.put(1.71,1.23);
+        }
+
+        public static final InterpolatingDoubleTreeMap PASSING_SHOOTER_VELOCITY_MAP = new InterpolatingDoubleTreeMap();
+        public static final InterpolatingDoubleTreeMap PASSING_TIME_MAP = new InterpolatingDoubleTreeMap();
+        static {
+            PASSING_SHOOTER_VELOCITY_MAP.put(6.05,20.0);
+            PASSING_SHOOTER_VELOCITY_MAP.put(8.05,25.0);
+            PASSING_SHOOTER_VELOCITY_MAP.put(9.85,32.0);
+            PASSING_SHOOTER_VELOCITY_MAP.put(13.85,40.0);
+
+            PASSING_TIME_MAP.put(6.05,1.46);
+            PASSING_TIME_MAP.put(8.05,1.61);
+            PASSING_TIME_MAP.put(9.85,1.65);
+            PASSING_TIME_MAP.put(13.85,2.06);
         }
 
     }

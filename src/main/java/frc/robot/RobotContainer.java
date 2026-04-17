@@ -628,6 +628,35 @@ public class RobotContainer {
             Constants.Operator.Auto.AUTO_INTAKE_MAX_SPEED,
             SmartDashboard.getNumber("Auto/IntakeShootTime", Constants.Operator.Auto.DEFAULT_INTAKE_SHOOT_TIME));
 
+      case CENTER_PATH_THEN_SHOOT:
+        return Commands.sequence(
+        
+          new DriveToSequenceCommand(
+              driveSubsystem,
+              Constants.Operator.Auto.CENTER_POSITION_THEN_SHOOT_AUTO.stream()
+                  .map(FieldUtil::flipIfRed)
+                  .toList()),
+                  
+           new IntakeAndShootWhileDriving(
+            driveSubsystem,
+            intakePivot,
+            intakeRoller,
+            shooterSubsystem,
+            turretSubsystem,
+            transferSubsystem,
+            () -> FieldUtil.flipIfRed(Constants.Field.BLUE_HUB_TRANSLATION),
+            FieldUtil.flipIfRed(Constants.Operator.Auto.DEPOT_READY_INTAKE_POSE),
+            FieldUtil.flipIfRed(Constants.Operator.Auto.DEPOT_INTAKE_POSE),
+            false,
+            Constants.Operator.Auto.AUTO_INTAKE_MAX_SPEED,
+            SmartDashboard.getNumber("Auto/IntakeShootTime", Constants.Operator.Auto.DEFAULT_INTAKE_SHOOT_TIME))       
+                  
+                  );
+          
+        
+
+
+
       case NEUTRAL_LEFT:
         return Commands.sequence(
 

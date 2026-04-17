@@ -75,7 +75,6 @@ public class IntakeAndShootWhileDriving extends SequentialCommandGroup {
             // Stop driving + intake
             Commands.parallel(
                 drive.getStopCommand(),
-                intakePivot.raiseIntakeCommand(),
                 intakeRoller.getStopCommand()
             ),
 
@@ -85,7 +84,8 @@ public class IntakeAndShootWhileDriving extends SequentialCommandGroup {
             // Finally stop shooter + turret
             Commands.parallel(
                 shooter.getStopCommand(),
-                transfer.getStopCommand()
+                transfer.getStopCommand(),
+                intakePivot.raiseIntakeCommand()
             )
         );
     }

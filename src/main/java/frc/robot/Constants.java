@@ -78,8 +78,8 @@ public class Constants {
             public static final Pose2d DEPOT_READY_INTAKE_POSE = new Pose2d(1.250,6.000,Rotation2d.k180deg);
             public static final Pose2d DEPOT_INTAKE_POSE = new Pose2d(0.650,6.000,Rotation2d.k180deg);
 
-            public static final Pose2d OUTPOST_READY_INTAKE_POSE = new Pose2d(0.495,1.617,Rotation2d.kCW_90deg);
-            public static final Pose2d OUTPOST_INTAKE_POSE = new Pose2d(0.495,0.661,Rotation2d.kCW_90deg);
+            public static final Pose2d OUTPOST_READY_INTAKE_POSE = new Pose2d(0.495,1.922,Rotation2d.kCW_90deg);
+            public static final Pose2d OUTPOST_INTAKE_POSE = new Pose2d(0.495,0.966,Rotation2d.kCW_90deg);
 
             public static final List<Pose2d> NEUTRAL_LEFT_SEQUENCE_ONE = List.of(
                 new Pose2d(7.730, 7.457, Rotation2d.fromDegrees(160)),

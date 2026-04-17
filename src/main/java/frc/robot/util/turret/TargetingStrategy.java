@@ -4,7 +4,7 @@ import frc.robot.Constants;
 
 public enum TargetingStrategy {
     SHOOTING(Constants.Turret.SHOOTING_SOLVER_CONFIG),
-    PASSING(Constants.Turret.SHOOTING_SOLVER_CONFIG);
+    PASSING(Constants.Turret.PASSING_SOLVER_CONFIG);
 
     private TurretSolver.Config config;
 

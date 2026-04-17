@@ -208,7 +208,6 @@ public class Constants {
         public static final Translation2d BLUE_ALLIANCE_ZONE_C1 = new Translation2d(
                 0.000,
                 0.000);
-
         public static final Translation2d BLUE_ALLIANCE_ZONE_C2 = new Translation2d(
                 4.647,
                 flipY(BLUE_ALLIANCE_ZONE_C1.getY()));
@@ -409,7 +408,7 @@ public class Constants {
         public static final double TURN_TABLE_RATIO = 24.0 / 200.0;
         public static final double ENCODER_FACTOR = (TURRET_GEAR_REDUCTION) / (2.0 * Math.PI * TURN_TABLE_RATIO);
 
-        public static final double STOW_PUSH_DOWN_SPEED = 0.6; // percent of max speed
+        public static final double STOW_PUSH_DOWN_SPEED = 0.3; // percent of max speed
         public static final double STOW_PUSH_DOWN_TIME = 0.1; // seconds
 
         public static final double PITCH_GEAR_RATIO = (26.0 / 447.2);
@@ -425,7 +424,7 @@ public class Constants {
         public static final double HOOD_STABLE = 5;
 
         public static final double HOOD_FINISH_VELOCITY = 0.1;
-        public static final Rotation2d HOOD_FAR_ANGLE = Rotation2d.fromDegrees(-50.0);
+        public static final Rotation2d HOOD_FAR_ANGLE = Rotation2d.fromDegrees(-10.0);
 
         public static final double OUTPUT_RANGE_MAX = 1;
         public static final double OUTPUT_RANGE_MIN = -1;
@@ -474,6 +473,15 @@ public class Constants {
             Shooter.SHOOTING_SHOOTER_VELOCITY_MAP,
             Shooter.SHOOTING_TIME_MAP,
             1.829
+        );
+
+        public static final TurretSolver.Config PASSING_SOLVER_CONFIG = new TurretSolver.Config(
+            0.0,
+            TURRET_TRANSLATION,
+            PASSING_HOOD_ANGLE_MAP,
+            Shooter.PASSING_SHOOTER_VELOCITY_MAP,
+            Shooter.PASSING_TIME_MAP,
+            0.0
         );
 
     }

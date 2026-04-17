@@ -80,12 +80,12 @@ public class Constants {
 
             public static final List<Pose2d> CENTER_POSITION_THEN_SHOOT_AUTO = List.of(
                 new Pose2d(4.322, 0.555, Rotation2d.kZero),
-                new Pose2d(7.761, 1.210, Rotation2d.kZero),
-                new Pose2d(8.250, 3.180, Rotation2d.kZero),
-                new Pose2d(7.639, 3.750, Rotation2d.kZero),
-                new Pose2d(7.273, 3.486, Rotation2d.kZero),
-                new Pose2d(5.747, 0.657, Rotation2d.kZero),
-                new Pose2d(0.436, 0.617, Rotation2d.kZero)
+                new Pose2d(7.761, 1.210, Rotation2d.fromDegrees(90)),
+                new Pose2d(8.250, 3.180, Rotation2d.fromDegrees(90)),
+                new Pose2d(7.639, 3.750, Rotation2d.fromDegrees(-105)),
+                new Pose2d(7.273, 3.486, Rotation2d.k180deg),
+                new Pose2d(5.747, 0.657, Rotation2d.k180deg),
+                new Pose2d(0.436, 0.617, Rotation2d.k180deg)
 
             );
 

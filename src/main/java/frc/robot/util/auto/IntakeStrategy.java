@@ -5,6 +5,7 @@ public enum IntakeStrategy {
     DEPOT,
     OUTPOST,
     CENTER_PATH_THEN_SHOOT,
+    CENTER_PATH_THEN_SHOOT_NO_DEPOT,
     NEUTRAL_LEFT,
     NEUTRAL_RIGHT,
     RAM_LEFT,

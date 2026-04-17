@@ -653,9 +653,14 @@ public class RobotContainer {
                   
                   );
           
+      case CENTER_PATH_THEN_SHOOT_NO_DEPOT:
+        return Commands.sequence(
         
-
-
+          new DriveToSequenceCommand(
+              driveSubsystem,
+              Constants.Operator.Auto.CENTER_POSITION_THEN_SHOOT_AUTO.stream()
+                  .map(FieldUtil::flipIfRed)
+                  .toList()));
 
       case NEUTRAL_LEFT:
         return Commands.sequence(

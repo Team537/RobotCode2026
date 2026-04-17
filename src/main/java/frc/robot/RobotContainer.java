@@ -50,6 +50,8 @@ import frc.robot.util.swerve.requests.RotationDirective;
 import frc.robot.util.swerve.requests.RotationRequest;
 import frc.robot.util.swerve.requests.TranslationDirective;
 import frc.robot.util.swerve.requests.TranslationRequest;
+import frc.robot.util.turret.TargetingData;
+import frc.robot.util.turret.TargetingStrategy;
 import frc.robot.util.turret.TurretSolver;
 import frc.robot.util.vision.detections.RobotDetection;
 
@@ -85,7 +87,7 @@ public class RobotContainer {
   boolean xHeld = false;
   boolean yHeld = false;
 
-  Supplier<Translation3d> targetingSupplier = () -> Translation3d.kZero;
+  Supplier<TargetingData> targetingSupplier = () -> new TargetingData(Translation3d.kZero,TargetingStrategy.SHOOTING);
 
   SendableChooser<IntakeStrategy> intakeStrategyChooser = new SendableChooser<>();
 
@@ -261,7 +263,7 @@ public class RobotContainer {
     }
 
     robotField.setRobotPose(driveSubsystem.getPose());
-    robotField.getObject("Target").setPose(new Pose2d(targetingSupplier.get().toTranslation2d(), Rotation2d.kZero));
+    robotField.getObject("Target").setPose(new Pose2d(targetingSupplier.get().translation().toTranslation2d(), Rotation2d.kZero));
 
   }
 
@@ -294,7 +296,7 @@ public class RobotContainer {
       Optional<Alliance> alliance = FieldUtil.getAlliance();
       if (alliance.isPresent()) {
         if (FieldUtil.flipIfRed(Constants.Field.BLUE_ALLIANCE_ZONE).contains(robotPosition)) {
-          return FieldUtil.flipIfRed(Constants.Field.BLUE_HUB_TRANSLATION);
+          return new TargetingData(FieldUtil.flipIfRed(Constants.Field.BLUE_HUB_TRANSLATION),TargetingStrategy.SHOOTING);
         }
       }
 
@@ -331,10 +333,10 @@ public class RobotContainer {
         double targetHeight = SmartDashboard.getNumber(basePath + "TargetHeight", 0.25);
 
         if (detectedRobot.isPresent()) {
-          return detectedRobot.get().getPoseTranslation3d();
+          return new TargetingData(detectedRobot.get().getPoseTranslation3d(),TargetingStrategy.PASSING);
         } else if (useFallback) {
           Translation3d fallbackTarget = new Translation3d(fallbackX, fallbackY, targetHeight);
-          return FieldUtil.flipIfRed(fallbackTarget);
+          return new TargetingData(FieldUtil.flipIfRed(fallbackTarget),TargetingStrategy.PASSING);
         }
       }
 
@@ -347,7 +349,7 @@ public class RobotContainer {
           double x = SmartDashboard.getNumber(basePath + "X", 0.0);
           double y = SmartDashboard.getNumber(basePath + "Y", 0.0);
           double z = SmartDashboard.getNumber(basePath + "Z", 0.0);
-          return FieldUtil.flipIfRed(new Translation3d(x, y, z));
+          return new TargetingData(FieldUtil.flipIfRed(new Translation3d(x, y, z)),TargetingStrategy.PASSING);
         }
 
         case B: {
@@ -357,7 +359,7 @@ public class RobotContainer {
           double y = SmartDashboard.getNumber(basePath + "Y", 0.0);
           double z = SmartDashboard.getNumber(basePath + "Z", 0.0);
 
-          return FieldUtil.flipIfRed(new Translation3d(x, y, z));
+          return new TargetingData(FieldUtil.flipIfRed(new Translation3d(x, y, z)),TargetingStrategy.PASSING);
         }
 
         default: {
@@ -368,7 +370,7 @@ public class RobotContainer {
           double y = SmartDashboard.getNumber(basePath + "Y", 0.0);
           double z = SmartDashboard.getNumber(basePath + "Z", 0.0);
 
-          return FieldUtil.flipIfRed(new Translation3d(x, y, z));
+          return new TargetingData(FieldUtil.flipIfRed(new Translation3d(x, y, z)),TargetingStrategy.PASSING);
         }
       }
 
@@ -377,8 +379,7 @@ public class RobotContainer {
     // Driver controls
 
     Trigger stowTrigger = new Trigger(
-        () -> driverController.getBButton() || SwerveUtil.willRobotEnterRegion(driveSubsystem.getPose(),
-            driveSubsystem.getVelocity(), Constants.Field.TRENCH_REGION, Constants.Drive.HOOD_STOW_LOOKAHEAD_TIME));
+        () -> driverController.getBButton());
     stowTrigger.and(() -> !FieldUtil.isAutonomous()).whileTrue(
         turretSubsystem.getStowCommand());
 
@@ -565,7 +566,7 @@ public class RobotContainer {
             Commands
                 .waitSeconds(SmartDashboard.getNumber("Auto/StartDelay", Constants.Operator.Auto.DEFAULT_START_DELAY)),
             intakePivot.raiseIntakeCommand(),
-            turretSubsystem.getTargetCommand(() -> FieldUtil.flipIfRed(Constants.Field.BLUE_HUB_TRANSLATION),
+            turretSubsystem.getTargetCommand(() -> new TargetingData(FieldUtil.flipIfRed(Constants.Field.BLUE_HUB_TRANSLATION),TargetingStrategy.SHOOTING),
                 driveSubsystem::getPose, driveSubsystem::getVelocity)),
 
         new ShootPreloadCommand(
@@ -574,7 +575,7 @@ public class RobotContainer {
             transferSubsystem,
             intakePivot,
             intakeRoller,
-            () -> FieldUtil.flipIfRed(Constants.Field.BLUE_HUB_TRANSLATION),
+            () -> new TargetingData(FieldUtil.flipIfRed(Constants.Field.BLUE_HUB_TRANSLATION),TargetingStrategy.SHOOTING),
             driveSubsystem::getPose,
             driveSubsystem::getVelocity,
             SmartDashboard.getNumber("Auto/PreloadShootTime", Constants.Operator.Auto.DEFAULT_PRELOAD_SHOOT_TIME)),
@@ -606,7 +607,7 @@ public class RobotContainer {
             shooterSubsystem,
             turretSubsystem,
             transferSubsystem,
-            () -> FieldUtil.flipIfRed(Constants.Field.BLUE_HUB_TRANSLATION),
+            () -> new TargetingData(FieldUtil.flipIfRed(Constants.Field.BLUE_HUB_TRANSLATION),TargetingStrategy.SHOOTING),
             FieldUtil.flipIfRed(Constants.Operator.Auto.DEPOT_READY_INTAKE_POSE),
             FieldUtil.flipIfRed(Constants.Operator.Auto.DEPOT_INTAKE_POSE),
             false,
@@ -621,7 +622,7 @@ public class RobotContainer {
             shooterSubsystem,
             turretSubsystem,
             transferSubsystem,
-            () -> FieldUtil.flipIfRed(Constants.Field.BLUE_HUB_TRANSLATION),
+            () -> new TargetingData(FieldUtil.flipIfRed(Constants.Field.BLUE_HUB_TRANSLATION),TargetingStrategy.SHOOTING),
             FieldUtil.flipIfRed(Constants.Operator.Auto.OUTPOST_READY_INTAKE_POSE),
             FieldUtil.flipIfRed(Constants.Operator.Auto.OUTPOST_INTAKE_POSE),
             false,
@@ -741,7 +742,7 @@ public class RobotContainer {
             shooterSubsystem,
             turretSubsystem,
             transferSubsystem,
-            () -> FieldUtil.flipIfRed(target),
+            () -> new TargetingData(FieldUtil.flipIfRed(target),TargetingStrategy.PASSING),
             FieldUtil.flipIfRed(ready),
             FieldUtil.flipIfRed(intake),
             stow,

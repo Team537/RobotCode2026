@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Configs;
 import frc.robot.Constants;
+import frc.robot.util.turret.TargetingData;
 import frc.robot.util.turret.TurretSolver;
 import frc.robot.util.turret.TurretUtil;
 
@@ -177,7 +178,7 @@ public class ShooterSubsystem extends SubsystemBase {
      * @return a shooter velocity command driven by the ballistic solver
      */
     public Command getTargetCommand(
-        Supplier<Translation3d> targetTranslationSupplier,
+        Supplier<TargetingData> targetingDataSupplier,
         Supplier<Pose2d> robotPoseSupplier,
         Supplier<ChassisSpeeds> robotVelocitySupplier
     ) {
@@ -186,8 +187,8 @@ public class ShooterSubsystem extends SubsystemBase {
                 TurretSolver.solve(
                     robotPoseSupplier.get(),
                     robotVelocitySupplier.get(),
-                    targetTranslationSupplier.get(),
-                    Constants.Turret.SOLVER_CONFIG
+                    targetingDataSupplier.get().translation(),
+                    targetingDataSupplier.get().strategy().getConfig()
                 );
 
             SmartDashboard.putNumber("Target Velocity", solution.getLaunchVelocity());

@@ -70,7 +70,7 @@ public class Constants {
         public static class Auto {
 
             public static final double DEFAULT_START_DELAY = 0.0;
-            public static final double DEFAULT_PRELOAD_SHOOT_TIME = 0.0;
+            public static final double DEFAULT_PRELOAD_SHOOT_TIME = 4.0;
             public static final double DEFAULT_INTAKE_SHOOT_TIME = 4.0;
 
             public static final double AUTO_INTAKE_MAX_SPEED = 1.0;
@@ -88,9 +88,8 @@ public class Constants {
                 new Pose2d(0.436, 0.617, Rotation2d.k180deg)
 
             );
-
-            public static final Pose2d OUTPOST_READY_INTAKE_POSE = new Pose2d(1.375,0.661,Rotation2d.k180deg);
-            public static final Pose2d OUTPOST_INTAKE_POSE = new Pose2d(0.619,0.661,Rotation2d.k180deg);
+            public static final Pose2d OUTPOST_READY_INTAKE_POSE = new Pose2d(0.495,1.922,Rotation2d.kCW_90deg);
+            public static final Pose2d OUTPOST_INTAKE_POSE = new Pose2d(0.495,0.966,Rotation2d.kCW_90deg);
 
             public static final List<Pose2d> NEUTRAL_LEFT_SEQUENCE_ONE = List.of(
                 new Pose2d(7.730, 7.457, Rotation2d.fromDegrees(160)),
@@ -219,9 +218,8 @@ public class Constants {
         public static final Translation2d BLUE_ALLIANCE_ZONE_C1 = new Translation2d(
                 0.000,
                 0.000);
-
         public static final Translation2d BLUE_ALLIANCE_ZONE_C2 = new Translation2d(
-                4.028,
+                4.647,
                 flipY(BLUE_ALLIANCE_ZONE_C1.getY()));
 
         public static final Translation2d RED_ALLIANCE_ZONE_C1 = flipTranslation(BLUE_ALLIANCE_ZONE_C1);
@@ -420,7 +418,7 @@ public class Constants {
         public static final double TURN_TABLE_RATIO = 24.0 / 200.0;
         public static final double ENCODER_FACTOR = (TURRET_GEAR_REDUCTION) / (2.0 * Math.PI * TURN_TABLE_RATIO);
 
-        public static final double STOW_PUSH_DOWN_SPEED = 0.6; // percent of max speed
+        public static final double STOW_PUSH_DOWN_SPEED = 0.3; // percent of max speed
         public static final double STOW_PUSH_DOWN_TIME = 0.1; // seconds
 
         public static final double PITCH_GEAR_RATIO = (26.0 / 447.2);
@@ -429,14 +427,14 @@ public class Constants {
         public static final boolean PITCH_INVERTED = true;
 
         public static final Rotation2d MAX_PITCH = Rotation2d.fromDegrees(45.0);
-        public static final Rotation2d MIN_PITCH = Rotation2d.fromDegrees(8.00);
-        public static final Rotation2d HOOD_START_POSITION = Rotation2d.fromDegrees(8.00);
+        public static final Rotation2d MIN_PITCH = Rotation2d.fromDegrees(7.00);
+        public static final Rotation2d HOOD_START_POSITION = Rotation2d.fromDegrees(7.00);
 
         public static final double HOOD_STABLE_TIME = 0.1;
         public static final double HOOD_STABLE = 5;
 
         public static final double HOOD_FINISH_VELOCITY = 0.1;
-        public static final Rotation2d HOOD_FAR_ANGLE = Rotation2d.fromDegrees(-50.0);
+        public static final Rotation2d HOOD_FAR_ANGLE = Rotation2d.fromDegrees(-10.0);
 
         public static final double OUTPUT_RANGE_MAX = 1;
         public static final double OUTPUT_RANGE_MIN = -1;
@@ -459,24 +457,41 @@ public class Constants {
             0.537 //537!!!
         );
 
-        public static final InterpolatingDoubleTreeMap HOOD_ANGLE_MAP = new InterpolatingDoubleTreeMap();
+        public static final InterpolatingDoubleTreeMap SHOOTING_HOOD_ANGLE_MAP = new InterpolatingDoubleTreeMap();
         static {
-            HOOD_ANGLE_MAP.put(3.23,14.8);
-            HOOD_ANGLE_MAP.put(4.19,16.8);
-            HOOD_ANGLE_MAP.put(4.72,18.8);
-            HOOD_ANGLE_MAP.put(5.38,19.5);
-            HOOD_ANGLE_MAP.put(4.44,16.7);
-            HOOD_ANGLE_MAP.put(2.71,12.7);
-            HOOD_ANGLE_MAP.put(1.71,10.3);
+            SHOOTING_HOOD_ANGLE_MAP.put(3.23,14.8);
+            SHOOTING_HOOD_ANGLE_MAP.put(4.19,16.8);
+            SHOOTING_HOOD_ANGLE_MAP.put(4.72,18.8);
+            SHOOTING_HOOD_ANGLE_MAP.put(5.38,19.5);
+            SHOOTING_HOOD_ANGLE_MAP.put(4.44,16.7);
+            SHOOTING_HOOD_ANGLE_MAP.put(2.71,12.7);
+            SHOOTING_HOOD_ANGLE_MAP.put(1.71,10.3);
         }
 
-        public static final TurretSolver.Config SOLVER_CONFIG = new TurretSolver.Config(
+        public static final InterpolatingDoubleTreeMap PASSING_HOOD_ANGLE_MAP = new InterpolatingDoubleTreeMap();
+        static {
+            PASSING_HOOD_ANGLE_MAP.put(6.05,22.8);
+            PASSING_HOOD_ANGLE_MAP.put(8.05,24.9);
+            PASSING_HOOD_ANGLE_MAP.put(9.85,26.8);
+            PASSING_HOOD_ANGLE_MAP.put(13.85,29.8);
+        }
+
+        public static final TurretSolver.Config SHOOTING_SOLVER_CONFIG = new TurretSolver.Config(
             0.0,
             TURRET_TRANSLATION,
-            HOOD_ANGLE_MAP,
-            Shooter.SHOOTER_VELOCITY_MAP,
-            Shooter.TIME_MAP,
+            SHOOTING_HOOD_ANGLE_MAP,
+            Shooter.SHOOTING_SHOOTER_VELOCITY_MAP,
+            Shooter.SHOOTING_TIME_MAP,
             1.829
+        );
+
+        public static final TurretSolver.Config PASSING_SOLVER_CONFIG = new TurretSolver.Config(
+            0.0,
+            TURRET_TRANSLATION,
+            PASSING_HOOD_ANGLE_MAP,
+            Shooter.PASSING_SHOOTER_VELOCITY_MAP,
+            Shooter.PASSING_TIME_MAP,
+            0.0
         );
 
     }
@@ -505,25 +520,39 @@ public class Constants {
 
         public static final boolean MOTOR_INVERTED = true;
 
-        public static final InterpolatingDoubleTreeMap SHOOTER_VELOCITY_MAP = new InterpolatingDoubleTreeMap();
-        public static final InterpolatingDoubleTreeMap TIME_MAP = new InterpolatingDoubleTreeMap();
+        public static final InterpolatingDoubleTreeMap SHOOTING_SHOOTER_VELOCITY_MAP = new InterpolatingDoubleTreeMap();
+        public static final InterpolatingDoubleTreeMap SHOOTING_TIME_MAP = new InterpolatingDoubleTreeMap();
 
         static {
-            SHOOTER_VELOCITY_MAP.put(3.23,23.0);
-            SHOOTER_VELOCITY_MAP.put(4.19,25.0);
-            SHOOTER_VELOCITY_MAP.put(4.72,26.0);
-            SHOOTER_VELOCITY_MAP.put(5.38,27.0);
-            SHOOTER_VELOCITY_MAP.put(4.44,25.0);
-            SHOOTER_VELOCITY_MAP.put(2.71,21.0);
-            SHOOTER_VELOCITY_MAP.put(1.71,19.0);
+            SHOOTING_SHOOTER_VELOCITY_MAP.put(3.23,23.0);
+            SHOOTING_SHOOTER_VELOCITY_MAP.put(4.19,25.0);
+            SHOOTING_SHOOTER_VELOCITY_MAP.put(4.72,26.0);
+            SHOOTING_SHOOTER_VELOCITY_MAP.put(5.38,27.0);
+            SHOOTING_SHOOTER_VELOCITY_MAP.put(4.44,25.0);
+            SHOOTING_SHOOTER_VELOCITY_MAP.put(2.71,21.0);
+            SHOOTING_SHOOTER_VELOCITY_MAP.put(1.71,19.0);
 
-            TIME_MAP.put(3.23,1.41);
-            TIME_MAP.put(4.19,1.47);
-            TIME_MAP.put(4.72,1.57);
-            TIME_MAP.put(5.38,1.61);
-            TIME_MAP.put(4.44,1.45);
-            TIME_MAP.put(2.71,1.30);
-            TIME_MAP.put(1.71,1.23);
+            SHOOTING_TIME_MAP.put(3.23,1.41);
+            SHOOTING_TIME_MAP.put(4.19,1.47);
+            SHOOTING_TIME_MAP.put(4.72,1.57);
+            SHOOTING_TIME_MAP.put(5.38,1.61);
+            SHOOTING_TIME_MAP.put(4.44,1.45);
+            SHOOTING_TIME_MAP.put(2.71,1.30);
+            SHOOTING_TIME_MAP.put(1.71,1.23);
+        }
+
+        public static final InterpolatingDoubleTreeMap PASSING_SHOOTER_VELOCITY_MAP = new InterpolatingDoubleTreeMap();
+        public static final InterpolatingDoubleTreeMap PASSING_TIME_MAP = new InterpolatingDoubleTreeMap();
+        static {
+            PASSING_SHOOTER_VELOCITY_MAP.put(6.05,20.0);
+            PASSING_SHOOTER_VELOCITY_MAP.put(8.05,25.0);
+            PASSING_SHOOTER_VELOCITY_MAP.put(9.85,32.0);
+            PASSING_SHOOTER_VELOCITY_MAP.put(13.85,40.0);
+
+            PASSING_TIME_MAP.put(6.05,1.46);
+            PASSING_TIME_MAP.put(8.05,1.61);
+            PASSING_TIME_MAP.put(9.85,1.65);
+            PASSING_TIME_MAP.put(13.85,2.06);
         }
 
     }

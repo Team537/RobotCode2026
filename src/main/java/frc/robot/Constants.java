@@ -660,6 +660,7 @@ public class Constants {
         public static final Rotation2d INTAKE_MIN_ANGLE = Rotation2d.fromDegrees(0);
         public static final Rotation2d INTAKE_MAX_ANGLE = INTAKE_START_POS; //Prevents the robot from going beyond its maximum angle
         public static final Rotation2d INTAKE_RAISED_ANGLE = Rotation2d.fromDegrees(110.0);
+        public static final Rotation2d INTAKE_HOPPER_ANGLE = Rotation2d.fromDegrees(45.0);
         public static final Rotation2d INTAKE_DEPLOYED_ANGLE = INTAKE_MIN_ANGLE;        
 
         public static final Rotation2d INTAKE_TOLERANCE_ANGLE = Rotation2d.fromDegrees(3);

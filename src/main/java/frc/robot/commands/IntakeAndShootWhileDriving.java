@@ -72,19 +72,30 @@ public class IntakeAndShootWhileDriving extends SequentialCommandGroup {
                 transfer.getLoadCommand()
             ),
 
-            // Stop driving + intake
+            // Stop driving + (continue shooting)
             Commands.parallel(
                 drive.getStopCommand(),
-                intakeRoller.getStopCommand()
-            ),
+                
+                shooter.getTargetCommand(
+                        targetingSupplier,
+                        drive::getPose,
+                        drive::getVelocity),
+                turret.getTargetCommand(targetingSupplier, drive::getPose, drive::getVelocity),
 
-            // Wait before stopping shooter/turret
-            Commands.waitSeconds(postStopDelay),
+                transfer.getLoadCommand(),
+
+                intakeRoller.getIntakeCommand(),
+
+                intakePivot.hopperIntakeCommand()
+
+            ).withTimeout(postStopDelay),
 
             // Finally stop shooter + turret
             Commands.parallel(
                 shooter.getStopCommand(),
                 transfer.getStopCommand(),
+                intakeRoller.getStopCommand(),
+                turret.getStowCommand(),
                 intakePivot.raiseIntakeCommand()
             )
         );

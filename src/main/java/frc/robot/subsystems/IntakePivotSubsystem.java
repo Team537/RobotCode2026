@@ -109,6 +109,12 @@ public class IntakePivotSubsystem extends SubsystemBase {
             .withName("RaiseIntake");
     }
 
+    //Raises the intake to the hopper position
+    public Command hopperIntakeCommand() {
+        return setIntakeAngleCommand(Constants.IntakePivot.INTAKE_HOPPER_ANGLE)
+            .withName("HopperIntake");
+    }
+
     //Deploys intake 
     public Command deployIntakeCommand() {
         return setIntakeAngleCommand(Constants.IntakePivot.INTAKE_DEPLOYED_ANGLE)

@@ -47,6 +47,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
+    robotContainer.driveSubsystem.resetVisionStats();
     CommandScheduler.getInstance().cancelAll();
     CommandTimeline.cancelAll();
     FieldStatePublisher.setupElasticNotifications();
@@ -57,10 +58,13 @@ public class Robot extends TimedRobot {
   public void autonomousPeriodic() {}
 
   @Override
-  public void autonomousExit() {}
+  public void autonomousExit() {
+    robotContainer.driveSubsystem.logVisionStats("auto");
+  }
 
   @Override
   public void teleopInit() {
+    robotContainer.driveSubsystem.resetVisionStats();
     CommandScheduler.getInstance().cancelAll();
     robotContainer.scheduleTeleOp();
   }
@@ -69,7 +73,9 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {}
 
   @Override
-  public void teleopExit() {}
+  public void teleopExit() {
+    robotContainer.driveSubsystem.logVisionStats("teleop");
+  }
 
   @Override
   public void testInit() {

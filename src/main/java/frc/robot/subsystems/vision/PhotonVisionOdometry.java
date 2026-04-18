@@ -12,6 +12,11 @@ import frc.robot.Robot;
 import frc.robot.util.vision.Cameras;
 
 import java.awt.Desktop;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -46,6 +51,14 @@ public class PhotonVisionOdometry {
    * Photon Vision Simulation
    */
   public VisionSystemSim visionSim;
+  /**
+   * Total loop cycles processed since the last reset (any-camera aggregate).
+   */
+  private long anyCamTotalCycles = 0;
+  /**
+   * Loop cycles in which at least one camera had a tag since the last reset.
+   */
+  private long anyCamCyclesWithTag = 0;
   /**
    * Count of times that the odom thinks we're more than 10meters away from the
    * april tag.
@@ -122,6 +135,7 @@ public class PhotonVisionOdometry {
        */
       visionSim.update(swerveDrive.getSimulationDriveTrainPose().get());
     }
+    boolean anyCameraHasTag = false;
     for (Cameras camera : Cameras.values()) {
       Optional<EstimatedRobotPose> poseEst = getEstimatedGlobalPose(camera);
       if (poseEst.isPresent()) {
@@ -135,7 +149,27 @@ public class PhotonVisionOdometry {
         SmartDashboard.putNumber("VisionX", pose.estimatedPose.getX());
         SmartDashboard.putNumber("VisionY", pose.estimatedPose.getY());
       }
+
+      // Publish per-camera tag detection percentage (0–100).
+      SmartDashboard.putNumber("Vision/TagDetectionPct/" + camera.name(),
+          camera.getTagDetectionPercentage());
+
+      // Check whether this camera saw a tag in its latest result.
+      if (!camera.resultsList.isEmpty() && camera.resultsList.get(camera.resultsList.size() - 1).hasTargets()) {
+        anyCameraHasTag = true;
+      }
     }
+
+    // Aggregate: track cycles where at least one camera had a tag.
+    anyCamTotalCycles++;
+    if (anyCameraHasTag) {
+      anyCamCyclesWithTag++;
+    }
+    double anyCamPct = anyCamTotalCycles > 0
+        ? (anyCamCyclesWithTag * 100.0 / anyCamTotalCycles)
+        : 0.0;
+    SmartDashboard.putNumber("Vision/TagDetectionPct/ANY_CAMERA", anyCamPct);
+    SmartDashboard.putBoolean("Vision/AnyCameraHasTag", anyCameraHasTag);
 
   }
 
@@ -163,6 +197,59 @@ public class PhotonVisionOdometry {
           });
     }
     return poseEst;
+  }
+
+  /**
+   * Resets tag-detection statistics for all cameras and the any-camera aggregate.
+   * Should be called whenever the robot is enabled (teleop or autonomous) so
+   * percentages reflect only the current run.
+   */
+  public void resetAllCameraStats() {
+    for (Cameras camera : Cameras.values()) {
+      camera.resetStats();
+    }
+    anyCamTotalCycles = 0;
+    anyCamCyclesWithTag = 0;
+  }
+
+  /**
+   * @return Percentage (0–100) of loop cycles in which at least one camera had an
+   *         AprilTag visible, since the last {@link #resetAllCameraStats()} call.
+   */
+  public double getAnyCameraTagDetectionPercentage() {
+    return anyCamTotalCycles > 0 ? (anyCamCyclesWithTag * 100.0 / anyCamTotalCycles) : 0.0;
+  }
+
+  /**
+   * Appends a summary of each camera's tag-detection percentage to
+   * {@code vision-stats.log} in the WPILib operating directory returned by
+   * {@code edu.wpi.first.wpilibj.Filesystem.getOperatingDirectory()}. Each entry
+   * is timestamped and labelled with the run type (e.g. "teleop" or "auto").
+   *
+   * @param runLabel Short label describing the mode that just ended.
+   */
+  public void logVisionStats(String runLabel) {
+    StringBuilder sb = new StringBuilder();
+    sb.append(OffsetDateTime.now()).append(" [").append(runLabel).append("]\n");
+    for (Cameras camera : Cameras.values()) {
+      sb.append(String.format("  %-15s %5.1f%%  (%d / %d frames)%n",
+          camera.name(),
+          camera.getTagDetectionPercentage(),
+          camera.getFramesWithTags(),
+          camera.getTotalFrames()));
+    }
+    sb.append("\n");
+
+    Path logFile = edu.wpi.first.wpilibj.Filesystem.getOperatingDirectory()
+        .toPath().resolve("vision-stats.log");
+    try {
+      Files.writeString(logFile, sb.toString(),
+          StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+    } catch (IOException e) {
+      edu.wpi.first.wpilibj.DriverStation.reportError(
+          "[VisionStats] Failed to write log to " + logFile + ": " + e.getMessage(),
+          e.getStackTrace());
+    }
   }
 
   /**

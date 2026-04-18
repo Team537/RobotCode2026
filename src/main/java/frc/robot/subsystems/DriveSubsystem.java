@@ -194,6 +194,41 @@ public class DriveSubsystem extends SubsystemBase {
     }
 
     /**
+     * Resets vision tag-detection statistics for all cameras.
+     * Should be called at the start of each enabled period (teleop/auto) so the
+     * reported percentages only cover the current run.
+     */
+    public void resetVisionStats() {
+        if (useVisionOdometry && visionOdometry != null) {
+            visionOdometry.resetAllCameraStats();
+        }
+    }
+
+    /**
+     * Appends each camera's tag-detection percentage to the on-robot log file.
+     * Should be called at the end of each enabled period (teleop/auto).
+     *
+     * @param runLabel Short label describing the mode that just ended (e.g. "teleop").
+     */
+    public void logVisionStats(String runLabel) {
+        if (useVisionOdometry && visionOdometry != null) {
+            visionOdometry.logVisionStats(runLabel);
+        }
+    }
+
+    /**
+     * Returns the percentage (0–100) of loop cycles in which at least one camera
+     * had an AprilTag visible, since the last {@link #resetVisionStats()} call.
+     * Returns 0 if vision odometry is not in use.
+     */
+    public double getAnyCameraTagDetectionPercentage() {
+        if (useVisionOdometry && visionOdometry != null) {
+            return visionOdometry.getAnyCameraTagDetectionPercentage();
+        }
+        return 0.0;
+    }
+
+    /**
      * Sets a supplier that returns a speed scale factor applied to all drive output.
      * A value of 1.0 is full speed; 0.5 limits the robot to 50% of normal speed.
      *

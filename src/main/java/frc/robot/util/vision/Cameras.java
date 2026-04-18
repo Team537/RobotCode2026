@@ -4,11 +4,6 @@ import java.util.List;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
-import static edu.wpi.first.units.Units.Microsecond;
-import static edu.wpi.first.units.Units.Microseconds;
-import static edu.wpi.first.units.Units.Milliseconds;
-import static edu.wpi.first.units.Units.Seconds;
-
 import java.util.ArrayList;
 import java.util.Optional;
 
@@ -28,7 +23,6 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.networktables.NetworkTablesJNI;
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import frc.robot.Constants.VisionOdometryConstants;
@@ -97,6 +91,45 @@ public enum Cameras {
     public Optional<EstimatedRobotPose> estimatedRobotPose = Optional.empty();
 
     /**
+     * Total number of camera frames received since the last reset.
+     */
+    private long totalFrames = 0;
+    /**
+     * Number of camera frames in which at least one AprilTag was detected since the last reset.
+     */
+    private long framesWithTags = 0;
+    /**
+     * Percentage (0–100) of camera frames in which at least one AprilTag was detected.
+     * Updated each time new frames are processed. Reset to 0 when {@link #resetStats()} is called.
+     */
+    private double tagDetectionPercentage = 0.0;
+
+    /**
+     * Resets tag-detection statistics. Call this when the robot is enabled so
+     * percentages reflect only the current run.
+     */
+    public void resetStats() {
+        totalFrames = 0;
+        framesWithTags = 0;
+        tagDetectionPercentage = 0.0;
+    }
+
+    /** @return Percentage (0–100) of frames in which at least one AprilTag was detected. */
+    public double getTagDetectionPercentage() {
+        return tagDetectionPercentage;
+    }
+
+    /** @return Total camera frames received since the last reset. */
+    public long getTotalFrames() {
+        return totalFrames;
+    }
+
+    /** @return Camera frames in which at least one AprilTag was detected since the last reset. */
+    public long getFramesWithTags() {
+        return framesWithTags;
+    }
+
+    /**
      * Simulated camera instance which only exists during simulations.
      */
     public PhotonCameraSim cameraSim;
@@ -105,10 +138,6 @@ public enum Cameras {
      * queries.
      */
     public List<PhotonPipelineResult> resultsList = new ArrayList<>();
-    /**
-     * Last read from the camera timestamp to prevent lag due to slow data fetches.
-     */
-    private double lastReadTimestamp = Microsecond.of(NetworkTablesJNI.now()).in(Seconds);
 
     /**
      * Construct a Photon Camera class with help. Standard deviations are fake
@@ -221,22 +250,25 @@ public enum Cameras {
     }
 
     /**
-     * Update the latest results, cached with a maximum refresh rate of 1req/15ms.
-     * Sorts the list by timestamp.
+     * Update the latest unread results from the camera. Sorts the list by timestamp.
      */
     private void updateUnreadResults() {
-        double mostRecentTimestamp = resultsList.isEmpty() ? 0.0 : resultsList.get(0).getTimestampSeconds();
-        double currentTimestamp = Microseconds.of(NetworkTablesJNI.now()).in(Seconds);
-        double debounceTime = Milliseconds.of(15).in(Seconds);
-        for (PhotonPipelineResult result : resultsList) {
-            mostRecentTimestamp = Math.max(mostRecentTimestamp, result.getTimestampSeconds());
-        }
-
         resultsList = Robot.isReal() ? camera.getAllUnreadResults() : cameraSim.getCamera().getAllUnreadResults();
-        lastReadTimestamp = currentTimestamp;
         resultsList.sort((PhotonPipelineResult a, PhotonPipelineResult b) -> {
             return a.getTimestampSeconds() >= b.getTimestampSeconds() ? 1 : -1;
         });
+
+        // Track tag detection at the per-frame level.
+        for (PhotonPipelineResult frame : resultsList) {
+            totalFrames++;
+            if (frame.hasTargets()) {
+                framesWithTags++;
+            }
+        }
+        tagDetectionPercentage = (totalFrames > 0)
+                ? (framesWithTags * 100.0 / totalFrames)
+                : 0.0;
+
         if (!resultsList.isEmpty()) {
             updateEstimatedGlobalPose();
         }
